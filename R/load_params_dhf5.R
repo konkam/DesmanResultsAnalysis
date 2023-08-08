@@ -93,20 +93,18 @@ load_ll <- function(number_of_variants = 1, nchains = 5, include_warmup = FALSE,
 nucleotides_letters <- c("A", "C", "G", "T")
 
 summarise_tau <- function(tau) {
-  if (length(dim(tau)) == 3) {
-    number_of_variants <- 1
-  } else {
-    number_of_variants <- dim(tau)[2]
-  }
+  # if (length(dim(tau)) == 3) {
+  #   number_of_variants <- 1
+  # } else {
+  #   number_of_variants <- dim(tau)[2]
+  # }
+
+  number_of_variants <- dim(tau)[2]
 
   tidyr::expand_grid(i = seq_along(nucleotides_letters), j = 1:number_of_variants) %>%
     (function(df) {
       mapply(FUN = function(nucleotide_id, variant_id) {
-        if (number_of_variants == 1) {
-          tmp <- tau[nucleotide_id, , ] %>% colSums() # Counting the number of nucleotide of type nucleotide_id in the genome of variant_id, at each iteration.
-        } else {
-          tmp <- tau[nucleotide_id, variant_id, , ] %>% colSums() # Counting the number of nucleotide of type nucleotide_id in the genome of variant_id, at each iteration.
-        }
+        tmp <- tau[nucleotide_id, variant_id, , ] %>% colSums() # Counting the number of nucleotide of type nucleotide_id in the genome of variant_id, at each iteration.
         tibble(aa = tmp) %>%
           setNames(paste(nucleotides_letters[nucleotide_id], variant_id, sep = ""))
       }, df$i, df$j, SIMPLIFY = FALSE)
@@ -185,9 +183,9 @@ load_gamma_one_chain <- function(number_of_variants = 1, chain = 1, include_warm
   sampling_gamma <- rhdf5::h5read(paste(foldername, "/Gamma_store.csv", sep = ""), name = "gamma_store")
 
 
-  if (number_of_variants == 1) {
-    sampling_gamma <- sampling_gamma %>% (function(x) array(data = x, dim = c(1, dim(x)))) # resizing to a tensor for the following code to still work. Note that with 1 variant, proportions are always 1, so not very interesting.
-  }
+  # if (number_of_variants == 1) {
+  #   sampling_gamma <- sampling_gamma %>% (function(x) array(data = x, dim = c(1, dim(x)))) # resizing to a tensor for the following code to still work. Note that with 1 variant, proportions are always 1, so not very interesting.
+  # }
 
   n_samples <- dim(sampling_gamma)[2]
 
