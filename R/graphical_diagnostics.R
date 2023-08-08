@@ -9,8 +9,34 @@
 #' @return A trace plot for the log likelihood
 #' @export
 log_likelihood_trace <- function(number_of_variants = 1, nchains = 5, include_warmup = FALSE, prefix = "") {
+  log_likelihood_ggplot2(number_of_variants = number_of_variants, nchains = nchains, include_warmup = include_warmup, prefix = prefix)
+}
+
+log_likelihood_trace_coda <- function(number_of_variants = 1, nchains = 5, include_warmup = FALSE, prefix = "") {
   load_ll(number_of_variants = number_of_variants, nchains = nchains, include_warmup = include_warmup, prefix = prefix) %>%
     coda::traceplot()
+}
+
+#' @importFrom ggplot2 ggplot aes theme_bw geom_line ylab xlab
+log_likelihood_ggplot2 <- function(number_of_variants = 1, nchains = 5, include_warmup = FALSE, prefix = "") {
+  load_ll(number_of_variants = number_of_variants, nchains = nchains, include_warmup = include_warmup, prefix = prefix) %>%
+    (function(mcmc_list){
+      seq_along(mcmc_list) %>%
+        lapply(function(chain_id){
+          mcmc_list[[chain_id]] %>%
+            tibble::as_tibble() %>%
+            mutate(chain_id = chain_id) %>%
+            tibble::rowid_to_column(var = "iteration")
+
+        })
+    }) %>%
+    dplyr::bind_rows() %>%
+    ggplot(aes(x = iteration, y = loglik, colour = factor(chain_id))) +
+    theme_bw() +
+    geom_line() +
+    viridis::scale_color_viridis(discrete = T, name = "Chain") +
+    xlab("Iteration") +
+    ylab("Log likelihood")
 }
 
 #' Traceplot for the sequencing error matrix
@@ -20,7 +46,7 @@ log_likelihood_trace <- function(number_of_variants = 1, nchains = 5, include_wa
 #' @return A trace plot for the sequencing error matrix
 #' @export
 #'
-#' @importFrom ggplot2 ggplot aes theme_bw facet_wrap geom_line ylab
+#' @importFrom ggplot2 facet_wrap
 #'
 eta_trace <- function(number_of_variants = 1, nchains = 5, include_warmup = FALSE, prefix = "") {
   load_eta_parameter(number_of_variants = number_of_variants, nchains = nchains, include_warmup = include_warmup, prefix = prefix) %>%
