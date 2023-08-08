@@ -2,7 +2,7 @@
 % Please edit documentation in R/graphical_diagnostics.R
 \name{gamma_trace}
 \alias{gamma_trace}
-\title{Title}
+\title{Trace plot for the relative abundances}
 \usage{
 gamma_trace(
   number_of_variants = 1,
@@ -26,6 +26,9 @@ gamma_trace(
 
 \item{samples}{A integer vector describing which samples to plot. By default, only the first sample.}
 }
+\value{
+A trace plot for the relative abundances
+}
 \description{
-Title
+Trace plot for the relative abundances
 }
