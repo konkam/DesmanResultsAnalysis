@@ -189,6 +189,11 @@ load_gamma_one_chain <- function(number_of_variants = 1, chain = 1, include_warm
 
   n_samples <- dim(sampling_gamma)[2]
 
+  n_variants_in_chain = dim(sampling_gamma)[1]
+  if(n_variants_in_chain < number_of_variants){
+    stop(paste("The number of variants in the saved file (",  paste(foldername, "/Gamma_store.csv", sep = ""),") is smaller than the number of variants requested. ", number_of_variants, " were requested, but only ", n_variants_in_chain, " variants are present in the saved file.", sep = ""))
+  }
+
 
   mcmc_object <- tidyr::expand_grid(i = 1:number_of_variants, j = 1:n_samples) %>%
     (function(df) {
