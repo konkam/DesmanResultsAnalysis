@@ -13,6 +13,9 @@ plot_relative_abundance(number_of_variants = 1, chain = 5, prefix = "")
 
 \item{prefix}{File path describing where the results are stored.}
 }
+\value{
+A plot the relative abundance for each variants in each sample
+}
 \description{
 Plot the relative abundance for each variants in each sample
 }

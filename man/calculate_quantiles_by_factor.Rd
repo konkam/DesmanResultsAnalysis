@@ -9,7 +9,7 @@ calculate_quantiles_by_factor(
   factor_column,
   value_column,
   quantiles,
-  add_mean = F
+  add_mean = FALSE
 )
 }
 \arguments{
