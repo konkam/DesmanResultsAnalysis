@@ -112,7 +112,7 @@ summarise_tau <- function(tau) {
     dplyr::bind_cols()
 }
 
-load_tau_one_chain <- function(number_of_variants = 1, chain = 1, include_warmup = FALSE, prefix = "") {
+load_tau_and_summarise_one_chain <- function(number_of_variants = 1, chain = 1, include_warmup = FALSE, prefix = "") {
   foldername <- create_folder_name(number_of_variants, chain, prefix = prefix)
 
   # Note that if you have 1 variant a 3d array is loaded, while with more than 1 variants it's a 4d variable
@@ -129,30 +129,61 @@ load_tau_one_chain <- function(number_of_variants = 1, chain = 1, include_warmup
   #     fileh5[["tau_store"]][, , , ]
   #   })
 
+  # if (include_warmup) {
+  #   warm_up_tau <- rhdf5::h5read(paste(foldername, "/tau_store_before_burnin.csv", sep = ""), name = "tau_store")
+  # }
+  #
+  # sampling_tau <- rhdf5::h5read(paste(foldername, "/tau_store.csv", sep = ""), name = "tau_store")
+
+  # mcmc_object <- summarise_tau(sampling_tau) %>%
+  #   # select(-iter) %>%
+  #   (function(df) {
+  #     if (include_warmup) {
+  #       dplyr::bind_rows(summarise_tau(warm_up_tau), df) # put warmup in front of course
+  #     } else {
+  #       df
+  #     }
+  #   }) %>%
+  #   coda::mcmc(data = .)
+
+  load_tau_one_chain(number_of_variants = number_of_variants, chain = chain, include_warmup = include_warmup, prefix = prefix) %>%
+    summarise_tau %>%
+    coda::mcmc(data = .)
+
+  # return(mcmc_object)
+}
+
+load_tau_one_chain <- function(number_of_variants = 1, chain = 1, include_warmup = FALSE, prefix = "") {
+  foldername <- create_folder_name(number_of_variants, chain, prefix = prefix)
+
   if (include_warmup) {
     warm_up_tau <- rhdf5::h5read(paste(foldername, "/tau_store_before_burnin.csv", sep = ""), name = "tau_store")
   }
 
   sampling_tau <- rhdf5::h5read(paste(foldername, "/tau_store.csv", sep = ""), name = "tau_store")
 
-  mcmc_object <- summarise_tau(sampling_tau) %>%
-    # select(-iter) %>%
-    (function(df) {
-      if (include_warmup) {
-        dplyr::bind_rows(summarise_tau(warm_up_tau), df) # put warmup in front of course
-      } else {
-        df
-      }
-    }) %>%
-    coda::mcmc(data = .)
+  # mcmc_object <- sampling_tau %>%
+  #   # select(-iter) %>%
+  #   (function(df) {
+  #     if (include_warmup) {
+  #       dplyr::bind_rows(warm_up_tau, df) # put warmup in front of course
+  #     } else {
+  #       df
+  #     }
+  #   })
 
-  return(mcmc_object)
+  if (include_warmup){
+    return(abind::abind(warm_up_tau, sampling_tau, along = 4))
+  }
+  else{
+    return(sampling_tau)
+  }
 }
 
 load_tau_parameter <- function(number_of_variants = 1, nchains = 5, include_warmup = FALSE, prefix = "") {
   1:nchains %>%
     lapply(FUN = function(chain_id) {
-      load_tau_one_chain(number_of_variants = number_of_variants, chain = chain_id, include_warmup = include_warmup, prefix = prefix)
+      load_tau_and_summarise_one_chain(number_of_variants = number_of_variants, chain = chain_id, include_warmup = include_warmup, prefix = prefix)
     }) %>%
     coda::mcmc.list()
 }
