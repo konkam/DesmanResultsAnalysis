@@ -113,7 +113,30 @@ nucleotide_count_trace(number_of_variants = 2, include_warmup = T, prefix = path
 
 <img src="man/figures/README-unnamed-chunk-10-1.png" width="100%" />
 
-### Summarising the relative abundances
+### Exploring the relative abundances
+
+#### Visualising the relative abundances for troubleshooting
+
+There are many samples and variants, so it’s better to plot only a
+subset of the samples.
+
+``` r
+gamma_trace(number_of_variants = 2, prefix = path_desman_results, samples = c(1,2))
+```
+
+<img src="man/figures/README-unnamed-chunk-11-1.png" width="100%" />
+
+By default, all variants are plotted, but when the number of variants
+starts to be large, it’s possible to plot only a subset of them via a
+dedicated keyword
+
+``` r
+gamma_trace(number_of_variants = 4, prefix = path_desman_results, samples = c(1,2), variants = 1:3)
+```
+
+<img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" />
+
+#### Summarising the relative abundances
 
 We do not plot the relative abundances with only 1 variant, since they
 are trivially 1 everywhere. Here, you should choose the chain with the
@@ -124,7 +147,7 @@ plot_relative_abundance(number_of_variants = 4, chain = 2, prefix = path_desman_
 #> Joining with `by = join_by(Parameter)`
 ```
 
-<img src="man/figures/README-unnamed-chunk-11-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-13-1.png" width="100%" />
 
 I did not include a function to choose this chain automatically, but it
 may be guessed by looking at the log likelihood trace plot. The deviance
@@ -136,6 +159,6 @@ likelihood.
 log_likelihood_trace(number_of_variants = 4, include_warmup = F, prefix = path_desman_results)
 ```
 
-<img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-14-1.png" width="100%" />
 
 Here, chain 2 is probably the one with the highest likelihood

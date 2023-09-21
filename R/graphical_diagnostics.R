@@ -95,8 +95,14 @@ gamma_trace <- function(number_of_variants = 1, nchains = 5, include_warmup = FA
       Variant = Parameter %>% stringr::str_split_i("_", i = 2),
       Sample_id = Parameter %>% stringr::str_split_i("_", i = 3)
     ) %>%
-    filter(Variant %in% variants) %>%
-    filter(Sample_id %in% samples) %>%
+    # dplyr::filter( {{ Variant }} %in% variants) %>%
+    # dplyr::filter({{ Sample_id }} %in% samples) %>%
+    (function(df){
+      df[df[["Variant"]] %in% as.character(variants),]
+    }) %>%
+    (function(df){
+      df[df[["Sample_id"]] %in% samples,]
+    }) %>%
     ggplot(aes(x = Iteration, y = value, colour = factor(Chain))) +
     theme_bw() +
     facet_grid(Variant ~ Sample_id, labeller = "label_both") +
