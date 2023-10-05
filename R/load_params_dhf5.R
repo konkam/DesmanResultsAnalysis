@@ -90,8 +90,6 @@ load_ll <- function(number_of_variants = 1, nchains = 5, include_warmup = FALSE,
     coda::mcmc.list()
 }
 
-nucleotides_letters <- c("A", "C", "G", "T")
-
 summarise_tau <- function(tau) {
   # if (length(dim(tau)) == 3) {
   #   number_of_variants <- 1
