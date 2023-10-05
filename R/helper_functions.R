@@ -92,14 +92,14 @@ nucleotides_conversion_function = function(nms){
 filter_rows_not_all_equal <- function(input_tibble, columns_to_check = NULL, columns_to_exclude = NULL) {
   if (!is.null(columns_to_check)) {
     result_tibble <- input_tibble %>%
-      filter(
+      dplyr::filter(
         (!do.call(pmin, dplyr::select(., dplyr::all_of(columns_to_check))) ==
            do.call(pmax, dplyr::select(., dplyr::all_of(columns_to_check))))
         | is.na(do.call(pmin, dplyr::select(., dplyr::all_of(columns_to_check))))
       )
   } else {
     result_tibble <- input_tibble %>%
-      filter(
+      dplyr::filter(
         (!do.call(pmin, dplyr::select(., -dplyr::all_of(columns_to_exclude))) ==
            do.call(pmax, dplyr::select(., -dplyr::all_of(columns_to_exclude))))
         | is.na(do.call(pmin, dplyr::select(., -dplyr::all_of(columns_to_exclude))))

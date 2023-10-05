@@ -120,7 +120,7 @@ gamma_trace <- function(number_of_variants = 1, nchains = 5, include_warmup = FA
 #'
 #' @return A trace plot for the relative abundances
 #' @export
-#' @importFrom ggplot2 facet_grid ylim
+#' @importFrom ggplot2 facet_grid ylim ggplot
 #'
 gamma_trace_with_variants_identified <- function(number_of_variants = 1, nchains = 5, include_warmup = FALSE, prefix = "", variants = NULL, samples = c(1)) {
   variant_table = lapply(1:nchains, function(chain_id){load_tau_one_chain(number_of_variants = number_of_variants, chain = chain_id, include_warmup = include_warmup, prefix = prefix)}) %>%
@@ -140,7 +140,7 @@ gamma_trace_with_variants_identified <- function(number_of_variants = 1, nchains
       Variant = Parameter %>% stringr::str_split_i("_", i = 2),
       Sample_id = Parameter %>% stringr::str_split_i("_", i = 3)
     ) %>%
-    left_join(variant_table) %>%
+    dplyr::left_join(variant_table) %>%
     (function(df){
       df[df[["variant_id_in_ref"]] %in% as.character(variants),]
     }) %>%
