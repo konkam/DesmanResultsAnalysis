@@ -111,3 +111,48 @@ gamma_trace <- function(number_of_variants = 1, nchains = 5, include_warmup = FA
     viridis::scale_color_viridis(name = "Chain", discrete = TRUE) +
     ylim(0, 1)
 }
+
+#' Trace plot for the relative abundances for all chains, with chain-specific variants disambiguated.
+#'
+#' @inheritParams log_likelihood_trace
+#' @param variants A integer vector describing which variants to plot. By default, all variants.
+#' @param samples A integer vector describing which samples to plot. By default, only the first sample.
+#'
+#' @return A trace plot for the relative abundances
+#' @export
+#' @importFrom ggplot2 facet_grid ylim
+#'
+gamma_trace_with_variants_identified <- function(number_of_variants = 1, nchains = 5, include_warmup = FALSE, prefix = "", variants = NULL, samples = c(1)) {
+  variant_table = lapply(1:nchains, function(chain_id){load_tau_one_chain(number_of_variants = number_of_variants, chain = chain_id, include_warmup = include_warmup, prefix = prefix)}) %>%
+    which_variants_in_each_chain %>%
+    rename(Variant = variant_id_in_chain,
+           Sample_id = chain_id) %>%
+    mutate(Variant = as.character(Variant),
+           Sample_id = as.character(Sample_id))
+
+  if(is.null(variants)){
+    variants = variant_table$variant_id_in_ref %>% unique()
+  }
+
+  load_gamma_parameter(number_of_variants = number_of_variants, prefix = prefix, include_warmup = include_warmup, nchains = nchains) %>%
+    ggmcmc::ggs() %>%
+    mutate(
+      Variant = Parameter %>% stringr::str_split_i("_", i = 2),
+      Sample_id = Parameter %>% stringr::str_split_i("_", i = 3)
+    ) %>%
+    left_join(variant_table) %>%
+    (function(df){
+      df[df[["variant_id_in_ref"]] %in% as.character(variants),]
+    }) %>%
+    (function(df){
+      df[df[["Sample_id"]] %in% samples,]
+    }) %>%
+    ggplot(aes(x = Iteration, y = value, colour = factor(Chain))) +
+    theme_bw() +
+    facet_grid(Variant_sequence_variable_positions ~ Sample_id) +
+    geom_line() +
+    ylab("Relative abundance") +
+    viridis::scale_color_viridis(name = "Chain", discrete = TRUE) +
+    ylim(0, 1)
+
+}
