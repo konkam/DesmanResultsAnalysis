@@ -25,7 +25,7 @@ df <- tibble(
   C = c("X", "Y", "X", "Z", "Z", "Z")
 )
 
-#Only check columns A and B
+# Only check columns A and B
 result_df1 <- filter_rows_not_all_equal(df, columns_to_check = c("A", "B"))
 print(result_df1)
 

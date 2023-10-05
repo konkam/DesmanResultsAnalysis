@@ -1,4 +1,3 @@
-
 #' Traceplot for the log likelihood
 #'
 #' @param number_of_variants The number of variants considered.
@@ -20,14 +19,13 @@ log_likelihood_trace_coda <- function(number_of_variants = 1, nchains = 5, inclu
 #' @importFrom ggplot2 ggplot aes theme_bw geom_line ylab xlab
 log_likelihood_ggplot2 <- function(number_of_variants = 1, nchains = 5, include_warmup = FALSE, prefix = "") {
   load_ll(number_of_variants = number_of_variants, nchains = nchains, include_warmup = include_warmup, prefix = prefix) %>%
-    (function(mcmc_list){
+    (function(mcmc_list) {
       seq_along(mcmc_list) %>%
-        lapply(function(chain_id){
+        lapply(function(chain_id) {
           mcmc_list[[chain_id]] %>%
             tibble::as_tibble() %>%
             mutate(chain_id = chain_id) %>%
             tibble::rowid_to_column(var = "iteration")
-
         })
     }) %>%
     dplyr::bind_rows() %>%
@@ -97,11 +95,11 @@ gamma_trace <- function(number_of_variants = 1, nchains = 5, include_warmup = FA
     ) %>%
     # dplyr::filter( {{ Variant }} %in% variants) %>%
     # dplyr::filter({{ Sample_id }} %in% samples) %>%
-    (function(df){
-      df[df[["Variant"]] %in% as.character(variants),]
+    (function(df) {
+      df[df[["Variant"]] %in% as.character(variants), ]
     }) %>%
-    (function(df){
-      df[df[["Sample_id"]] %in% samples,]
+    (function(df) {
+      df[df[["Sample_id"]] %in% samples, ]
     }) %>%
     ggplot(aes(x = Iteration, y = value, colour = factor(Chain))) +
     theme_bw() +
@@ -123,15 +121,21 @@ gamma_trace <- function(number_of_variants = 1, nchains = 5, include_warmup = FA
 #' @importFrom ggplot2 facet_grid ylim ggplot
 #'
 gamma_trace_with_variants_identified <- function(number_of_variants = 1, nchains = 5, include_warmup = FALSE, prefix = "", variants = NULL, samples = c(1)) {
-  variant_table = lapply(1:nchains, function(chain_id){load_tau_one_chain(number_of_variants = number_of_variants, chain = chain_id, include_warmup = include_warmup, prefix = prefix)}) %>%
-    which_variants_in_each_chain %>%
-    dplyr::rename(Variant = variant_id_in_chain,
-           Sample_id = chain_id) %>%
-    mutate(Variant = as.character(Variant),
-           Sample_id = as.character(Sample_id))
+  variant_table <- lapply(1:nchains, function(chain_id) {
+    load_tau_one_chain(number_of_variants = number_of_variants, chain = chain_id, include_warmup = include_warmup, prefix = prefix)
+  }) %>%
+    which_variants_in_each_chain() %>%
+    dplyr::rename(
+      Variant = variant_id_in_chain,
+      Sample_id = chain_id
+    ) %>%
+    mutate(
+      Variant = as.character(Variant),
+      Sample_id = as.character(Sample_id)
+    )
 
-  if(is.null(variants)){
-    variants = variant_table$variant_id_in_ref %>% unique()
+  if (is.null(variants)) {
+    variants <- variant_table$variant_id_in_ref %>% unique()
   }
 
   load_gamma_parameter(number_of_variants = number_of_variants, prefix = prefix, include_warmup = include_warmup, nchains = nchains) %>%
@@ -141,11 +145,11 @@ gamma_trace_with_variants_identified <- function(number_of_variants = 1, nchains
       Sample_id = Parameter %>% stringr::str_split_i("_", i = 3)
     ) %>%
     dplyr::left_join(variant_table) %>%
-    (function(df){
-      df[df[["variant_id_in_ref"]] %in% as.character(variants),]
+    (function(df) {
+      df[df[["variant_id_in_ref"]] %in% as.character(variants), ]
     }) %>%
-    (function(df){
-      df[df[["Sample_id"]] %in% samples,]
+    (function(df) {
+      df[df[["Sample_id"]] %in% samples, ]
     }) %>%
     ggplot(aes(x = Iteration, y = value, colour = factor(Chain))) +
     theme_bw() +
@@ -154,5 +158,4 @@ gamma_trace_with_variants_identified <- function(number_of_variants = 1, nchains
     ylab("Relative abundance") +
     viridis::scale_color_viridis(name = "Chain", discrete = TRUE) +
     ylim(0, 1)
-
 }

@@ -2,8 +2,8 @@ compute_relative_abundance <- function(number_of_variants = 1, chain = 5, includ
   load_gamma_parameter(number_of_variants = number_of_variants, prefix = prefix, include_warmup = include_warmup, nchains = chain) %>%
     ggmcmc::ggs() %>%
     # dplyr::filter(Chain == chain) %>%
-    (function(df){
-      df[df$Chain == chain,]
+    (function(df) {
+      df[df$Chain == chain, ]
     }) %>%
     calculate_quantiles_by_factor(factor_column = "Parameter", value_column = "value", quantiles = quantiles, add_mean = T) %>%
     dplyr::mutate(

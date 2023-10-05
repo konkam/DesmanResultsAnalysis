@@ -145,7 +145,7 @@ load_tau_and_summarise_one_chain <- function(number_of_variants = 1, chain = 1, 
   #   coda::mcmc(data = .)
 
   load_tau_one_chain(number_of_variants = number_of_variants, chain = chain, include_warmup = include_warmup, prefix = prefix) %>%
-    summarise_tau %>%
+    summarise_tau() %>%
     coda::mcmc(data = .)
 
   # return(mcmc_object)
@@ -170,10 +170,9 @@ load_tau_one_chain <- function(number_of_variants = 1, chain = 1, include_warmup
   #     }
   #   })
 
-  if (include_warmup){
+  if (include_warmup) {
     return(abind::abind(warm_up_tau, sampling_tau, along = 4))
-  }
-  else{
+  } else {
     return(sampling_tau)
   }
 }
@@ -199,9 +198,9 @@ load_gamma_one_chain <- function(number_of_variants = 1, chain = 1, include_warm
     warm_up_gamma <- rhdf5::h5read(paste(foldername, "/Gamma_store_before_burnin.csv", sep = ""), name = "gamma_store")
 
 
-  #   if (number_of_variants == 1) {
-  #     warm_up_gamma <- warm_up_gamma %>% (function(x) array(data = x, dim = c(1, dim(x)))) # resizing to a tensor for the following code to still work. Note that with 1 variant, proportions are always 1, so not very interesting.
-  #   }
+    #   if (number_of_variants == 1) {
+    #     warm_up_gamma <- warm_up_gamma %>% (function(x) array(data = x, dim = c(1, dim(x)))) # resizing to a tensor for the following code to still work. Note that with 1 variant, proportions are always 1, so not very interesting.
+    #   }
   }
 
   # sampling_gamma <- hdf5r::H5File$new(paste(foldername, "/Gamma_store.csv", sep = ""), mode = "r+") %>%
@@ -218,9 +217,9 @@ load_gamma_one_chain <- function(number_of_variants = 1, chain = 1, include_warm
 
   n_samples <- dim(sampling_gamma)[2]
 
-  n_variants_in_chain = dim(sampling_gamma)[1]
-  if(n_variants_in_chain < number_of_variants){
-    stop(paste("The number of variants in the saved file (",  paste(foldername, "/Gamma_store.csv", sep = ""),") is smaller than the number of variants requested. ", number_of_variants, " were requested, but only ", n_variants_in_chain, " variants are present in the saved file.", sep = ""))
+  n_variants_in_chain <- dim(sampling_gamma)[1]
+  if (n_variants_in_chain < number_of_variants) {
+    stop(paste("The number of variants in the saved file (", paste(foldername, "/Gamma_store.csv", sep = ""), ") is smaller than the number of variants requested. ", number_of_variants, " were requested, but only ", n_variants_in_chain, " variants are present in the saved file.", sep = ""))
   }
 
 

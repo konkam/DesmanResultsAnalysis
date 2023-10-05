@@ -121,7 +121,7 @@ There are many samples and variants, so it’s better to plot only a
 subset of the samples.
 
 ``` r
-gamma_trace(number_of_variants = 2, prefix = path_desman_results, samples = c(1,2))
+gamma_trace(number_of_variants = 2, prefix = path_desman_results, samples = c(1, 2))
 ```
 
 <img src="man/figures/README-unnamed-chunk-11-1.png" width="100%" />
@@ -131,7 +131,7 @@ starts to be large, it’s possible to plot only a subset of them via a
 dedicated keyword
 
 ``` r
-gamma_trace(number_of_variants = 4, prefix = path_desman_results, samples = c(1,2), variants = 1:3)
+gamma_trace(number_of_variants = 4, prefix = path_desman_results, samples = c(1, 2), variants = 1:3)
 ```
 
 <img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" />

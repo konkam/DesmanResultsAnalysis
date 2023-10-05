@@ -55,10 +55,14 @@ calculate_quantiles_by_factor <- function(input_table, factor_column, value_colu
 }
 
 nucleotides_letters <- c("A", "C", "G", "T")
-nucleotides_indicator_vector = lapply(1:4, function(i){diag(x = 1, nrow = 4)[i,]})
-nucleotides_dict = c(nucleotides_letters, nucleotides_indicator_vector) %>% (function(v) v %>% setNames(rev(v)))
-nucleotides_conversion_function = function(nms){
-  sapply(nms, function(nm){nucleotides_dict[nm]})
+nucleotides_indicator_vector <- lapply(1:4, function(i) {
+  diag(x = 1, nrow = 4)[i, ]
+})
+nucleotides_dict <- c(nucleotides_letters, nucleotides_indicator_vector) %>% (function(v) v %>% setNames(rev(v)))
+nucleotides_conversion_function <- function(nms) {
+  sapply(nms, function(nm) {
+    nucleotides_dict[nm]
+  })
 }
 
 
@@ -78,7 +82,7 @@ nucleotides_conversion_function = function(nms){
 #'   C = c("X", "Y", "X", "Z", "Z", "Z")
 #' )
 #'
-#' #Only check columns A and B
+#' # Only check columns A and B
 #' result_df1 <- filter_rows_not_all_equal(df, columns_to_check = c("A", "B"))
 #' print(result_df1)
 #'
@@ -94,15 +98,15 @@ filter_rows_not_all_equal <- function(input_tibble, columns_to_check = NULL, col
     result_tibble <- input_tibble %>%
       dplyr::filter(
         (!do.call(pmin, dplyr::select(., dplyr::all_of(columns_to_check))) ==
-           do.call(pmax, dplyr::select(., dplyr::all_of(columns_to_check))))
-        | is.na(do.call(pmin, dplyr::select(., dplyr::all_of(columns_to_check))))
+          do.call(pmax, dplyr::select(., dplyr::all_of(columns_to_check)))) |
+          is.na(do.call(pmin, dplyr::select(., dplyr::all_of(columns_to_check))))
       )
   } else {
     result_tibble <- input_tibble %>%
       dplyr::filter(
         (!do.call(pmin, dplyr::select(., -dplyr::all_of(columns_to_exclude))) ==
-           do.call(pmax, dplyr::select(., -dplyr::all_of(columns_to_exclude))))
-        | is.na(do.call(pmin, dplyr::select(., -dplyr::all_of(columns_to_exclude))))
+          do.call(pmax, dplyr::select(., -dplyr::all_of(columns_to_exclude)))) |
+          is.na(do.call(pmin, dplyr::select(., -dplyr::all_of(columns_to_exclude))))
       )
   }
   return(result_tibble)
@@ -136,4 +140,3 @@ find_equal_column <- function(input_tibble, target_vector) {
   matching_columns <- colnames(input_tibble)[sapply(input_tibble, function(col) all(col == target_vector))]
   return(matching_columns)
 }
-
