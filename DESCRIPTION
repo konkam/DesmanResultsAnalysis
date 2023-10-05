@@ -2,7 +2,7 @@ Package: DesmanResultsAnalysis
 Title: What the Package Does (One Line, Title Case)
 Version: 0.0.0.9000
 Authors@R: 
-    person("Guillaume", "KON KAM KING", , "guillaume.konkamkinf@inrae.fr", role = c("aut", "cre"),
+    person("Guillaume", "KON KAM KING", , "guillaume.konkamking@inrae.fr", role = c("aut", "cre"),
            comment = c(ORCID = "YOUR-ORCID-ID"))
 Description: What the package does (one paragraph).
 License: MIT + file LICENSE
