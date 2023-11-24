@@ -2,13 +2,10 @@
 collect_variants_one_chain <- function(tau_sample_one_chain) {
   # tau_sample_one_chain = load_tau_one_chain(number_of_variants = 3, chain = 1, include_warmup = T, prefix = path_desman_results)
   # The nucleotide maximising the L2 posterior loss is the most frequent nucleotide, or the MAP of the MCMC sample.
-  n_variants <- dim(tau_sample_one_chain)[2]
-  n_positions <- dim(tau_sample_one_chain)[3]
-
   tau_sample_one_chain %>%
-    apply(X = ., MARGIN = c(1, 2, 3), FUN = sum) %>%
-    apply(X = ., MARGIN = c(2, 3), FUN = which.max) %>%
-    apply(X = ., c(1, 2), function(x) nucleotides_letters[x]) %>%
+    apply(MARGIN = c(1, 2, 3), FUN = sum) %>%
+    apply(MARGIN = c(2, 3), FUN = which.max) %>%
+    apply(MARGIN = c(1, 2), function(x) nucleotides_letters[x]) %>%
     t() %>%
     as_tibble() %>%
     tibble::rowid_to_column("Position")
@@ -16,7 +13,7 @@ collect_variants_one_chain <- function(tau_sample_one_chain) {
 
 
 #' @importFrom dplyr bind_cols select
-merge_variants_all_chains <- function(tau_samples_all_chains, keep_only_variable_positions = F) {
+merge_variants_all_chains <- function(tau_samples_all_chains, keep_only_variable_positions = FALSE) {
   # tau_samples_all_chains = lapply(1:10, function(chain_id){load_tau_one_chain(number_of_variants = 3, chain = chain_id, include_warmup = T, prefix = path_desman_results)})
 
   # lapply(seq_along(tau_samples_all_chains), function(chain_id){
@@ -57,8 +54,8 @@ merge_variants_all_chains <- function(tau_samples_all_chains, keep_only_variable
 }
 
 which_variants_in_each_chain <- function(tau_samples_all_chains) {
-  reference_all_positions <- merge_variants_all_chains(tau_samples_all_chains, keep_only_variable_positions = F)
-  reference_variable_positions <- merge_variants_all_chains(tau_samples_all_chains, keep_only_variable_positions = T)
+  reference_all_positions <- merge_variants_all_chains(tau_samples_all_chains, keep_only_variable_positions = FALSE)
+  reference_variable_positions <- merge_variants_all_chains(tau_samples_all_chains, keep_only_variable_positions = TRUE)
   seq_along(tau_samples_all_chains) %>%
     lapply(
       (function(chain_id) {
