@@ -80,45 +80,54 @@ translate_dna_matrix_to_binary_array <- function(variants_string_matrix) {
   plyr::aaply(variants_string_matrix,1:2,function(x){x==nucleotides})}
   
 #'@examples
-#'variants_string_vector=sim_variants_string_matrix(3,12)|>plyr::aaply(2,paste0,collapse="")
+#'variants_string_vector=sim_variants_string_matrix(g=3,v=12)|>plyr::aaply(2,paste0,collapse="")
 #'translate_dna_string_vector_to_binary_array(variants_string_vector)
 translate_dna_string_vector_to_binary_array <- function(variants_string_vector) {
-  variants_string_vector|>plyr::aaply(1,function(x){strsplit(x,"")|>unname()|>unlist()})}
+  variants_string_vector|>
+    plyr::aaply(1,function(x){strsplit(x,"")|>
+      unname()|>
+      unlist()})|>
+    t()|>
+    (function(x){x|>(`dimnames<-`)(list(v=1:dim(x)[1],g=1:dim(x)[2]))})()}
 
 
 #'@examples 
 #'sim_variants_string_matrix(v=12,g=3)
-#'sim_variants(g=3,v=12)
 sim_variants_string_matrix<-function(v,g){
   plyr::raply(g,sample(nucleotides,size = v,replace=TRUE))|>
     t()|>
     (`dimnames<-`)(list(v=1:v,g=1:g))}
-
-sim_variants<-function(v,g){
+#'@examples 
+#'sim_tau_vga(g=3,v=12)
+sim_tau_vga<-function(v,g){
   sim_variants_string_matrix(v,g)|>
     translate_dna_matrix_to_binary_array()}
 
 
 
+sim_pi_gs<-function(g,s){rdirichlet(alpha = rep(1, g), n_samples = s) |> t()}
+
 #'@params
 #'@examples 
 #'sim_n_vsa(s=3,n=1000,v=50,g=5)
-
-sim_n_vsa <- function(s,n,
-    variants_binary_array=NULL,
+sim_n_vsa <- function(n,
+    tau_vga=NULL,
+    pi_gs=NULL,
     v=NULL,
     g=NULL,
+    s=NULL,
     error_rate=.001){
-  if(is.null(variants_binary_array)){variants_binary_array=sim_variants(v=v,g=g)}else{
-  v=dim(variants_binary_array)[1]
-  g=dim(variants_binary_array)[2]}
-  
-  pi_gs <- rdirichlet(alpha = rep(1, g), n_samples = s) |> t()
+  if(is.null(tau_vga)){tau_vga=sim_variants(v=v,g=g)}else{
+  v=dim(tau_vga)[1]
+  g=dim(tau_vga)[2]}
+  if(is.null(pi_gs)){pi_gs=sim_pi_gs(g = g,s = s)}else{
+    s=dim(pi_gs)[2]}
+    
   n_vs <- rpois(n = v * s, lambda = 20) |> matrix(c(v, s)) # Mean coverage is 20, which is pretty favourable
   epsilon <- diag(x = 1 - error_rate, nrow = 4) + error_rate / 3 * (matrix(data = 1, nrow = 4, ncol = 4) - diag(x = 1, nrow = 4))
   tildeepsilon=c(1-error_rate,error_rate)
   p_vsabg=einsum::einsum("vgb,gs,ba->vsabg",
-                         variants_binary_array,
+                         tau_vga,
                          pi_gs,
                          epsilon)
   
@@ -128,21 +137,17 @@ sim_n_vsa <- function(s,n,
   
   n_vsa<-plyr::aaply(np_vsa,1:2,function(x){rmultinom(n = 1, size = x[1], prob = x[2:5])|>setNames(nucleotides)})
   
-  list(pi_gs=pi_gs,n_vsa=n_vsa) }
-  
-  
-  
-  
-
-
-
-
-
+  n_vsa}
+#'@examples
+#'sim_tau_pi_n(g=5,v=50,s=3,n=n)
+sim_tau_pi_n<-function(v,g,s,n,error_rate=.001){
+  tau_vga=sim_tau_vga(v=v,g=g)
+  pi_gs=sim_pi_gs(g=g,s=s)
+  n_vsa=sim_n_vsa(n=n,tau_vga=tau_vga,pi_gs=pi_gs,error_rate = error_rate)
+  list(tau_vga=tau_vga,pi_gs=pi_gs,n_vsa=n_vsa)
+}
 
 ## Inference
-
-
-
 #### Prior specification for the error matrix
 
 #'@description 
@@ -170,76 +175,26 @@ error_matrix_prior_specification <- function(error_rate, prior_std) {
 #'@description
 #'Run jags.
 #'@param n_vsa an array of counts.
-#'@param variant_bin a collection of variants
+#'@param tau_vga a collection of variants
 #'@param G an integer. If G is smaller than the number of variants in the variant bin, then the algorithm is ran on the minimum of G and the number of variants in the bin.
 #'@param epsilon a numerical value. if NA, then  
 #'@param error_rate = 0.001,
 #'@param prior_std = 0.01
 #'
 #'@examples
-#' set.seed(0)
-#' Variant_1 <- "AACGTGTCCTCTTG"
-#' Variant_2 <- "AACGTGAAATCTTG"
-#' Variant_3 <- "CACGTGAACCCTTG"
-#' 
-#' Variants <- c(Variant_1, Variant_2, Variant_3)
-#' 
-#' # Variants <- c("AAAAAAAAAAAAAAAAAAAA", "ACACACACACACACACACAC") # Debug
-#' 
-#' G <- length(Variants) # Number of variants
-#' V <- Variants |>
-#'   first() |>
-#'   str_length() # Number of positions
-#' 
-#' ##that's tau
-#' variant_bin <- 
-#'   Variants|>
-#'   plyr::aaply(1,translate_dna_to_binary)|>
-#'   aperm(c(2:1,3))
-#' 
-#' 
-#' S <- 5 # Number of samples
-#' # S <- 2 # Debug
-#' pi_gs <- rdirichlet(alpha = rep(1, G), n_samples = S) |> t()
-#' 
-#' Nvs <- rpois(n = V * S, lambda = 20) |> matrix(c(V, S)) # Mean coverage is 20, which is pretty favourable
-#' 
-#' error_rate <- 0.001
-#' epsilon <- diag(x = 1 - error_rate, nrow = 4) + error_rate / 3 * (matrix(data = 1, nrow = 4, ncol = 4) - diag(x = 1, nrow = 4))
-#' 
-#' tildeepsilon=c(1-error_rate,error_rate)
-#' 
-#' if(FALSE){
-#'   p_vsa <- array(dim = c(V, S, 4))
-#'   for (v in seq(V)) {
-#'     for (s in seq(S)) {
-#'       p_g <- array(data = 0, dim = c(1, 4))
-#'       for (g in seq(G)) {
-#'         p_g <- p_g + pi_gs[g, s] * variant_bin[v, g, ] %*% epsilon
-#'       }
-#'       p_vsa[v, s, ] <- p_g
-#'     }
-#'   }
-#' }
-#' p_vsabg=einsum::einsum("vgb,gs,ba->vsabg",variant_bin,pi_gs,epsilon)
-#' p_vsa<-plyr::aaply(p_vsabg,1:3,sum)
-#' 
-#' n_vsa <- array(dim = c(V, S, 4))
-#' for (v in seq(V)) {
-#'   for (s in seq(S)) {
-#'     n_vsa[v, s, ] <- rmultinom(n = 1, size = Nvs[v, s], prob = p_vsa[v, s, ])
-#'   }
-#' }
+#' tau_pi_n=sim_tau_pi_n(v=50,g=5,s=3,n=1000)
+#' desman_fixed_variants(n_vsa=tau_pi_n$n_vsa,tau_vga=tau_pi_n$tau_vga,G=12)
 desman_fixed_variants<-function(n_vsa,
-                                variant_bin,
+                                tau_vga,
                                 G,
                                 epsilon=NA,
                                 error_rate = 0.001,
-                                prior_std = 0.01){
+                                prior_std = 0.01,
+                                n_chains=n_chains){
   
   V=dim(n_vsa)[1]
   S=dim(n_vsa)[2]
-  G=min(G,length(variant_bin))
+  G=min(G,dim(tau_vga)[2])
 
   
   
@@ -255,7 +210,7 @@ model {
   for (v in 1:V){
     for (g in 1:G){
       for (a in 1:4){
-        mixed_variant_bin[v, g, a] = inprod(variant_bin[v,g,], epsilon[,a])
+        mixed_variants[v, g, a] = inprod(tau_vga[v,g,], epsilon[,a])
       }
     }
   }
@@ -263,7 +218,7 @@ model {
     for (s in 1:S){
       for (g in 1:G){
         for (a in 1:4){
-          p_g[v, s, g, a] = pi_gs[g, s] * mixed_variant_bin[v, g, a]
+          p_g[v, s, g, a] = pi_gs[g, s] * mixed_variants[v, g, a]
         }
       }
       for (a in 1:4){
@@ -298,7 +253,7 @@ model {
   for (v in 1:V){
     for (g in 1:G){
       for (a in 1:4){
-        mixed_variant_bin[v, g, a] = inprod(variant_bin[v,g,], epsilon[,a])
+        mixed_variants[v, g, a] = inprod(tau_vga[v,g,], epsilon[,a])
       }
     }
   }
@@ -307,7 +262,7 @@ model {
     for (s in 1:S){
       for (g in 1:G){
         for (a in 1:4){
-          p_g[v, s, g, a] = pi_gs[g, s] * mixed_variant_bin[v, g, a]
+          p_g[v, s, g, a] = pi_gs[g, s] * mixed_variants[v, g, a]
         }
       }
       for (a in 1:4){
@@ -329,14 +284,19 @@ data_list <- list(
   S = S, 
   epsilon = epsilon, 
   n_vsa = n_vsa, 
-  variant_bin = variant_bin, 
+  tau_vga = tau_vga, 
   alpha = rep(1, G),
   nvs = n_vsa |> apply(MARGIN = c(1, 2), FUN = sum)
 )
 # Compiling and producing posterior samples from the model.
-jags_samples <- autorun.jags(model = model_string_fixed_epsilon, data = data_list, monitor = c("pi_gs"), adapt = 2000)}
+jags_samples <- runjags::autorun.jags(model = model_string_fixed_epsilon, 
+                             data = data_list, monitor = c("pi_gs"), adapt = 2000,
+                             n.chains=n_chains)
+}
 
 
+runjags:::setup.jagsfile(model = model_string_fixed_epsilon, n.chains = n_chains, 
+               data = data_list,monitor=NA)
 
 
 if(is.na(epsilon)){
@@ -344,8 +304,7 @@ if(is.na(epsilon)){
 error_matrix_prior <- error_matrix_prior_specification(error_rate = error_rate, prior_std = prior_std)
 
 data_list <- list(
-  V = V, G = G, S = S, n_vsa = n_vsa, variant_bin = variant_bin, alpha = rep(1, G),
-  # p_vsa = p_vsa,
+  V = V, G = G, S = S, n_vsa = n_vsa, tau_vga = tau_vga, alpha = rep(1, G),
   a = error_matrix_prior["a"],
   b = error_matrix_prior["b"],
   nvs = n_vsa |> apply(MARGIN = c(1, 2), FUN = sum)
@@ -356,6 +315,7 @@ jags_samples <- run.jags(model = model_string,
                          data = data_list, 
                          monitor = c("pi_gs", "tildeepsilon"), 
                          adapt = 2000,
+                         n.chains=n.chains,
                          method = "parallel")
 
 }
