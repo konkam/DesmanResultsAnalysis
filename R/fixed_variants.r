@@ -296,7 +296,7 @@ jags_samples <- runjags::autorun.jags(model = model_string_fixed_epsilon,
 
 
 runjags:::setup.jagsfile(model = model_string_fixed_epsilon, n.chains = n_chains, 
-               data = data_list,monitor=NA)
+               data = data_list,monitor = c("pi_gs"))
 
 
 if(is.na(epsilon)){
@@ -315,7 +315,7 @@ jags_samples <- run.jags(model = model_string,
                          data = data_list, 
                          monitor = c("pi_gs", "tildeepsilon"), 
                          adapt = 2000,
-                         n.chains=n.chains,
+                         n.chains=n_chains,
                          method = "parallel")
 
 }
