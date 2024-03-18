@@ -1,0 +1,3 @@
+fixed_variants:
+  store: _targets_store/fixed_variants
+  script: _targets_scripts/fixed_variants.r
