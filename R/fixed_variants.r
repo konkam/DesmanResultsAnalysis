@@ -1,8 +1,6 @@
 library(tidyverse)
 library(runjags)
 
-
-
 nucleotides=c("A","C","G","T")|>
   (function(x){x|>setNames(x)})()
 
@@ -77,13 +75,17 @@ translate_dna_to_binary <- function(dna_string) {
 #'variants_string_matrix=sim_variants_string_matrix(3,12)
 #'translate_dna_matrix_to_binary_array(variants)
 translate_dna_matrix_to_binary_array <- function(variants_string_matrix) {
-  plyr::aaply(variants_string_matrix,1:2,function(x){x==nucleotides})}
-  
+  variants_string_matrix|>
+    toupper()|>
+    plyr::aaply(1:2,`==`,nucleotides)|>
+    (`*`)(1)}
+
 #'@examples
 #'variants_string_vector=sim_variants_string_matrix(g=3,v=12)|>plyr::aaply(2,paste0,collapse="")
 #'translate_dna_string_vector_to_binary_array(variants_string_vector)
 translate_dna_string_vector_to_binary_array <- function(variants_string_vector) {
   variants_string_vector|>
+    toupper()|>
     plyr::aaply(1,function(x){strsplit(x,"")|>
       unname()|>
       unlist()})|>
@@ -101,11 +103,12 @@ sim_variants_string_matrix<-function(v,g){
 #'sim_tau_vga(g=3,v=12)
 sim_tau_vga<-function(v,g){
   sim_variants_string_matrix(v,g)|>
-    translate_dna_matrix_to_binary_array()}
+    translate_dna_matrix_to_binary_array()|>
+    ('*')(1)}
 
 
 
-sim_pi_gs<-function(g,s){rdirichlet(alpha = rep(1, g), n_samples = s) |> t()}
+sim_pi_gs<-function(g,s,alpha0=1){rdirichlet(alpha = rep(alpha0, g), n_samples = s) |> t()}
 
 #'@params
 #'@examples 
@@ -116,11 +119,12 @@ sim_n_vsa <- function(n,
     v=NULL,
     g=NULL,
     s=NULL,
-    error_rate=.001){
+    error_rate=.001,
+    alpha0=1){
   if(is.null(tau_vga)){tau_vga=sim_variants(v=v,g=g)}else{
   v=dim(tau_vga)[1]
   g=dim(tau_vga)[2]}
-  if(is.null(pi_gs)){pi_gs=sim_pi_gs(g = g,s = s)}else{
+  if(is.null(pi_gs)){pi_gs=sim_pi_gs(g = g,s = s,alpha0=alpha0)}else{
     s=dim(pi_gs)[2]}
     
   n_vs <- rpois(n = v * s, lambda = 20) |> matrix(c(v, s)) # Mean coverage is 20, which is pretty favourable
@@ -137,12 +141,13 @@ sim_n_vsa <- function(n,
   
   n_vsa<-plyr::aaply(np_vsa,1:2,function(x){rmultinom(n = 1, size = x[1], prob = x[2:5])|>setNames(nucleotides)})
   
-  n_vsa}
+  n_vsa|>
+    (function(x){x|>(`dimnames<-`)(dim(x)|>lapply(seq_len)|>setNames(c('v','s','a')))})()}
 #'@examples
-#'sim_tau_pi_n(g=5,v=50,s=3,n=n)
-sim_tau_pi_n<-function(v,g,s,n,error_rate=.001){
+#'sim_tau_pi_n(g=5,v=50,s=3,n=n,alpha0=1)
+sim_tau_pi_n<-function(v,g,s,n,error_rate=.001,alpha0=1){
   tau_vga=sim_tau_vga(v=v,g=g)
-  pi_gs=sim_pi_gs(g=g,s=s)
+  pi_gs=sim_pi_gs(g=g,s=s,alpha0=alpha0)
   n_vsa=sim_n_vsa(n=n,tau_vga=tau_vga,pi_gs=pi_gs,error_rate = error_rate)
   list(tau_vga=tau_vga,pi_gs=pi_gs,n_vsa=n_vsa)
 }
@@ -180,24 +185,24 @@ error_matrix_prior_specification <- function(error_rate, prior_std) {
 #'@param epsilon a numerical value. if NA, then  
 #'@param error_rate = 0.001,
 #'@param prior_std = 0.01
-#'
 #'@examples
-#' tau_pi_n=sim_tau_pi_n(v=50,g=5,s=3,n=1000)
-#' desman_fixed_variants(n_vsa=tau_pi_n$n_vsa,tau_vga=tau_pi_n$tau_vga,G=12)
+#' tau_pi_n=sim_tau_pi_n(v=50,g=5,s=3,n=1000,alpha0=1)
+#' desman_fixed_variants(
+#'   n_vsa=tau_pi_n$n_vsa,
+#'   tau_vga=tau_pi_n$tau_vga,
+#'   G=12)
 desman_fixed_variants<-function(n_vsa,
                                 tau_vga,
                                 G,
                                 epsilon=NA,
                                 error_rate = 0.001,
                                 prior_std = 0.01,
-                                n_chains=n_chains){
-  
+                                n_chains=n_chains,
+                                alpha0=1){
   V=dim(n_vsa)[1]
   S=dim(n_vsa)[2]
   G=min(G,dim(tau_vga)[2])
 
-  
-  
   model_string <- "
 model {
   # Likelihood
@@ -241,7 +246,8 @@ model {
 "
 
     
-model_string_fixed_epsilon <- "
+model_string_fixed_epsilon <- 
+"
 model {
   # Likelihood
   for (v in 1:V){
@@ -289,9 +295,10 @@ data_list <- list(
   nvs = n_vsa |> apply(MARGIN = c(1, 2), FUN = sum)
 )
 # Compiling and producing posterior samples from the model.
-jags_samples <- runjags::autorun.jags(model = model_string_fixed_epsilon, 
+    jags_samples <- runjags::autorun.jags(model = model_string_fixed_epsilon, 
                              data = data_list, monitor = c("pi_gs"), adapt = 2000,
                              n.chains=n_chains)
+    
 }
 
 
@@ -304,9 +311,9 @@ if(is.na(epsilon)){
 error_matrix_prior <- error_matrix_prior_specification(error_rate = error_rate, prior_std = prior_std)
 
 data_list <- list(
-  V = V, G = G, S = S, n_vsa = n_vsa, tau_vga = tau_vga, alpha = rep(1, G),
-  a = error_matrix_prior["a"],
-  b = error_matrix_prior["b"],
+  V = V, G = G, S = S, n_vsa = n_vsa, tau_vga = tau_vga, alpha = rep(alpha0, G),
+  aa = error_matrix_prior["a"],
+  bb = error_matrix_prior["b"],
   nvs = n_vsa |> apply(MARGIN = c(1, 2), FUN = sum)
 )
 
