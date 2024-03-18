@@ -1,5 +1,3 @@
-library(tidyverse)
-library(runjags)
 
 nucleotides=c("A","C","G","T")|>
   (function(x){x|>setNames(x)})()
@@ -82,8 +80,8 @@ translate_dna_matrix_to_binary_array <- function(variants_string_matrix) {
 
 #'@examples
 #'variants_string_vector=sim_variants_string_matrix(g=3,v=12)|>plyr::aaply(2,paste0,collapse="")
-#'translate_dna_string_vector_to_binary_array(variants_string_vector)
-translate_dna_string_vector_to_binary_array <- function(variants_string_vector) {
+#'translate_dna_string_vector_to_string_matrix(variants_string_vector)
+translate_dna_string_vector_to_string_matrix <- function(variants_string_vector) {
   variants_string_vector|>
     toupper()|>
     plyr::aaply(1,function(x){strsplit(x,"")|>
@@ -202,7 +200,7 @@ desman_fixed_variants<-function(n_vsa,
   V=dim(n_vsa)[1]
   S=dim(n_vsa)[2]
   G=min(G,dim(tau_vga)[2])
-
+  dimnames(n_vsa)<-lapply(dim(n_vsa),seq_len)
   model_string <- "
 model {
   # Likelihood
@@ -234,11 +232,11 @@ model {
   for (s in 1:S){
     pi_gs[1:G,s] ~ ddirch(alpha[1:G])
   }
-  tildeepsilon~ddirch(c(a, b))
+  tildeepsilon~ddirch(c(aa, bb))
   
-  for (aa in 1:4){
-      for (bb in 1:4){
-        epsilon[aa,bb] = (aa!=bb)*tildeepsilon[2]/3 +(aa==bb)*tildeepsilon[1]
+  for (a in 1:4){
+      for (b in 1:4){
+        epsilon[a,b] = (a!=b)*tildeepsilon[2]/3 +(a==b)*tildeepsilon[1]
         }
     }
 }
@@ -297,13 +295,8 @@ data_list <- list(
 # Compiling and producing posterior samples from the model.
     jags_samples <- runjags::autorun.jags(model = model_string_fixed_epsilon, 
                              data = data_list, monitor = c("pi_gs"), adapt = 2000,
-                             n.chains=n_chains)
+                             n.chains=n_chains)}
     
-}
-
-
-runjags:::setup.jagsfile(model = model_string_fixed_epsilon, n.chains = n_chains, 
-               data = data_list,monitor = c("pi_gs"))
 
 
 if(is.na(epsilon)){

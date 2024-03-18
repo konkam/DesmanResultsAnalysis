@@ -2,7 +2,9 @@
 library(targets)
 library(ggplot2)
 library(dplyr)
-library(raster)
+library(tidyverse)
+library(runjags)
+
 # library(tarchetypes) # Load other packages as needed. # nolint
 
 # Set target options:
@@ -26,10 +28,23 @@ variants<-
     "atgacaaaaaagaaattgcccgttcgttttacgggtcagcactttactattgataaagtgctaataaaagatgcaataagacaagcaaatataagtaatcaggatacggttttagatattggggcaggcaaggggtttcttactgttcatttattaaaaatcgccaacaatgttgttgctattgaaaacgacacagctttggttgaacatttacgaaaattattttctgatgcccgaaatgttcaagttgtcggttgtgattttaggaattttgcagttccgaaatttcctttcaaagtggtgtcaaatattccttatggcattacttccgatattttcaaaatcctgatgtttgagagtcttgGaaattttctgggagGttccattGtccttcaattagaacctacacaaaagttattttcgaggaagctttacaatccatataccgttttctatcatactttttttgatttgaaacttgtctatgaggtaggtcctgaaagtttcttgccaccgccaactgtcaaatcagccctgttaaacattaaaagaaaacacttattttttgattttaagtttaaagccaaatacttagcatttatttcctgtctgttagagaaacctgatttatctgtaaaaacagctttaaagtcgattttcaggaaaagtcaggtcaggtcaatttcggaaaaattcggtttaaaccttaatgctcaaattgtttgtttgtctccaagtcaatggttaaactgttttttggaaatgctggaagttgtccctgaaaaatttcatccttcgtag",
     "atgacaaaaaagaaattgcccgttcgttttacgggtcagcactttactattgataaagtgctaataaaagatgcaataagacaagcaaatataagtaatcaggatacggttttagatattggggcaggcaaggggtttcttactgttcatttattaaaaatcgccaacaatgttgttgctattgaaaacgacacagctttggttgaacatttacgaaaattattttctgatgcccgaaatgttcaagttgtcggttgtgattttaggaattttgcagttccgaaatttcctttcaaagtggtgtcaaatattccttatggcattacttccgatattttcaaaatcctgatgtttgagagtcttgAaaattttctgggagGttccattGtccttcaattagaacctacacaaaagttattttcgaggaagctttacaatccatataccgttttctatcatactttttttgatttgaaacttgtctatgaggtaggtcctgaaagtttcttgccaccgccaactgtcaaatcagccctgttaaacattaaaagaaaacacttattttttgattttaagtttaaagccaaatacttagcatttatttcctgtctgttagagaaacctgatttatctgtaaaaacagctttaaagtcgattttcaggaaaagtcaggtcaggtcaatttcggaaaaattcggtttaaaccttaatgctcaaattgtttgtttgtctccaagtcaatggttaaactgttttttggaaatgctggaagttgtccctgaaaaatttcatccttcgtag",
     "atgacaaaaaagaaattgcccgttcgttttacgggtcagcactttactattgataaagtgctaataaaagatgcaataagacaagcaaatataagtaatcaggatacggttttagatattggggcaggcaaggggtttcttactgttcatttattaaaaatcgccaacaatgttgttgctattgaaaacgacacagctttggttgaacatttacgaaaattattttctgatgcccgaaatgttcaagttgtcggttgtgattttaggaattttgcagttccgaaatttcctttcaaagtggtgtcaaatattccttatggcattacttccgatattttcaaaatcctgatgtttgagagtcttgGaaattttctgggagGttccattAtccttcaattagaacctacacaaaagttattttcgaggaagctttacaatccatataccgttttctatcatactttttttgatttgaaacttgtctatgaggtaggtcctgaaagtttcttgccaccgccaactgtcaaatcagccctgttaaacattaaaagaaaacacttattttttgattttaagtttaaagccaaatacttagcatttatttcctgtctgttagagaaacctgatttatctgtaaaaacagctttaaagtcgattttcaggaaaagtcaggtcaggtcaatttcggaaaaattcggtttaaaccttaatgctcaaattgtttgtttgtctccaagtcaatggttaaactgttttttggaaatgctggaagttgtccctgaaaaatttcatccttcgtag")
+
+
 list(
   tar_target(
-    name =counts,
+    name =ln_vsa,
     command = desman_input_file|>get_data_from_server()|>read_desman_input_files()),
   tar_target(
-    names=tau_vga,
-    command =variants|>translate_dna_string_vector_to_binary_array()))
+    name=tau_vga,
+    command =variants|>
+      translate_dna_string_vector_to_string_matrix()|>
+      translate_dna_matrix_to_binary_array()),
+  tar_target(name = mcmc_output,
+             command = desman_fixed_variants(ln_vsa[[1]],
+                                                       tau_vga,
+                                                       G=dim(tau_vga)[2],
+                                                       epsilon=NA,
+                                                       error_rate = 0.001,
+                                                       prior_std = 0.01,
+                                                       n_chains=2,
+                                                       alpha0=.1)))

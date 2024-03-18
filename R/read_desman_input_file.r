@@ -4,7 +4,7 @@
 #'read_desman_input_files()->X
 read_desman_input_files<-
   function(desman_input_file){
-    read.csv(desman_input_file)|>tidyr::pivot_longer(cols=!c("Position","X"),
+    desman_input_file|>read.csv()|>tidyr::pivot_longer(cols=!c("Position","X"),
                            names_to=c("s","a"),
                            names_pattern = "([[:alnum:]]+_+[[:alnum:]]+)\\.([[:alnum:]]+)")|>
       plyr::dlply(~X,
