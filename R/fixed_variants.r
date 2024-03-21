@@ -192,7 +192,7 @@ error_matrix_prior_specification <- function(error_rate, prior_std) {
 desman_fixed_variants<-function(n_vsa,
                                 tau_vga,
                                 G,
-                                epsilon=NA,
+                                tildeepsilon=NA,
                                 error_rate = 0.001,
                                 prior_std = 0.01,
                                 n_chains=n_chains,
@@ -205,7 +205,7 @@ desman_fixed_variants<-function(n_vsa,
 
     
 
-if(!is.na(epsilon)){
+if(!is.na(tildeepsilon)){
   model_string_fixed_epsilon <- 
     "
 model {
@@ -247,7 +247,7 @@ data_list <- list(
   V = V, 
   G = G, 
   S = S, 
-  epsilon = epsilon, 
+  epsilon = 2*tildeepsilon*diag(4)+(1-tildeepsilon), 
   n_vsa = n_vsa, 
   tau_vga = tau_vga, 
   alpha = rep(1, G),
@@ -260,7 +260,7 @@ data_list <- list(
     
 
 
-if(is.na(epsilon)){
+if(is.na(tildeepsilon)){
 model_string <- "
 model {
   # Likelihood
