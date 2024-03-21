@@ -11,9 +11,9 @@ get_data_from_server<-function(
     server=c("front.migale.inrae.fr"),
     cred=if(is.element("montruc",installed.packages()[,1])){montruc::inraetruc()
     }else{
-      list(username=readline(prompt="Enter user name: "),pwd=readline(prompt="Password: "))}){
+      list(username=readline(prompt="Enter user name: "),password=readline(prompt="Password: "))}){
   if(file.exists(dirorfilepathonserver)){destdirorfile<-dirorfilepathonserver}else{
-  system(paste0(if(!is.null(cred$password)&password!=""){paste0("sshpass -p ",cred$password)}else{}," scp -r ",cred$username,"@",server,":",dirorfilepathonserver," ",destdirorfile|>gsub(pattern = " ",replacement = "\\ ",fixed = T)|>gsub(pattern = "\\\\ ",replacement = "\\ ",fixed = T)))}
+  system(paste0(if(!is.null(cred$password)){if(cred$password!=""){paste0("sshpass -p ",cred$password)}}else{}," scp -r ",cred$username,"@",server,":",dirorfilepathonserver," ",destdirorfile|>gsub(pattern = " ",replacement = "\\ ",fixed = T)|>gsub(pattern = "\\\\ ",replacement = "\\ ",fixed = T)))}
   destdirorfile}
 
 #'@examples
