@@ -201,7 +201,67 @@ desman_fixed_variants<-function(n_vsa,
   S=dim(n_vsa)[2]
   G=min(G,dim(tau_vga)[2])
   dimnames(n_vsa)<-lapply(dim(n_vsa),seq_len)
-  model_string <- "
+
+
+    
+
+if(!is.na(epsilon)){
+  model_string_fixed_epsilon <- 
+    "
+model {
+  # Likelihood
+  for (v in 1:V){
+    for (s in 1:S){
+      n_vsa[v,s,] ~ dmulti(p_vsa[v,s,], nvs[v,s])
+    }
+  }
+  # Mangled variants
+  for (v in 1:V){
+    for (g in 1:G){
+      for (a in 1:4){
+        mixed_variants[v, g, a] = inprod(tau_vga[v,g,], epsilon[,a])
+      }
+    }
+  }
+  # Latent multinomial observation probability
+  for (v in 1:V){
+    for (s in 1:S){
+      for (g in 1:G){
+        for (a in 1:4){
+          p_g[v, s, g, a] = pi_gs[g, s] * mixed_variants[v, g, a]
+        }
+      }
+      for (a in 1:4){
+        p_vsa[v, s, a] = sum(p_g[v, s, , a]) # Sum over variants
+      }
+    }
+  }
+
+  # Prior
+  for (s in 1:S){
+    pi_gs[1:G, s] ~ ddirch(alpha[1:G])
+  }
+}
+"
+data_list <- list(
+  V = V, 
+  G = G, 
+  S = S, 
+  epsilon = epsilon, 
+  n_vsa = n_vsa, 
+  tau_vga = tau_vga, 
+  alpha = rep(1, G),
+  nvs = n_vsa |> apply(MARGIN = c(1, 2), FUN = sum)
+)
+# Compiling and producing posterior samples from the model.
+    jags_samples <- runjags::autorun.jags(model = model_string_fixed_epsilon, 
+                             data = data_list, monitor = c("pi_gs"), adapt = 2000,
+                             n.chains=n_chains)}
+    
+
+
+if(is.na(epsilon)){
+model_string <- "
 model {
   # Likelihood
   for (v in 1:V){
@@ -242,65 +302,6 @@ model {
 }
 
 "
-
-    
-model_string_fixed_epsilon <- 
-"
-model {
-  # Likelihood
-  for (v in 1:V){
-    for (s in 1:S){
-      n_vsa[v,s,] ~ dmulti(p_vsa[v,s,], nvs[v,s])
-    }
-  }
-  # Mangled variants
-  for (v in 1:V){
-    for (g in 1:G){
-      for (a in 1:4){
-        mixed_variants[v, g, a] = inprod(tau_vga[v,g,], epsilon[,a])
-      }
-    }
-  }
-  # Latent multinomial observation probability
-  for (v in 1:V){
-    for (s in 1:S){
-      for (g in 1:G){
-        for (a in 1:4){
-          p_g[v, s, g, a] = pi_gs[g, s] * mixed_variants[v, g, a]
-        }
-      }
-      for (a in 1:4){
-        p_vsa[v, s, a] = sum(p_g[v, s, , a]) # Sum over variants
-      }
-    }
-  }
-
-  # Prior
-  for (s in 1:S){
-    pi_gs[1:G, s] ~ ddirch(alpha[1:G])
-  }
-}
-"
-if(!is.na(epsilon)){
-data_list <- list(
-  V = V, 
-  G = G, 
-  S = S, 
-  epsilon = epsilon, 
-  n_vsa = n_vsa, 
-  tau_vga = tau_vga, 
-  alpha = rep(1, G),
-  nvs = n_vsa |> apply(MARGIN = c(1, 2), FUN = sum)
-)
-# Compiling and producing posterior samples from the model.
-    jags_samples <- runjags::autorun.jags(model = model_string_fixed_epsilon, 
-                             data = data_list, monitor = c("pi_gs"), adapt = 2000,
-                             n.chains=n_chains)}
-    
-
-
-if(is.na(epsilon)){
-  
 error_matrix_prior <- error_matrix_prior_specification(error_rate = error_rate, prior_std = prior_std)
 
 data_list <- list(

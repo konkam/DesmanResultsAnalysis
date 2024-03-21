@@ -11,27 +11,27 @@ get_data_from_server<-function(
     server=c("front.migale.inrae.fr"),
     cred=if(is.element("montruc",installed.packages()[,1])){montruc::inraetruc()
     }else{
-      list(username=readline(prompt="Enter user name: "))}){
+      list(username=readline(prompt="Enter user name: "),pwd=readline(prompt="Password: "))}){
   if(file.exists(dirorfilepathonserver)){destdirorfile<-dirorfilepathonserver}else{
-  system(paste0(if(!is.null(cred$password)){paste0("sshpass -p ",cred$password)}else{}," scp -r ",cred$username,"@",server,":",dirorfilepathonserver," ",destdirorfile|>gsub(pattern = " ",replacement = "\\ ",fixed = T)|>gsub(pattern = "\\\\ ",replacement = "\\ ",fixed = T)))}
+  system(paste0(if(!is.null(cred$password)&password!=""){paste0("sshpass -p ",cred$password)}else{}," scp -r ",cred$username,"@",server,":",dirorfilepathonserver," ",destdirorfile|>gsub(pattern = " ",replacement = "\\ ",fixed = T)|>gsub(pattern = "\\\\ ",replacement = "\\ ",fixed = T)))}
   destdirorfile}
 
 #'@examples
 #'"timestampedexports/Cube_20220629.csv"|>get_inst_files()
-get_inst_files<-function(path,package="LocustAnalysis"){
+get_inst_files<-function(path,package="DesmanResultsAnalysis"){
   suppressWarnings(c(file.path("inst",path),                           
                      system.file(path,package=package))|>
                      Filter(f=file.exists)|>
                      (`[`)(1))}
 
-load_data_file<-function(.data,package="LocustAnalysis"){
+load_data_file<-function(.data,package="DesmanResultsAnalysis"){
   if(file.exists(file.path("data",paste0(.data,".rda")))){
     file.path("data",paste0(.data,".rda"))|>load(envir = parent.frame())
   }else{
     data(list=.data,package=package,envir = parent.frame())
   }}
 
-get_load_data_file<-function(.data,package="LocustAnalysis"){
+get_load_data_file<-function(.data,package="DesmanResultsAnalysis"){
   if(exists(file.path("data",paste0(.data,".rda")))){
     file.path("data",paste0(.data,".rda"))|>load()|>get()
   }else{
@@ -40,7 +40,7 @@ get_load_data_file<-function(.data,package="LocustAnalysis"){
 
 #'@examples
 #'"timestampedexports"|>get_inst_files()
-get_inst_dirs<-function(path,packagefolder="inst",package="LocustAnalysis"){
+get_inst_dirs<-function(path,packagefolder="inst",package="DesmanResultsAnalysis"){
   suppressWarnings(c(file.path("inst",path),                           
                      system.file(path,package=package))|>
                      Filter(f=dir.exists)|>
