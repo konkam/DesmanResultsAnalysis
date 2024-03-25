@@ -1,9 +1,9 @@
 # Load packages required to define the pipeline:
 library(targets)
-library(ggplot2)
+#library(ggplot2)
 library(dplyr)
-library(tidyverse)
-library(runjags)
+#library(tidyverse)
+#library(runjags)
 
 # library(tarchetypes) # Load other packages as needed. # nolint
 
