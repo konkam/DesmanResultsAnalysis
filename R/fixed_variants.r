@@ -199,14 +199,73 @@ desman_fixed_variants<-function(n_vsa,
                                 alpha0=1){
   V=dim(n_vsa)[1]
   S=dim(n_vsa)[2]
-  G=min(G,dim(tau_vga)[2])
+  Gd=dim(tau_vga)[2]
+  G=min(G,Gd)
   dimnames(n_vsa)<-lapply(dim(n_vsa),seq_len)
 
 
-    
+model.string.f<-function(tildeepsilon=NA,G,tau_vga){
+  Gd=dim(tau_vga)[2]
+paste0("
+model {
+  # Likelihood
+  for (v in 1:V){
+    for (s in 1:S){
+      n_vsa[v,s,] ~ dmulti(p_vsa[v,s,], nvs[v,s])
+    }
+  }
+  # Mangled variants
+  for (v in 1:V){
+    for (g in 1:Gd){
+      for (a in 1:4){
+        mixed_variants[v, g, a] = inprod(tau_vga[v,g,], epsilon[,a])
+      }
+    }
+  }
+  
+  # Latent multinomial observation probability
+  for (v in 1:V){
+    for (s in 1:S){
+      for (g in 1:Gd){
+        for (a in 1:4){
+          p_g[v, s, g, a] = pi_gs[g, s] * mixed_variants[v, g, a]
+        }
+      }
+      for (a in 1:4){
+        p_vsa[v, s, a] = sum(p_g[v, s, , a]) # Sum over variants
+      }
+    }
+  }
+
+  # Prior
+  for (s in 1:S){",
+       if(G<Gd){
+         "
+          pi_sel_gs[1:G, s] ~ ddirch(alpha[1:G])
+          selected_[1:Gd, s] ~ dsample(rep(1,Gd),G)
+          pi_gs[1:Gd, s]  =pi_sel_gs[(1:N)[selected_[1:Gd, s]==1], s] 
+          
+"}else{
+       "
+    pi_gs[1:Gd, s] ~ ddirch(alpha[1:Gd])
+"},
+  "}",
+  if(is.null(tildeepsilon)){
+    "tildeepsilon~ddirch(c(aa, bb))
+     for (a in 1:4){
+      for (b in 1:4){
+        epsilon[a,b] = (a!=b)*tildeepsilon[2]/3 +(a==b)*tildeepsilon[1]
+        }
+    }
+"},
+  "
+}
+")
+  
+}    
 
 if(!is.na(tildeepsilon)){
-  model_string_fixed_epsilon <- 
+  model_string <- 
     "
 model {
   # Likelihood
@@ -241,8 +300,9 @@ model {
   for (s in 1:S){
     pi_gs[1:G, s] ~ ddirch(alpha[1:G])
   }
-}
+  }
 "
+
 data_list <- list(
   V = V, 
   G = G, 
@@ -254,7 +314,7 @@ data_list <- list(
   nvs = n_vsa |> apply(MARGIN = c(1, 2), FUN = sum)
 )
 # Compiling and producing posterior samples from the model.
-    jags_samples <- runjags::autorun.jags(model = model_string_fixed_epsilon, 
+    jags_samples <- runjags::autorun.jags(model = model_string, 
                              data = data_list, monitor = c("pi_gs"), adapt = 2000,
                              n.chains=n_chains)}
     
