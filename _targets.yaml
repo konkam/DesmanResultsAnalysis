@@ -1,6 +1,6 @@
 fixed_variants:
   store: _targets_store/fixed_variants
-  script: _targets_scripts/fixed_variants.r
+  script: _targets_scripts/script_fixed_variants.r
   
 fixed_variants_large_dictionnary:
   store: _targets_store/fixed_variants_large_dictionnary

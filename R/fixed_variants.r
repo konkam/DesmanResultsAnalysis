@@ -174,39 +174,9 @@ error_matrix_prior_specification <- function(error_rate, prior_std) {
 ### Model 
 
 
-
-#'@description
-#'Run jags.
-#'@param n_vsa an array of counts.
-#'@param tau_vga a collection of variants
-#'@param G an integer. If G is smaller than the number of variants in the variant bin, then the algorithm is ran on the minimum of G and the number of variants in the bin.
-#'@param epsilon a numerical value. if NA, then  
-#'@param error_rate = 0.001,
-#'@param prior_std = 0.01
-#'@examples
-#' tau_pi_n=sim_tau_pi_n(v=50,g=5,s=3,n=1000,alpha0=1)
-#' desman_fixed_variants(
-#'   n_vsa=tau_pi_n$n_vsa,
-#'   tau_vga=tau_pi_n$tau_vga,
-#'   G=12)
-desman_fixed_variants<-function(n_vsa,
-                                tau_vga,
-                                G,
-                                tildeepsilon=NA,
-                                error_rate = 0.001,
-                                prior_std = 0.01,
-                                n_chains=n_chains,
-                                alpha0=1){
-  V=dim(n_vsa)[1]
-  S=dim(n_vsa)[2]
-  Gd=dim(tau_vga)[2]
-  G=min(G,Gd)
-  dimnames(n_vsa)<-lapply(dim(n_vsa),seq_len)
-
-
 model.string.f<-function(tildeepsilon=NA,G,tau_vga){
   Gd=dim(tau_vga)[2]
-paste0("
+  paste0("
 model {
   # Likelihood
   for (v in 1:V){
@@ -239,8 +209,8 @@ model {
 
   # Prior
   for (s in 1:S){",
-       if(G<Gd){
-         "
+         if(G<Gd){
+           "
           pi_sel_gs[1:G, s] ~ ddirch(alpha[1:G])
           selected_[1:Gd, s] ~ dsample(rep(1,Gd),G)
           selected_pos=order(selected_[1:Gd, s]*(1:N))[1:G]
@@ -248,11 +218,11 @@ model {
           pi_gs[selected_pos, s]  =pi_sel_gs[1:G, s] 
           pi_gs[non_selected_pos, s]  =rep(0,(Gd-G))
 "}else{
-       "
+  "
     pi_gs[1:Gd, s] ~ ddirch(alpha[1:Gd])
 "},
   "}",
-  if(is.null(tildeepsilon)){
+  if(is.na(tildeepsilon)){
     "tildeepsilon~ddirch(c(aa, bb))
      for (a in 1:4){
       for (b in 1:4){
@@ -266,44 +236,38 @@ model {
   
 }    
 
-if(!is.na(tildeepsilon)){
-  model_string <- 
-    "
-model {
-  # Likelihood
-  for (v in 1:V){
-    for (s in 1:S){
-      n_vsa[v,s,] ~ dmulti(p_vsa[v,s,], nvs[v,s])
-    }
-  }
-  # Mangled variants
-  for (v in 1:V){
-    for (g in 1:G){
-      for (a in 1:4){
-        mixed_variants[v, g, a] = inprod(tau_vga[v,g,], epsilon[,a])
-      }
-    }
-  }
-  # Latent multinomial observation probability
-  for (v in 1:V){
-    for (s in 1:S){
-      for (g in 1:G){
-        for (a in 1:4){
-          p_g[v, s, g, a] = pi_gs[g, s] * mixed_variants[v, g, a]
-        }
-      }
-      for (a in 1:4){
-        p_vsa[v, s, a] = sum(p_g[v, s, , a]) # Sum over variants
-      }
-    }
-  }
+#'@description
+#'Run jags.
+#'@param n_vsa an array of counts.
+#'@param tau_vga a collection of variants
+#'@param G an integer. If G is smaller than the number of variants in the variant bin, then the algorithm is ran on the minimum of G and the number of variants in the bin.
+#'@param epsilon a numerical value. if NA, then  
+#'@param error_rate = 0.001,
+#'@param prior_std = 0.01
+#'@examples
+#' tau_pi_n=sim_tau_pi_n(v=50,g=5,s=3,n=1000,alpha0=1)
+#' desman_fixed_variants(
+#'   n_vsa=tau_pi_n$n_vsa,
+#'   tau_vga=tau_pi_n$tau_vga,
+#'   G=12)
+desman_fixed_variants<-function(n_vsa,
+                                tau_vga,
+                                G,
+                                tildeepsilon=NA,
+                                error_rate = 0.001,
+                                prior_std = 0.01,
+                                n_chains=n_chains,
+                                alpha0=1){
+  V=dim(n_vsa)[1]
+  S=dim(n_vsa)[2]
+  Gd=dim(tau_vga)[2]
+  G=min(G,Gd)
+  dimnames(n_vsa)<-lapply(dim(n_vsa),seq_len)
 
-  # Prior
-  for (s in 1:S){
-    pi_gs[1:G, s] ~ ddirch(alpha[1:G])
-  }
-  }
-"
+  
+  model_string <- model.string.f(tildeepsilon=NA,G,tau_vga)
+
+if(!is.na(tildeepsilon)){
 
 data_list <- list(
   V = V, 
@@ -323,47 +287,7 @@ data_list <- list(
 
 
 if(is.na(tildeepsilon)){
-model_string <- "
-model {
-  # Likelihood
-  for (v in 1:V){
-    for (s in 1:S){
-      n_vsa[v,s,] ~ dmulti(p_vsa[v,s,], nvs[v,s])
-    }
-  }
-  # Mixed variants
-  for (v in 1:V){
-    for (g in 1:G){
-      for (a in 1:4){
-        mixed_variants[v, g, a] = inprod(tau_vga[v,g,], epsilon[,a])
-      }
-    }
-  }
-  for (v in 1:V){
-    for (s in 1:S){
-      for (g in 1:G){
-        for (a in 1:4){
-          p_g[v, s, g, a] = pi_gs[g, s] * mixed_variants[v, g, a]
-        }
-      }
-      for (a in 1:4){
-        p_vsa[v,s,a] = sum(p_g[v, s, ,a])
-      }
-    }
-  }
-  for (s in 1:S){
-    pi_gs[1:G,s] ~ ddirch(alpha[1:G])
-  }
-  tildeepsilon~ddirch(c(aa, bb))
   
-  for (a in 1:4){
-      for (b in 1:4){
-        epsilon[a,b] = (a!=b)*tildeepsilon[2]/3 +(a==b)*tildeepsilon[1]
-        }
-    }
-}
-
-"
 error_matrix_prior <- error_matrix_prior_specification(error_rate = error_rate, prior_std = prior_std)
 
 data_list <- list(
