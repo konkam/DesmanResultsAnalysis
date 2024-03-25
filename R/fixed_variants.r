@@ -243,8 +243,10 @@ model {
          "
           pi_sel_gs[1:G, s] ~ ddirch(alpha[1:G])
           selected_[1:Gd, s] ~ dsample(rep(1,Gd),G)
-          pi_gs[1:Gd, s]  =pi_sel_gs[(1:N)[selected_[1:Gd, s]==1], s] 
-          
+          selected_pos=order(selected_[1:Gd, s]*(1:N))[1:G]
+          non_selected_pos=order((rep(1,Gd)-selected_[1:Gd, s])*(1:N))[1:Gd-G]
+          pi_gs[selected_pos, s]  =pi_sel_gs[1:G, s] 
+          pi_gs[non_selected_pos, s]  =rep(0,(Gd-G))
 "}else{
        "
     pi_gs[1:Gd, s] ~ ddirch(alpha[1:Gd])
