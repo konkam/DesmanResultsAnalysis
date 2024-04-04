@@ -356,7 +356,7 @@ desman_fixed_variants <- function(n_vsa,
       epsilon = 2 * tildeepsilon * diag(4) + (1 - tildeepsilon),
       n_vsa = n_vsa,
       tau_vga = tau_vga,
-      alpha = rep(1, G),
+      alpha = rep(alpha0, G),
       nvs = n_vsa |> apply(MARGIN = c(1, 2), FUN = sum)
     )
     # Compiling and producing posterior samples from the model.
