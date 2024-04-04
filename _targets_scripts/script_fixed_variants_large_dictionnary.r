@@ -1,8 +1,8 @@
 # Load packages required to define the pipeline:
 library(targets)
+library(tidyverse)
 library(ggplot2)
 library(dplyr)
-library(tidyverse)
 library(runjags)
 
 # library(tarchetypes) # Load other packages as needed. # nolint
@@ -26,7 +26,7 @@ desman_input_file<-"/work_projet/ala/metachick-fugace/Analyses_Ouléye/DESMAN_20
 
 
 list(
-  tar_target(names=
+  tar_target(name=
                variants,
              command=
                c("atgacaaaaaagaaattgcccgttcgttttacgggtcagcactttactattgataaagtgctaataaaagatgcaataagacaagcaaatataagtaatcaggatacggttttagatattggggcaggcaaggggtttcttactgttcatttattaaaaatcgccaacaatgttgttgctattgaaaacgacacagctttggttgaacatttacgaaaattattttctgatgcccgaaatgttcaagttgtcggttgtgattttaggaattttgcagttccgaaatttcctttcaaagtggtgtcaaatattccttatggcattacttccgatattttcaaaatcctgatgtttgagagtcttgGaaattttctgggagCttccattGtccttcaattagaacctacacaaaagttattttcgaggaagctttacaatccatataccgttttctatcatactttttttgatttgaaacttgtctatgaggtaggtcctgaaagtttcttgccaccgccaactgtcaaatcagccctgttaaacattaaaagaaaacacttattttttgattttaagtttaaagccaaatacttagcatttatttcctgtctgttagagaaacctgatttatctgtaaaaacagctttaaagtcgattttcaggaaaagtcaggtcaggtcaatttcggaaaaattcggtttaaaccttaatgctcaaattgtttgtttgtctccaagtcaatggttaaactgttttttggaaatgctggaagttgtccctgaaaaatttcatccttcgtag",

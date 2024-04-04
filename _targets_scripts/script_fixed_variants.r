@@ -1,8 +1,8 @@
 # Load packages required to define the pipeline:
 library(targets)
-#library(ggplot2)
+library(tidyverse)
 library(dplyr)
-#library(tidyverse)
+#library(ggplot2)
 #library(runjags)
 
 # library(tarchetypes) # Load other packages as needed. # nolint
@@ -47,7 +47,7 @@ list(
                                                        error_rate = 0.001,
                                                        prior_std = 0.01,
                                                        n_chains=2,
-                                                       alpha0=.1)),
+                                                       alpha0=1)),
   tar_target(name = mcmc_output_fixed_epsilon,
              command = desman_fixed_variants(ln_vsa[[1]],
                                              tau_vga,
@@ -56,4 +56,4 @@ list(
                                              error_rate = 0.001,
                                              prior_std = 0.01,
                                              n_chains=2,
-                                             alpha0=.1)))
+                                             alpha0=1)))

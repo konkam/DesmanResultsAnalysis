@@ -197,12 +197,62 @@ error_matrix_prior_specification <- function(error_rate, prior_std) {
 #' @description
 #' Creates model string for jags
 #' @param tildeepsilon a numerical value. if NA, then the model uses a dirichlet prior.
-#' @param G an integer. If G is smaller than the number of variants in the variant bin, then the algorithm is ran on the minimum of G and the number of variants in the bin.
-#' @param tau_vga a collection of variants
 #' @examples
 #' tau_pi_n <- sim_tau_pi_n(v = 50, g = 5, s = 3, n = 1000, alpha0 = 1)
-#' model.string.f(NA, 3, tau_vga)
-model.string.f <- function(tildeepsilon = NA, G, tau_vga) {
+#' model.string.f(NA)
+model.string.f <- function(tildeepsilon = NA) {
+  paste0(
+    "
+model {
+  # Likelihood
+  for (v in 1:V){
+    for (s in 1:S){
+      n_vsa[v,s,] ~ dmulti(p_vsa[v,s,], nvs[v,s])
+    }
+  }
+  # Mangled variants
+  for (v in 1:V){
+    for (g in 1:G){
+      for (a in 1:4){
+        mixed_variants[v, g, a] = inprod(tau_vga[v,g,], epsilon[,a])
+      }
+    }
+  }
+
+  # Latent multinomial observation probability
+  for (v in 1:V){
+    for (s in 1:S){
+      for (g in 1:G){
+        for (a in 1:4){
+          p_g[v, s, g, a] = pi_gs[g, s] * mixed_variants[v, g, a]
+        }
+      }
+      for (a in 1:4){
+        p_vsa[v, s, a] = sum(p_g[v, s, , a]) # Sum over variants
+      }
+    }
+  }
+
+  # Prior
+  for (s in 1:S){
+    pi_gs[1:G, s] ~ ddirch(alpha[1:G])
+    }",
+    if (is.na(tildeepsilon)) {
+      "tildeepsilon~ddirch(c(aa, bb))
+     for (a in 1:4){
+      for (b in 1:4){
+        epsilon[a,b] = (a!=b)*tildeepsilon[2]/3 +(a==b)*tildeepsilon[1]
+        }
+    }
+"
+    },
+    "
+}
+"
+  )
+}
+
+model.string.intractable.f <- function(tildeepsilon = NA, G, tau_vga) {
   Gd <- dim(tau_vga)[2]
   paste0(
     "
@@ -267,7 +317,6 @@ model {
 "
   )
 }
-
 #' @description
 #' Run jags.
 #' @param n_vsa an array of counts.
@@ -293,18 +342,16 @@ desman_fixed_variants <- function(n_vsa,
                                   alpha0 = 1) {
   V <- dim(n_vsa)[1]
   S <- dim(n_vsa)[2]
-  Gd <- dim(tau_vga)[2]
-  G <- min(G, Gd)
+  G <- dim(tau_vga)[2]
   dimnames(n_vsa) <- lapply(dim(n_vsa), seq_len)
 
 
-  model_string <- model.string.f(tildeepsilon = tildeepsilon, G = G, tau_vga = tau_vga)
+  model_string <- model.string.f(tildeepsilon = tildeepsilon)
 
   if (!is.na(tildeepsilon)) {
     data_list <- list(
       V = V,
       G = G,
-      Gd = Gd,
       S = S,
       epsilon = 2 * tildeepsilon * diag(4) + (1 - tildeepsilon),
       n_vsa = n_vsa,
@@ -327,8 +374,7 @@ desman_fixed_variants <- function(n_vsa,
       error_rate = error_rate, prior_std = prior_std)
 
     data_list <- list(
-      V = V, G = G,
-      Gd = Gd, S = S, n_vsa = n_vsa, tau_vga = tau_vga, alpha = rep(alpha0, G),
+      V = V, G = G, S = S, n_vsa = n_vsa, tau_vga = tau_vga, alpha = rep(alpha0, G),
       aa = error_matrix_prior["a"],
       bb = error_matrix_prior["b"],
       nvs = n_vsa |> apply(MARGIN = c(1, 2), FUN = sum)
