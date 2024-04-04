@@ -1,4 +1,4 @@
-nucleotides <- c("A", "C", "G", "T") |>
+nucleotides <- c("a", "c", "g", "t") |>
   (function(x) {
     x |> setNames(x)
   })()
@@ -72,7 +72,7 @@ translate_dna_to_binary <- function(dna_string) {
 #' translate_dna_matrix_to_binary_array(variants)
 translate_dna_matrix_to_binary_array <- function(variants_string_matrix) {
   variants_string_matrix |>
-    toupper() |>
+    tolower() |>
     plyr::aaply(1:2, `==`, nucleotides) |>
     (`*`)(1)
 }
@@ -82,7 +82,7 @@ translate_dna_matrix_to_binary_array <- function(variants_string_matrix) {
 #' translate_dna_string_vector_to_string_matrix(variants_string_vector)
 translate_dna_string_vector_to_string_matrix <- function(variants_string_vector) {
   variants_string_vector |>
-    toupper() |>
+    tolower() |>
     plyr::aaply(1, function(x) {
       strsplit(x, "") |>
         unname() |>
