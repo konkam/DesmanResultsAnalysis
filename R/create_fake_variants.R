@@ -14,7 +14,8 @@ create_fake_variants<-function(n,dic,taux){
     plyr::aaply(1,
                 function(x){change=rbinom(length(x),1,taux)
                 x[change==1]<-sample(nucleotides,sum(change),replace=TRUE)
-                x})
+                x})|>
+    plyr::aaply(1,paste,collapse="")
     
   
 }
