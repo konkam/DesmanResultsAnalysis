@@ -1,10 +1,10 @@
 ---
 title: "Target Markdown"
-output: html_document
+output: github_document
 ---
 
 ```{r}
 tar_load(mcmc_output)
 dim(mcmc_output$mcmc[[1]])
-tar_visnetwork()
+#tar_visnetwork()
 ```
