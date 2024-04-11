@@ -367,8 +367,7 @@ desman_fixed_variants <- function(n_vsa,
     tau_vga = tau_vga,
     alpha = rep(alpha0, G),
     #epsilon = 2 * tildeepsilon * diag(4) + (1 - tildeepsilon),
-    nvs = n_vsa |> apply(MARGIN = c(1, 2), FUN = sum),
-  )
+    nvs = n_vsa |> apply(MARGIN = c(1, 2), FUN = sum))
   
   if (!is.na(tildeepsilon)) {
     data_list=c(data_list,list(tildeepsilon=tildeepsilon))
