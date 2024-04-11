@@ -73,4 +73,29 @@ add_metadata <- function(results, metadata, samples, nbvar,m1,m2){
   cond2=rep(metadata[which(metadata$ID %in% allS),"Age"],times=1,each=length(variants))
   cbind(results,cond1,cond2)
 }
+
+
+
+if(FALSE){
+  function(variants,samples,alpha_best,mcmc_output,mcmc_output_bestalpha,
+           metadata_file)
+    
+results <- head(jags_sample_to_summary_tibble(mcmc_output),-2)
+resultba <- head(jags_sample_to_summary_tibble(mcmc_output_bestalpha),-2)
+
+
+metadata=metadata_file |> read.csv()
+
+metafields <- c(colnames(metadata),"cond")
+metadata <- cbind(metadata,paste0(metadata$Rearing,metadata$Gen))
+colnames(metadata) <- metafields
+
+resultscond <- add_metadata(results, metadata, samples, length(variants),"cond","Age")
+resultbacond <- add_metadata(resultba, metadata, samples, length(variants),"cond","Age")
+
+list(plot1=plot_pi_summary(resultscond,samples,variants,0.1,0,"age (days)"),
+     plot2=plot_pi_summary(resultscond,samples,variants,0.1,0.05,"age (days)"),
+     plot3=plot_pi_summary(resultbacond,samples,variants,alpha_best,0.05,"age (days)"))}
+
+
   
