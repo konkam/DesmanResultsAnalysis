@@ -202,7 +202,7 @@ error_matrix_prior_specification <- function(error_rate, prior_std) {
 #' cat(model_string_f(NA))
 model_string_f <- function(tildeepsilon = NA,
                                 gs="jags") {
-  if(gs==jags){
+  if(gs=="jags"){
   paste0(
     "
 model {
@@ -382,10 +382,10 @@ desman_fixed_variants <- function(n_vsa,
                   aa = error_matrix_prior["a"],
                   bb = error_matrix_prior["b"]))}
   
-  monitor= ic("pi_gs", f (is.na(tildeepsilon)) {"tildeepsilon"})
+  monitor= c("pi_gs", if (is.na(tildeepsilon)) {"tildeepsilon"})
   
   # Compiling and producing posterior samples from the model.
-  gibbs_samples <- if(gs="jags"){
+  gibbs_samples <- if(gs=="jags"){
     runjags::run.jags(
       model = model_string,
       data = data_list,

@@ -34,7 +34,7 @@ The fasta file used for the dictionnary was: [",fasta_file,"]")
 ## Desman Tuning parameters
 
 ```{r,echo=FALSE}
-htmltools::tagList(Desman_tuning_parameters)
+htmltools::tagList(desman_tuning_parameters)
 ```
 # Results
 ## Free epsilon
