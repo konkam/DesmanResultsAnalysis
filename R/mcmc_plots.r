@@ -1,18 +1,16 @@
 
 #'@examples
 #'tar_load(mcmc_output)
-#'tar_load(ln_vsa)
-#'n_vsa=ln_vsa[[1]]
-#'variants=1:4
-plot_tilde_epsilon<-function(mcmc_output){
-  mcmc_output$mcmc |>
-    mcmc_output_df("tildeepsilon[2]")|>
-  ggplot(aes(x = iteration,group=as.factor(Var2),col=as.factor(Var2),y=value)) +
+#'plot_tilde_epsilon(mcmc_output)
+plot_tilde_epsilon<-function(mcmc_output,error_rate){
+  mcmc_output|>
+    mcmc_output_df(variable_name = "tildeepsilon[2]")|>
+  ggplot(aes(x = iteration,group=as.factor(variable),col=as.factor(variable),y=value)) +
   theme_bw() +
   geom_line()+
   scale_y_continuous(trans="log10")+
   geom_hline(yintercept = error_rate, colour = "red", size = 0.75) +
-  facet_grid(~Var2)+
+  facet_grid(~variable)+
   ggtitle("Real value in red, estimation in black")}
 
 

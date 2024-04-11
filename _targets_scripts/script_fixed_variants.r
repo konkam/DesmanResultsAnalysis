@@ -58,4 +58,4 @@ list(
                                              prior_std = 0.01,
                                              n_chains=2,
                                              alpha0=1)),
-  tarchetypes::tar_render(report,"reports/fixed_variants.rmd"))
+  tarchetypes::tar_render(report,"reports/fixed_variants.rmd",output_file = "reports/fixed_variants.md"))

@@ -107,7 +107,7 @@ sim_variants_string_matrix <- function(v, g) {
 sim_tau_vga <- function(v, g) {
   sim_variants_string_matrix(v, g) |>
     translate_dna_matrix_to_binary_array() |>
-    ("*")(1)
+    (`*`)(1)
 }
 
 sim_pi_gs <- function(g, s, alpha0 = 1) {
@@ -199,8 +199,10 @@ error_matrix_prior_specification <- function(error_rate, prior_std) {
 #' @param tildeepsilon a numerical value. if NA, then the model uses a dirichlet prior.
 #' @examples
 #' tau_pi_n <- sim_tau_pi_n(v = 50, g = 5, s = 3, n = 1000, alpha0 = 1)
-#' model.string.f(NA)
-model.string.f <- function(tildeepsilon = NA) {
+#' cat(model_string_f(NA))
+model_string_f <- function(tildeepsilon = NA,
+                                gs="jags") {
+  if(gs==jags){
   paste0(
     "
 model {
@@ -239,84 +241,95 @@ model {
     }",
     if (is.na(tildeepsilon)) {
       "tildeepsilon~ddirch(c(aa, bb))
+"
+    },
+    "
      for (a in 1:4){
       for (b in 1:4){
         epsilon[a,b] = (a!=b)*tildeepsilon[2]/3 +(a==b)*tildeepsilon[1]
         }
     }
-"
-    },
-    "
 }
 "
   )
+}else{paste0(
+    "
+data {
+  int<lower=1> V; // Number of positions
+  int<lower=1> S; // Number of samples
+  int<lower=1> G; // Number of variants
+  int nvs[V, S];  // Total count for each position-sample combination
+  real alpha[G];  // Dirichlet prior parameters for pi_gs",
+    if (!is.na(tildeepsilon)) {
+      "
+  real aa;        // Dirichlet prior parameter for epsilon (match)
+  real bb;        // Dirichlet prior parameter for epsilon (mismatch)"},
+"
 }
 
-model.string.intractable.f <- function(tildeepsilon = NA, G, tau_vga) {
-  Gd <- dim(tau_vga)[2]
-  paste0(
-    "
+parameters {
+  simplex[G] pi_gs[S];                     // Mixing proportions for each sample and group
+  simplex[2] tildeepsilon;                 // Base probabilities for matching/mismatching
+  real<lower=0, upper=1> tau_vga[V, G, 4]; // Proportion of each variant that matches group and allele
+}
+
+transformed parameters {
+  real epsilon[4, 4];           // Epsilon matrix with different probabilities for match/mismatch
+  real mixed_variants[V, G, 4]; // Computed variants after mixing
+  real p_g[V, S, G, 4];         // Probability grid for variants, samples, groups, alleles
+  real p_vsa[V, S, 4];          // Probability grid for observed data
+  
+  // Construct epsilon based on tildeepsilon
+  for (a in 1:4) {
+    for (b in 1:4) {
+      epsilon[a, b] = (a != b) * tildeepsilon[2] / 3 + (a == b) * tildeepsilon[1];
+    }
+  }
+  
+  // Compute mixed variants based on tau_vga and epsilon
+  for (v in 1:V) {
+    for (g in 1:G) {
+      for (a in 1:4) {
+        mixed_variants[v, g, a] = dot_product(tau_vga[v, g], epsilon[, a]);
+      }
+    }
+  }
+  
+  // Calculate p_g and p_vsa using mixed_variants and pi_gs
+  for (v in 1:V) {
+    for (s in 1:S) {
+      for (g in 1:G) {
+        for (a in 1:4) {
+          p_g[v, s, g, a] = pi_gs[s, g] * mixed_variants[v, g, a];
+        }
+      }
+      for (a in 1:4) {
+        p_vsa[v, s, a] = sum(p_g[v, s, , a]); // Sum over G
+      }
+    }
+  }
+}
+
 model {
-  # Likelihood
-  for (v in 1:V){
-    for (s in 1:S){
-      n_vsa[v,s,] ~ dmulti(p_vsa[v,s,], nvs[v,s])
+  // Prior distributions
+  for (s in 1:S) {
+    pi_gs[s] ~ dirichlet(alpha); // Dirichlet prior on mixing proportions
+  }
+  
+    }",
+if (is.na(tildeepsilon)) {
+  "tildeepsilon ~ dirichlet([aa, bb]); // Dirichlet prior on base match/mismatch probabilities"
+},"
+  // Likelihood
+  for (v in 1:V) {
+    for (s in 1:S) {
+      nvs[v, s] ~ multinomial(p_vsa[v, s]);
     }
   }
-  # Mangled variants
-  for (v in 1:V){
-    for (g in 1:Gd){
-      for (a in 1:4){
-        mixed_variants[v, g, a] = inprod(tau_vga[v,g,], epsilon[,a])
-      }
-    }
-  }
+}")}}
 
-  # Latent multinomial observation probability
-  for (v in 1:V){
-    for (s in 1:S){
-      for (g in 1:Gd){
-        for (a in 1:4){
-          p_g[v, s, g, a] = pi_gs[g, s] * mixed_variants[v, g, a]
-        }
-      }
-      for (a in 1:4){
-        p_vsa[v, s, a] = sum(p_g[v, s, , a]) # Sum over variants
-      }
-    }
-  }
 
-  # Prior
-  for (s in 1:S){",
-    if (G < Gd) {
-      "
-          pi_sel_gs[1:G, s] ~ ddirch(alpha[1:G])
-          selected_[1:Gd, s] ~ dsample(rep(1,Gd),G)
-          selected_pos=order(selected_[1:Gd, s]*(1:N))[1:G]
-          non_selected_pos=order((rep(1,Gd)-selected_[1:Gd, s])*(1:N))[1:Gd-G]
-          pi_gs[selected_pos, s]  =pi_sel_gs[1:G, s]
-          pi_gs[non_selected_pos, s]  =rep(0,(Gd-G))
-"
-    } else {
-      "
-    pi_gs[1:Gd, s] ~ ddirch(alpha[1:Gd])
-"
-    },
-    "}",
-    if (is.na(tildeepsilon)) {
-      "tildeepsilon~ddirch(c(aa, bb))
-     for (a in 1:4){
-      for (b in 1:4){
-        epsilon[a,b] = (a!=b)*tildeepsilon[2]/3 +(a==b)*tildeepsilon[1]
-        }
-    }
-"
-    },
-    "
-}
-"
-  )
-}
+
 #' @description
 #' Run jags.
 #' @param n_vsa an array of counts.
@@ -335,60 +348,54 @@ model {
 desman_fixed_variants <- function(n_vsa,
                                   tau_vga,
                                   G,
+                                  gs="jags",
                                   tildeepsilon = NA,
                                   error_rate = 0.001,
                                   prior_std = 0.01,
                                   n_chains = n_chains,
-                                  alpha0 = 1) {
+                                  alpha0 = 1,
+                                  ...) {
   V <- dim(n_vsa)[1]
   S <- dim(n_vsa)[2]
   G <- dim(tau_vga)[2]
   dimnames(n_vsa) <- lapply(dim(n_vsa), seq_len)
 
 
-  model_string <- model.string.f(tildeepsilon = tildeepsilon)
-
+  model_string <- model_string_f(tildeepsilon = tildeepsilon,gs=gs)
+  data_list <- list(
+    V = V,G = G,S = S,      n_vsa = n_vsa,
+    tau_vga = tau_vga,
+    alpha = rep(alpha0, G),
+    #epsilon = 2 * tildeepsilon * diag(4) + (1 - tildeepsilon),
+    nvs = n_vsa |> apply(MARGIN = c(1, 2), FUN = sum),
+  )
+  
   if (!is.na(tildeepsilon)) {
-    data_list <- list(
-      V = V,
-      G = G,
-      S = S,
-      epsilon = 2 * tildeepsilon * diag(4) + (1 - tildeepsilon),
-      n_vsa = n_vsa,
-      tau_vga = tau_vga,
-      alpha = rep(alpha0, G),
-      nvs = n_vsa |> apply(MARGIN = c(1, 2), FUN = sum)
-    )
-    # Compiling and producing posterior samples from the model.
-    jags_samples <- runjags::autorun.jags(
-      model = model_string,
-      data = data_list, monitor = c("pi_gs"), adapt = 2000,
-      n.chains = n_chains
-    )
-  }
-
-
-
-  if (is.na(tildeepsilon)) {
-    error_matrix_prior <- error_matrix_prior_specification(
-      error_rate = error_rate, prior_std = prior_std)
-
-    data_list <- list(
-      V = V, G = G, S = S, n_vsa = n_vsa, tau_vga = tau_vga, alpha = rep(alpha0, G),
-      aa = error_matrix_prior["a"],
-      bb = error_matrix_prior["b"],
-      nvs = n_vsa |> apply(MARGIN = c(1, 2), FUN = sum)
-    )
-
-    # Compiling and producing posterior samples from the model.
-    jags_samples <- runjags::run.jags(
+    data_list=c(data_list,list(tildeepsilon=tildeepsilon))
+  }else{
+    error_matrix_prior <- 
+      error_matrix_prior_specification(
+        error_rate = error_rate, 
+        prior_std = prior_std)
+    data_list=c(data_list,
+                list(
+                  aa = error_matrix_prior["a"],
+                  bb = error_matrix_prior["b"]))}
+  
+  monitor= ic("pi_gs", f (is.na(tildeepsilon)) {"tildeepsilon"})
+  
+  # Compiling and producing posterior samples from the model.
+  gibbs_samples <- if(gs="jags"){
+    runjags::run.jags(
       model = model_string,
       data = data_list,
-      monitor = c("pi_gs", "tildeepsilon"),
-      adapt = 2000,
-      n.chains = n_chains,
-      method = "parallel"
-    )
-  }
-  jags_samples
+      monitor = monitor,
+      ...
+    )}else{
+      rstan::stan(model_code = model_string, data = data_list, ...)
+
+      
+    }
+  
+  gibbs_samples
 }
