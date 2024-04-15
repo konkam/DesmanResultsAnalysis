@@ -3,9 +3,10 @@ library(targets)
 library(tarchetypes)
 library(tidyverse)
 library(dplyr)
-#library(ggplot2)
+library(ggplot2)
 #library(runjags)
 
+library(RColorBrewer)
 # library(tarchetypes) # Load other packages as needed. # nolint
 
 # Set target options:
