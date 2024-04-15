@@ -370,7 +370,7 @@ desman_fixed_variants <- function(n_vsa,
     nvs = n_vsa |> apply(MARGIN = c(1, 2), FUN = sum))
   
   if (!is.na(tildeepsilon)) {
-    data_list=c(data_list,list(tildeepsilon=c(tildeepsilon,1-tildeepsilon)))
+    data_list=c(data_list,list(tildeepsilon=c(1-tildeepsilon,tildeepsilon)))
   }else{
     error_matrix_prior <- 
       error_matrix_prior_specification(
