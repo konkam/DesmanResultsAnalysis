@@ -24,9 +24,9 @@ plot_tilde_epsilon<-function(mcmc_output,error_rate){
 plot_pi<-function(mcmc_output,n_vsa,variants){
   if(is.null(names(variants))){names(variants)<-1:length(variants)}
   names(variants)<-ifelse(is.na(names(variants)),1:length(variants),names(variants))
-mcmc_output$mcmc |>
-    mcmc_output_df("pi","gs")|>
-    dplyr::mutate(s=dimnames(n_vsa)[[2]][strtoi(s)])|>
+mcmc_output |>
+    mcmc_output_df(variable_name = "pi",index = "gs")|>
+    dplyr::mutate(s=if(!is.null(dimnames(n_vsa)[[2]])){dimnames(n_vsa)[[2]][strtoi(s)]}else{s})|>
     dplyr::mutate(g=names(variants)[strtoi(g)])|>
     dplyr::filter(iteration%%100==0)|>
     dplyr::group_by(s,g)|>

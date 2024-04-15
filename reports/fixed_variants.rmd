@@ -8,6 +8,7 @@ tar_load(mcmc_output)
 class(mcmc_output)
 tar_load(mcmc_output_fixed_epsilon)
 tar_load(desman_input_file)
+tar_load(n_vsa)
 try(tar_load(fasta_file))
 try(tar_load(variants))
 tar_load(desman_tuning_parameters)
@@ -24,7 +25,7 @@ tar_load(desman_tuning_parameters)
 The counts per position, sample and nucleotides array was obtained from:
 [`r desman_input_file`]()
 ```{r,eval=TRUE,echo=FALSE}
-knitr::asis_output(if(exists(fasta_file)){paste0("
+knitr::asis_output(if(exists("fasta_file")){paste0("
 The fasta file used for the dictionnary was: [",fasta_file,"]")
 }else{
   paste0("An ad hoc dictionnary of size ",length(variants)," was used")
@@ -39,14 +40,14 @@ htmltools::tagList(desman_tuning_parameters)
 # Results
 ## Free epsilon
 ```{r}
-plot_tilde_epsilon(mcmc_output = mcmc_output)
+plot_tilde_epsilon(mcmc_output = mcmc_output,error_rate = desman_tuning_parameters$error_rate)
 plot_pi(mcmc_output)
 ```
 
 
 ## Fixed epsilon
 ```{r}
-plot_pi(mcmc_output)
+plot_pi(mcmc_output=mcmc_output,n_vsa =n_vsa,variants = variants )
 ```
 # Reproduction
 To reproduce the code:
