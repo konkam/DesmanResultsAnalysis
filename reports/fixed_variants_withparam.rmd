@@ -1,28 +1,27 @@
 ---
 title: "MCMC report"
 output: github_document
+params: 
+  mcmc_output: 1
+  mcmc_output_fixed_epsilon: 1
+  desman_input_file: 1
+  fasta_file: 1
+  variants: 1
 ---
 
-```{r,eval=TRUE,echo=FALSE}
-tar_load(mcmc_output)
-class(mcmc_output)
-tar_load(mcmc_output_fixed_epsilon)
-tar_load(desman_input_file)
-try(tar_load(fasta_file))
-try(tar_load(variants))
-tar_load(desman_tuning_parameters)
-```
+
+
 
 
 # Setup
 
 ## Project ID
 
-`r Sys.getenv("TAR_PROJECT")`
+` r Sys.getenv("TAR_PROJECT")`
 
 ## Input data
 The counts per position, sample and nucleotides array was obtained from:
-[`r desman_input_file`]()
+`r desman_input_file`
 ```{r,eval=TRUE,echo=FALSE}
 knitr::asis_output(if(exists(fasta_file)){paste0("
 The fasta file used for the dictionnary was: [",fasta_file,"]")
@@ -31,26 +30,20 @@ The fasta file used for the dictionnary was: [",fasta_file,"]")
 })
 ```
 
-## Desman Tuning parameters
+## MCMC Tuning parameters
 
-```{r,echo=FALSE}
-htmltools::tagList(desman_tuning_parameters)
-```
+
 # Results
-## Free epsilon
+
 ```{r}
-plot_tilde_epsilon(mcmc_output = mcmc_output)
-plot_pi(mcmc_output)
+plot_tilde_epsilon(mcmc_output)
 ```
 
-
-## Fixed epsilon
-```{r}
-plot_pi(mcmc_output)
-```
 # Reproduction
+
 To reproduce the code:
-If not done, clone the [https://github.com/konkam/DesmanResultsAnalysis](repo)
+If not done, clone the repo: 
+[https://github.com/konkam/DesmanResultsAnalysis]
 
 then run:
 
