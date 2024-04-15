@@ -392,9 +392,6 @@ desman_fixed_variants <- function(n_vsa,
       ...
     )}else{
       rstan::stan(model_code = model_string, data = data_list, ...)
-
-      
     }
-  
   gibbs_samples
 }
