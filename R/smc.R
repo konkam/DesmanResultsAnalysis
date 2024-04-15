@@ -112,7 +112,7 @@ list(tau_vga=tau_vga,pi_gs=pi_gs,epsilon_ba=epsilon_ba)
 #'sim_tau_pi_n(v=v, g=g, s=s, n=n, error_rate = .001, alpha0=alpha0)|>attach()
 
 
-smc_sampler<-function(n_vsa,g,t_max,i,ess_min,b){}
+smc_sampler<-function(n_vsa,g,t_max,i,ess_min,b){
 xi_vsabg=sampler_xi(tau_vga=tau_vga,
                     pi_gs=pi_gs,
                     epsilon_ba = epsilon_ba)
