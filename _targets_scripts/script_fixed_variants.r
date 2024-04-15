@@ -95,3 +95,4 @@ list(
     output_file = "fixed_variants.md"
   )
 )
+

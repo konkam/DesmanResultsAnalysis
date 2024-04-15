@@ -1,5 +1,8 @@
 #' @description
 #' Summary function
+#' @examples
+#' tar_load(mcmc_output)
+#' jags_sample_to_summary_tibble(mcmc_output)|>View()
 jags_sample_to_summary_tibble <- function(jags_sample) {
   jags_sample |>
     summary() |>
@@ -12,7 +15,7 @@ jags_sample_to_summary_tibble <- function(jags_sample) {
 
 #' @description
 #' color palette
-color_palette <- c(brewer.pal(n = 12, name = "Paired"),"purple","orange","blue","green","pink","brown","turquoise","grey")
+color_palette <- c(RColorBrewer::brewer.pal(n = 12, name = "Paired"),"purple","orange","blue","green","pink","brown","turquoise","grey")
 
 #' @description
 #' Afficher l'abondance relative des variants
@@ -20,6 +23,14 @@ color_palette <- c(brewer.pal(n = 12, name = "Paired"),"purple","orange","blue",
 #' le passer en argument mais je ne suis pas du tout a l'aise avec ces objets.
 #' Idem ce serait top d'avoir les noms de variant directement dans le tau_vga, et qu'ils puissent être extraits 
 #' du pi_summary au lieu de les donner en argument.
+#' @examples
+#' results <- head(jags_sample_to_summary_tibble(mcmc_output),-2)
+#' metadata=metadata_file |> read.csv()
+#' metafields <- c(colnames(metadata),"cond")
+#' metadata <- cbind(metadata,paste0(metadata$Rearing,metadata$Gen))
+#' colnames(metadata) <- metafields
+#' resultscond <- add_metadata(results, metadata, samples, length(variants),"cond","Age")
+
 plot_pi_summary <- function(pi_summary,samples,variants,alpha,min_abundance,labelcond2) {
   V <- get_abundant_variants(pi_summary,min_abundance)
   vnames <- names(variants)[V]
