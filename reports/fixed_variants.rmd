@@ -48,11 +48,7 @@ plot_pi(mcmc_output)
 ```{r}
 plot_pi(mcmc_output)
 ```
-
-
-
 # Reproduction
-
 To reproduce the code:
 If not done, clone the [https://github.com/konkam/DesmanResultsAnalysis](repo)
 
