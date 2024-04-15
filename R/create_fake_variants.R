@@ -16,6 +16,4 @@ create_fake_variants<-function(n,dic,taux){
                 x[change==1]<-sample(nucleotides,sum(change),replace=TRUE)
                 x})|>
     plyr::aaply(1,paste,collapse="")
-    
-  
 }
