@@ -41,13 +41,13 @@ htmltools::tagList(desman_tuning_parameters)
 ## Free epsilon
 ```{r}
 plot_tilde_epsilon(mcmc_output = mcmc_output,error_rate = desman_tuning_parameters$error_rate)
-plot_pi(mcmc_output)
+plot_pi(mcmc_output,n_vsa =n_vsa,variants = variants)
 ```
 
 
 ## Fixed epsilon
 ```{r}
-plot_pi(mcmc_output=mcmc_output,n_vsa =n_vsa,variants = variants )
+plot_pi(mcmc_output=mcmc_output_fixed_epsilon,n_vsa =n_vsa,variants = variants )
 ```
 # Reproduction
 To reproduce the code:
