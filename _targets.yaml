@@ -5,3 +5,8 @@ fixed_variants:
 fixed_variants_large_dictionnary:
   store: _targets_store/fixed_variants_large_dictionnary
   script: _targets_scripts/script_fixed_variants_large_dictionnary.r
+
+
+smc_1:
+  store: _targets_store/smc_1
+  script: _targets_scripts/script_smc_1.r

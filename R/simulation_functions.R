@@ -20,6 +20,11 @@ sim_pi_gs <- function(g, s, alpha0 = 1) {
   rdirichlet(alpha = rep(alpha0, g), n_samples = s) |> t()
 }
 
+epsilon_ba_f <- function(error_rate){diag(x = 1 - error_rate, nrow = 4) + 
+  error_rate / 3 * (matrix(data = 1, nrow = 4, ncol = 4) - diag(x = 1, nrow = 4))}
+
+
+
 #' @params
 #' @examples
 #' sim_n_vsa(s = 3, n = 1000, v = 50, g = 5)
@@ -44,14 +49,12 @@ sim_n_vsa <- function(n,
   }
   # Mean coverage is 20, which is pretty favourable
   n_vs <- rpois(n = v * s, lambda = 20) |> matrix(c(v, s)) 
-  epsilon <- diag(x = 1 - error_rate, nrow = 4) + 
-    error_rate / 3 * (matrix(data = 1, nrow = 4, ncol = 4) - diag(x = 1, nrow = 4))
-  
+  epsilon_ba <- epsilon_ba_f(error_rate)
   p_vsabg <- einsum::einsum(
     "vgb,gs,ba->vsabg",
     tau_vga,
     pi_gs,
-    epsilon
+    epsilon_ba
   )
   
   p_vsa <- plyr::aaply(p_vsabg, 1:3, sum)
@@ -70,10 +73,11 @@ sim_n_vsa <- function(n,
 
 #' @examples
 #' g = 5;v = 50; s = 3; n = 100; alpha0 = .1
-#' sim_tau_pi_n(g = 5, v = 50, s = 3, n = 100, alpha0 = 1)
-sim_tau_pi_n <- function(v, g, s, n, error_rate = .001, alpha0 = 1) {
+#' sim_tau_pi_epsilon_n(g = 5, v = 50, s = 3, n = 100, alpha0 = 1)
+sim_tau_pi_epsilon_n <- function(v, g, s, n, error_rate = .001, alpha0 = 1) {
   tau_vga <- sim_tau_vga(v = v, g = g)
   pi_gs <- sim_pi_gs(g = g, s = s, alpha0 = alpha0)
+  epsilon_ba=epsilon_ba_f(error_rate)
   n_vsa <- sim_n_vsa(n = n, tau_vga = tau_vga, pi_gs = pi_gs, error_rate = error_rate)
-  list(tau_vga = tau_vga, pi_gs = pi_gs, n_vsa = n_vsa)
+  list(tau_vga = tau_vga, pi_gs = pi_gs, epsilon_ba=epsilon_ba,n_vsa = n_vsa)
 }
