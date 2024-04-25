@@ -51,7 +51,9 @@ list(
   tar_target(fixed_tildeepsilon, .0001),
   tar_target(
     name = ln_vsa,
-    command = desman_input_file |> get_data_from_server() |> read_desman_input_files()
+    command = desman_input_file |> 
+      get_data_from_server() |> 
+      read_desman_input_files()
   ),
   tar_target(
     name = tau_vga,
