@@ -402,6 +402,7 @@ data_tempering_stratified<-function(n_vsa,seed=1,n_vsa_df=reorder_counts(n_vsa,s
   #'epsilon_iba=plyr::llply(sim,'[[',"epsilon_ba")|>c(list(along=3))|>do.call(what=abind::abind)
   #'ess_min=3
   #'max_lambda=1
+  #'n_plus=sum(n_vsa)
   #'min_samplesize=.5*n_plus
   #'max_samplesize=n_plus
   #'n_plus=sum(n_vsa)
