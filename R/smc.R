@@ -16,7 +16,7 @@ sampler_tau<-function(tau_vga,pi_gs,epsilon_ba,n_vsa,
     einsum::einsum(
       equation_string="vsgac,vsc->vga",
       log(
-        einsum::einsum("v,gs,ac->vsgac",1:v,pi_gs,epsilon_ab)+
+        einsum::einsum("v,gs,ac->vsgac",1:v,pi_gs,epsilon_ba)+
           einsum::einsum("a,gh,vhb,hs,bc->vsgac",rep(1,4),g_neq_g,tau_vga,pi_gs,epsilon_ba)),
       n_vsa))|>
     plyr::aaply(1:2,function(xi){sample(nucleotides,1,prob = xi)})|>
@@ -235,6 +235,7 @@ data_tempering_stratified<-function(n_vsa,seed=1,n_vsa_df=reorder_counts(n_vsa,s
                   loss1=-2*lambda+(2*allocation0+1)/n_vsa_v,
                   loss2=1/n_vsa_v)|>
     dplyr::arrange(loss1,loss2,r)
+  sample_size=lambda*sum(n_vsa)
   remaining=sample_size-sum(df$allocation0)
   H=nrow(n_vsa_df)
   while(remaining>0){
@@ -276,8 +277,8 @@ data_tempering_stratified<-function(n_vsa,seed=1,n_vsa_df=reorder_counts(n_vsa,s
   #'epsilon_iba=abind::abind(sim1$epsilon_ba,sim2$epsilon_ba,along=3)
   
   smc_logb_prime<-function(n_vsa_lambda,tau_ivga,pi_igs,epsilon_iba){
-    einsum::einsum("vsai,vsa->i",
-                   einsum::einsum("vgbi,gsi,bai->vsai",tau_ivga,pi_igs,epsilon_iba)|>
+    einsum::einsum("ivsa,vsa->i",
+                   einsum::einsum("ivga,igs,iba->ivsa",tau_ivga,pi_igs,epsilon_iba)|>
                      log(),
                    n_vsa_lambda)}
   
@@ -396,14 +397,16 @@ data_tempering_stratified<-function(n_vsa,seed=1,n_vsa_df=reorder_counts(n_vsa,s
   #'n=1000;v=20;g=5;s=3;alpha0=.1
   #'plyr::rlply(100,
   #'           sim_tau_pi_epsilon_n(v=v, g=g, s=s, n=n, error_rate = .001, alpha0=alpha0))->sim
-  #'n_vsa=sim_tau_pi_epsilon_n(v=v, g=g, s=s, n=n, error_rate = .001, alpha0=alpha0)$n_vsa
+  #'sim0=sim_tau_pi_epsilon_n(v=v, g=g, s=s, n=n, error_rate = .001, alpha0=alpha0)
+  #'n_vsa=sim0$n_vsa
+  #'plyr::rlply(100,sim0)->sim
   #'tau_ivga=plyr::llply(sim,'[[',"tau_vga")|>c(list(along=4))|>do.call(what=abind::abind)
   #'pi_igs=plyr::llply(sim,'[[',"pi_gs")|>c(list(along=3))|>do.call(what=abind::abind)
   #'epsilon_iba=plyr::llply(sim,'[[',"epsilon_ba")|>c(list(along=3))|>do.call(what=abind::abind)
   #'ess_min=3
   #'max_lambda=1
   #'n_plus=sum(n_vsa)
-  #'min_samplesize=.5*n_plus
+  #'min_samplesize=ceiling(.5*n_plus)
   #'max_samplesize=n_plus
   #'n_plus=sum(n_vsa)
   #'n_vsa_df=reorder_counts(n_vsa,seed=1)
@@ -483,22 +486,12 @@ data_tempering_stratified<-function(n_vsa,seed=1,n_vsa_df=reorder_counts(n_vsa,s
   #'n_vsa=sim_tau_pi_epsilon_n(v=v, g=g, s=s, n=n, error_rate = .001, alpha0=alpha0)$n_vsa
   #'n_vsa_df<-reorder_reads(n_vsa)
   #'n_vsa_lambda=sub_sample_counts(n_vsa_df,lambda=.5)
-  #'i=1000
+  #'i=10
+  #'tmax=10
   #'delta=1e-3
   #'ess_min=3
   #'max_lambda=1
   #'min_lambda=.5
-  #'unaccounted_for=unaccounted_for_f(n_vsa_df,lambda=min_lambda)
-  #'n_unaccounted_for=nrow(unaccounted_for)
-  #'smc_new_setup(ess_min=ess_min,
-  #'     n_vsa_lambda,
-  #'     unaccounted_for=unaccounted_for,
-  #'     n_unaccounted_for=n_unaccounted_for,
-  #'     min_lambda=min_lambda,
-  #'     max_lambda=1,
-  #'     tau_ivga,
-  #'pi_igs,
-  #'epsilon_iba)
   #'smc_sampler(n_vsa=n_vsa,g=g,t_max=3,i=i,ess_min,b)
   
   
@@ -523,11 +516,13 @@ data_tempering_stratified<-function(n_vsa,seed=1,n_vsa_df=reorder_counts(n_vsa,s
     ww<-rep(1/i,i)#w/sum(w)
     while(lambda<1&t<t_max){
       t=t+1
+      print(paste0(Sys.time()," - lambda:",lambda," - t:",t," - sample pps w"))
       sample_i=sample(x=i,size=i,replace=TRUE,prob=ww)
       epsilon_iba=epsilon_iba[sample_i,,]
       tau_ivga=tau_ivga[sample_i,,,]
       pi_igs=pi_igs[sample_i,,]
       
+      print(paste0(Sys.time()," - lambda:",lambda," - t:",t," - draw new"))
       
       
       new=plyr::alply(seq_len(i),1,
@@ -536,8 +531,12 @@ data_tempering_stratified<-function(n_vsa,seed=1,n_vsa_df=reorder_counts(n_vsa,s
                                    tau_ivga[i,,,],
                                    pi_igs[i,,],
                                    epsilon_iba[i,,],
-                                   alpha_g,delta)})
+                                   alpha_g,delta)},.progress = "text")
       
+      print(paste0(Sys.time()," - lambda:",lambda," - t:",t," - compute w"))
+      epsilon_iba=plyr::laply(new,`[[`,"epsilon_ba")
+      tau_ivga=plyr::laply(new,`[[`,"tau_vga")
+      pi_igs=plyr::laply(new,`[[`,"pi_gs")
       
       
       w<-smc_b_prime(n_vsa_lambda,tau_ivga,pi_igs,epsilon_iba)
