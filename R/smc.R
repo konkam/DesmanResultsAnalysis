@@ -152,9 +152,12 @@ smc_kernel<-function(n_vsa,tau_vga,pi_gs,epsilon_ba,alpha_g,delta){
   nu_vsab<-nu_from_xi(xi=xi_vsabg)
   mu_vsab<-mu_from_xi(xi=xi_vsabg)
   pi_gs<-sampler_pi(mu_vsag = mu_vsab,alpha_g = alpha_g)
+  w1<-smc_b_prime(n_vsa_lambda,tau_ivga,pi_igs,epsilon_iba)
   tau_vga<-sampler_tau(n_vsa = n_vsa,tau_vga = tau_vga,pi_gs = pi_gs,epsilon_ba = epsilon_ba)
+  w2<-smc_b_prime(n_vsa_lambda,tau_ivga,pi_igs,epsilon_iba)
   epsilon_ba<-sampler_epsilon_star(nu_vsab,delta)
-  list(tau_vga=tau_vga,pi_gs=pi_gs,epsilon_ba=epsilon_ba)
+  w3<-smc_b_prime(n_vsa_lambda,tau_ivga,pi_igs,epsilon_iba)
+  list(tau_vga=tau_vga,pi_gs=pi_gs,epsilon_ba=epsilon_ba,w1=w1,w2=w2,w3=w3)
 }
 
 smc_kernel_i<-function(i,g,n_vsa,tau_ivga,pi_igs,epsilon_iba,alpha_g,delta,g_neq_g =g_neq_g_f(g)){
@@ -497,12 +500,16 @@ resample_array<-function(the_array,dimension=1,selection=1:(dim(the_array)[dimen
 #'@param n_vsa : an array of integers, index by v(position) s (sample) and a (nucleotide a,c,g,t)
 #'@examples
 #'n=1000;v=20;g=5;s=3;alpha0=.1
-#'n_vsa=sim_tau_pi_epsilon_n(v=v, g=g, s=s, n=n, error_rate = .001, alpha0=alpha0)$n_vsa
-#'n_vsa_df<-reorder_reads(n_vsa)
+#'sim=sim_tau_pi_epsilon_n(v=v, g=g, s=s, n=n, error_rate = .001, alpha0=alpha0)
+#'n_vsa=sim$n_vsa
+#'i=100
+#'init=list(pi_igs=plyr::raply(i,sim$pi_gs),
+#'epsilon_iba=plyr::raply(i,sim$epsilon_ba),
+#'tau_ivga=plyr::raply(i,sim$tau_vga))
+#'n_vsa_df=reorder_counts(n_vsa = n_vsa,seed=seed)
 #'n_vsa_lambda=sub_sample_counts(n_vsa_df,lambda=.5)
-#'i=10
 #'delta=1e-3
-#'ess_min=3
+#'ess_min=60
 #'max_lambda=1
 #'min_lambda=.5
 #'unaccounted_for=unaccounted_for_f(n_vsa_df,lambda=min_lambda)
@@ -511,7 +518,11 @@ resample_array<-function(the_array,dimension=1,selection=1:(dim(the_array)[dimen
 #' n_plus=sum(n_vsa)
 #' trace_all=TRUE
 #' .update_lambda=update_lambda
-#' new=smc_sampler(n_vsa=n_vsa,g=g,t_min=t_min,t_max=t_max,i=i,ess_min=ess_min)
+#' 
+#' new=smc_sampler(n_vsa=n_vsa,g=g,t_min=t_min,t_max=t_max,i=i,ess_min=ess_min,init=init)
+#' save(new,file="new.rda")
+#' new$traces$ess
+#' 
 
 
 smc_sampler<-function(n_vsa,
@@ -526,18 +537,21 @@ smc_sampler<-function(n_vsa,
                       delta=1e-3,
                       alpha0=.1,
                       trace_all=TRUE,
-                      .update_lambda=update_lambda){
+                      .update_lambda=update_lambda,
+                      init=NULL){
   
-  lambda=0
+  lambda=0.1
   alpha_g=rep(alpha0,g)
   t=0
   v=dim(n_vsa)[1]
   s=dim(n_vsa)[2]
-  epsilon_iba=rbeta(i,1,1/delta)|>plyr::aaply(1,epsilon_ba_f)
-  tau_ivga <- plyr::raply(i,sim_tau_vga(v = v, g = g))
-  pi_igs <- plyr::raply(i,sim_pi_gs(g = g, s = s, alpha0 = alpha0))
+  new=if(is.null(init)){{
+   epsilon_iba=rbeta(i,1,1/delta)|>plyr::aaply(1,epsilon_ba_f)
+    tau_ivga <- plyr::raply(i,sim_tau_vga(v = v, g = g))
+    pi_igs <- plyr::raply(i,sim_pi_gs(g = g, s = s, alpha0 = alpha0))
+    new=list(epsilon_iba=epsilon_iba,tau_ivga=tau_ivga,pi_igs=pi_igs)}}else{init}
+  
   #w<-smc_b_prime(0*n_vsa,tau_ivga,pi_igs,epsilon_iba)
-  new=list(epsilon_iba=epsilon_iba,tau_ivga=tau_ivga,pi_igs=pi_igs)
   ww<-rep(1/i,i)#w/sum(w)
   if(trace_all){
     traces=list(epsilon_iba=array(epsilon_iba,c(1,dim(epsilon_iba))),
@@ -553,8 +567,8 @@ smc_sampler<-function(n_vsa,
     t=t+1
     n_vsa_lambda=data_tempering_stratified(n_vsa=n_vsa,n_plus=n_plus,n_vsa_df=n_vsa_df,lambda=lambda)
     sample_i=sample(x=i,size=i,replace=(i>1),prob=ww)
+    new0=new
     new=plyr::llply(new,resample_array,dimension=1,selection=sample_i)
-    
     new=with(new,
              plyr::alply(seq_len(i),1,
                          function(i){
@@ -568,16 +582,21 @@ smc_sampler<-function(n_vsa,
       setNames(c("tau_ivga","pi_igs","epsilon_iba"))
     
     
-    w<-do.call(what=smc_b_prime,c(list(n_vsa_lambda),new[c("tau_ivga","pi_igs","epsilon_iba")]))
+    w<-do.call(what=smc_b_prime,c(list(n_vsa_lambda=n_vsa_lambda),new[c("tau_ivga","pi_igs","epsilon_iba")]))
+    w<-w/max(w)
     ww<-w/sum(w)
+    ess=1/sum(ww^2)
+    sample_size=sum(n_vsa_lambda)
     lambda_n_vsa=.update_lambda(ess_min,
                                 n_vsa=n_vsa,
-                                n_plus=n_plus,seed=seed,n_vsa_df=n_vsa_df,min_samplesize=0,
+                                n_plus=n_plus,seed=seed,
+                                n_vsa_df=n_vsa_df,
+                                min_samplesize=sample_size,
                                 max_samplesize=n_plus,
                                 tau_ivga,
                                 pi_igs,
                                 epsilon_iba)
-    lambda=lambda_n_vsa$lambda
+    lambda=max(lambda_n_vsa$lambda,lambda*1.02)
     n_vsa_lambda=lambda_n_vsa$n_vsa_lambda
     
     
@@ -588,7 +607,7 @@ smc_sampler<-function(n_vsa,
                   tau_ivga=abind::abind(traces$tau_ivga,new$tau_ivga,along=1),
                   ww=abind::abind(traces$ww,array(ww,c(1,i)),along=1),
                   sample_i=abind::abind(traces$sample_i,array(sample_i,c(1,i)),along=1),
-                  ess=c(traces$ess,(sum(ww))^2/(sum(ww^2))))}
+                  ess=c(traces$ess,1/(sum(ww^2))))}
     
     
   }
