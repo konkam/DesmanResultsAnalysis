@@ -9,7 +9,7 @@ MCMC report
 
 ## Project ID
 
-fixed_variants
+smc_1
 
 ## Input data
 
@@ -63,6 +63,6 @@ then run:
 
 ``` r
 library(targets)
-Sys.setenv(TAR_PROJECT = 'fixed_variants')
+Sys.setenv(TAR_PROJECT = 'smc_1')
 tar_make()
 ```

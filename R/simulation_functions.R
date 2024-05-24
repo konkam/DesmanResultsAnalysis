@@ -1,8 +1,15 @@
 
 #' @examples
 #' sim_variants_string_matrix(v = 12, g = 3)
+nucleotides <- c("a", "c", "g", "t") |>
+  (function(x) {
+    x |> setNames(x)
+  })()
+
+#' @examples
+#' sim_variants_string_matrix(v = 12, g = 3)
 sim_variants_string_matrix <- function(v, g) {
-  plyr::raply(g, sample(nucleotides, size = v, replace = TRUE)) |>
+  plyr::raply(g, sample(nucleotides|>unname(), size = v, replace = TRUE)) |>
     t() |>
     (`dimnames<-`)(list(v = 1:v, g = 1:g))
 }
@@ -28,7 +35,7 @@ epsilon_ba_f <- function(error_rate){diag(x = 1 - error_rate, nrow = 4) +
 #' @params
 #' @examples
 #' sim_n_vsa(s = 3, n = 1000, v = 50, g = 5)
-sim_n_vsa <- function(n,
+sim_n_vsa <- function(n=1000,# expeted sample size
                       tau_vga = NULL,
                       pi_gs = NULL,
                       v = NULL,
@@ -48,22 +55,22 @@ sim_n_vsa <- function(n,
     s <- dim(pi_gs)[2]
   }
   # Mean coverage is 20, which is pretty favourable
-  n_vs <- rpois(n = v * s, lambda = 20) |> matrix(c(v, s)) 
+  n_vs <- if(is.null(n)){rpois(n = v * s, lambda = n) |> array(c(v, s))}else{array(n,c(v,s))}
   epsilon_ba <- epsilon_ba_f(error_rate)
-  p_vsabg <- einsum::einsum(
-    "vgb,gs,ba->vsabg",
+  p_vsabg <- einsum::einsum(equation_string = "vgb,gs,ba->vsabg",
     tau_vga,
     pi_gs,
     epsilon_ba
   )
   
-  p_vsa <- plyr::aaply(p_vsabg, 1:3, sum)
+  p_vsa <- plyr::aaply(p_vsabg, 1:3, sum,.drop = FALSE)|>abind::adrop(drop=4)
+  
   
   np_vsa <- abind::abind(n_vs, p_vsa, along = 3)
   
   n_vsa <- plyr::aaply(np_vsa, 1:2, function(x) {
     rmultinom(n = 1, size = x[1], prob = x[2:5]) |> setNames(nucleotides)
-  })
+  },.drop=FALSE)|>abind::adrop(drop=4)
   
   n_vsa |>
     (function(x) {
