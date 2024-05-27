@@ -1,145 +1,13 @@
-
-# Helper functions
-jags_sample_to_summary_tibble <- function(jags_sample) {
-  jags_sample |>
-    summary() |>
-    (function(ss) {
-      tibble(parname = rownames(ss)) |>
-        bind_cols(as_tibble(ss))
-    })()
-}
-## Data simulation
-
-# Helper functions
-#' @examples
-# alpha_values <- c(2, 3, 4) # Parameters for the Dirichlet distribution
-#' sample_dirichlet <- rdirichlet_onesmp(alpha_values)
-#' print(sample_dirichlet)
-rdirichlet_onesmp <- function(alpha) {
-  # Generate K independent random samples from Gamma distributions
-  y <- rgamma(length(alpha), shape = alpha, rate = 1)
-
-  # Normalize the samples to obtain the Dirichlet variables
-  x <- y / sum(y)
-
-  return(x)
-}
-#' @examples
-#' alpha_values <- c(2, 3, 4) # Parameters for the Dirichlet distribution
-#' num_samples <- 5 # Number of samples
-#' sample_dirichlet <- rdirichlet(alpha_values, n_samples = num_samples)
-#' print(sample_dirichlet)
-rdirichlet <- function(alpha, n_samples = 1) {
-  # Generate n_samples independent random samples from Gamma distributions
-  y <- matrix(rgamma(n_samples * length(alpha), shape = alpha, rate = 1), 
-              ncol = length(alpha))
-
-  # Normalize the samples to obtain the Dirichlet variables
-  x <- t(apply(y, 1, function(row) row / sum(row)))
-
-  return(x)
-}
-
-
-#' @examples
-#' dna_string <- "ActGG"
-#' result <- translate_dna_to_binary(dna_string)
-#' print(result)
-translate_dna_to_binary <- function(dna_string) {
-  # Create a matrix to store the binary representation
-  binary_matrix <- matrix(0,
-    nrow = dna_string|>nchar(),
-    ncol = 4,
-    dimnames = list(NULL, nucleotides)
-  )
-
-  # Fill in the matrix based on the nucleotides in the DNA string
-  for (i in 1:nchar(dna_string)) {
-    nucleotide <- dna_string|>tolower()|>substr(i, i)
-    binary_matrix[i, nucleotide] <- 1
-  }
-
-  return(binary_matrix)
-}
-
-
-#' @examples
-#' variants_string_matrix <- sim_variants_string_matrix(3, 12)
-#' translate_dna_matrix_to_binary_array(variants_string_matrix)
-translate_dna_matrix_to_binary_array <- function(variants_string_matrix) {
-  variants_string_matrix |>
-    tolower() |>
-    plyr::aaply(1:2, `==`, nucleotides) |>
-    (`*`)(1)
-}
-
-#' @examples
-#' variants_string_vector <- 
-#' sim_variants_string_matrix(g = 3, v = 12) |> 
-#' plyr::aaply(2, paste0, collapse = "")
-#' translate_dna_string_vector_to_string_matrix(variants_string_vector)
-translate_dna_string_vector_to_string_matrix <- function(variants_string_vector) {
-  variants_string_vector |>
-    tolower() |>
-    plyr::aaply(1, function(x) {
-      strsplit(x, "") |>
-        unname() |>
-        unlist()
-    }) |>
-    t() |>
-    (function(x) {
-      x |> (`dimnames<-`)(list(v = 1:dim(x)[1], g = 1:dim(x)[2]))
-    })()
-}
-
-
-#' @examples
-#' variants_string_vector <- 
-#' sim_variants_string_matrix(g = 3, v = 12) |> 
-#' plyr::aaply(2, paste0, collapse = "")
-#' translate_dna_string_vector_to_string_matrix(variants_string_vector)|>
-#' translate_dna_matrix_to_binary_array()|>
-#' translate_dna_binary_array_to_string_vector()
-translate_dna_binary_array_to_string_vector <- 
-  function(variants_binary_array) {
-    variants_binary_array |>
-      plyr::aaply(1:2,function(x){nucleotides[x==1]},.drop=FALSE)|>
-      abind::adrop(3)|>
-      plyr::aaply(2,paste,collapse="")
-}
-
-## Inference
-#### Prior specification for the error matrix
-
-#' @description
-#' Let's call \eqn{\tilde\epsilon} the error rate, which is of order 10e-3.
-#' \deqn{\epsilon=(1-\tilde\epsilon)\times I_4+ \frac{\tilde\epsilon}3\times(J_4-I_4),  } where \eqn{(\tilde\epsilon\sim\mathrm{Beta}(a,b)} means that the prior expected value for the diagonal element \eqn{\tilde\epsilon=\epsilon_{1,1}} is \eqn{\frac{a}{a+b}} and its variance is \eqn{\frac{ab}{(a+b)^2(a+b+1)}}
-#' Moment-matching specification for \eqn{a,b}:
-#' \deqn{
-#' \begin{align}
-#' &\frac{a}{a+b} = 1 - \eta \implies b = a\frac{\eta}{1-\eta} \\
-#' &\text{Var}(\epsilon_{1,1}) = \frac{ab}{(a+b)^2(a+b+1)} = \frac{(1-\eta)\eta}{\frac{a}{1-\eta}+1} = \frac{(1-\eta)^2\eta}{a+1-\eta}\implies a = \eta - 1 + \frac{(1-\eta)^2\eta}{\text{Var}(\epsilon_{1,1})}
-#' \end{align}
-#' }
-error_matrix_prior_specification <- function(error_rate, prior_std) {
-  a <- error_rate - 1 + (1 - error_rate)^2 * error_rate / prior_std^2
-  b <- a * error_rate / (1 - error_rate)
-  return(c(a, b) |> setNames(c("a", "b")))
-}
-
-
-
 ### Model
-
-
 #' @description
 #' Creates model string for jags
-#' @param tildeepsilon a numerical value. if NA, then the model uses a dirichlet prior.
+#' @param tildeepsilon a numerical value. if NA, then the model uses a Dirichlet prior.
+#' @param gs a character string. If "jags", the gibbs sampler used will be jags, stan if "stan."
 #' @examples
-#' tau_pi_n <- sim_tau_pi_n(v = 50, g = 5, s = 3, n = 1000, alpha0 = 1)
-#' cat(model_string_f(NA))
-model_string_f <- function(tildeepsilon = NA,
-                                gs="jags") {
+#' cat(model_string_fixed_variants_f(NA))
+model_string_fixed_variants_f <- 
+  function(tildeepsilon = NA,
+          gs="jags") {
   if(gs=="jags"){
   paste0(
     "
@@ -158,7 +26,6 @@ model {
       }
     }
   }
-
   # Latent multinomial observation probability
   for (v in 1:V){
     for (s in 1:S){
@@ -178,7 +45,7 @@ model {
     pi_gs[1:G, s] ~ ddirch(alpha[1:G])
     }",
     if (is.na(tildeepsilon)) {
-      "tildeepsilon~ddirch(c(aa, bb))
+      "tildeepsilon~ddirch(shape_epsilon)
 "
     },
     "
@@ -200,15 +67,14 @@ data {
   real alpha[G];  // Dirichlet prior parameters for pi_gs",
     if (!is.na(tildeepsilon)) {
       "
-  real aa;        // Dirichlet prior parameter for epsilon (match)
-  real bb;        // Dirichlet prior parameter for epsilon (mismatch)"},
+  real shape_epsilon[2];        // Dirichlet prior parameter for epsilon (match)"},
 "
 }
 
 parameters {
   simplex[G] pi_gs[S];                     // Mixing proportions for each sample and group
   simplex[2] tildeepsilon;                 // Base probabilities for matching/mismatching
-  real<lower=0, upper=1> tau_vga[V, G, 4]; // Proportion of each variant that matches group and allele
+  int<lower=0, upper=1> tau_vga[V, G, 4]; // Inidicator of each variant that matches position and variant
 }
 
 transformed parameters {
@@ -256,7 +122,7 @@ model {
   
     }",
 if (is.na(tildeepsilon)) {
-  "tildeepsilon ~ dirichlet([aa, bb]); // Dirichlet prior on base match/mismatch probabilities"
+  "tildeepsilon ~ dirichlet(shape_epsilon); // Dirichlet prior on base match/mismatch probabilities"
 },"
   // Likelihood
   for (v in 1:V) {
@@ -266,6 +132,24 @@ if (is.na(tildeepsilon)) {
   }
 }")}}
 
+
+#### Prior specification for the error matrix
+
+#' @description
+#' Let's call \eqn{\tilde\epsilon} the error rate, which is of order 10e-3.
+#' \deqn{\epsilon=(1-\tilde\epsilon)\times I_4+ \frac{\tilde\epsilon}3\times(J_4-I_4),  } where \eqn{(\tilde\epsilon\sim\mathrm{Beta}(a,b)} means that the prior expected value for the diagonal element \eqn{\tilde\epsilon=\epsilon_{1,1}} is \eqn{\frac{a}{a+b}} and its variance is \eqn{\frac{ab}{(a+b)^2(a+b+1)}}
+#' Moment-matching specification for \eqn{a,b}:
+#' \deqn{
+#' \begin{align}
+#' &\frac{a}{a+b} = 1 - \eta \implies b = a\frac{\eta}{1-\eta} \\
+#' &\text{Var}(\epsilon_{1,1}) = \frac{ab}{(a+b)^2(a+b+1)} = \frac{(1-\eta)\eta}{\frac{a}{1-\eta}+1} = \frac{(1-\eta)^2\eta}{a+1-\eta}\implies a = \eta - 1 + \frac{(1-\eta)^2\eta}{\text{Var}(\epsilon_{1,1})}
+#' \end{align}
+#' }
+error_matrix_prior_specification <- function(error_rate, prior_std) {
+  a <- error_rate - 1 + (1 - error_rate)^2 * error_rate / prior_std^2
+  b <- a * error_rate / (1 - error_rate)
+  return(c(a, b))
+}
 
 
 #' @description
@@ -278,12 +162,12 @@ if (is.na(tildeepsilon)) {
 #' @param prior_std = 0.01 controls the dirichlet prior on tildeepsilon
 #' @examples
 #' tau_pi_n <- sim_tau_pi_n(v = 50, g = 5, s = 3, n = 1000, alpha0 = 1)
-#' desman_fixed_variants(
+#' mcmc_fixed_variants(
 #'   n_vsa = tau_pi_n$n_vsa,
 #'   tau_vga = tau_pi_n$tau_vga,
 #'   G = 12
 #' )
-desman_fixed_variants <- function(n_vsa,
+mcmc_fixed_variants <- function(n_vsa,
                                   tau_vga,
                                   G,
                                   gs="jags",
@@ -299,7 +183,7 @@ desman_fixed_variants <- function(n_vsa,
   dimnames(n_vsa) <- lapply(dim(n_vsa), seq_len)
 
 
-  model_string <- model_string_f(tildeepsilon = tildeepsilon,gs=gs)
+  model_string <- model_string_fixed_variants_f(tildeepsilon = tildeepsilon,gs=gs)
   data_list <- list(
     V = V,G = G,S = S,      n_vsa = n_vsa,
     tau_vga = tau_vga,
@@ -310,14 +194,12 @@ desman_fixed_variants <- function(n_vsa,
   if (!is.na(tildeepsilon)) {
     data_list=c(data_list,list(tildeepsilon=c(1-tildeepsilon,tildeepsilon)))
   }else{
-    error_matrix_prior <- 
+    shape_epsilon <- 
       error_matrix_prior_specification(
         error_rate = error_rate, 
         prior_std = prior_std)
     data_list=c(data_list,
-                list(
-                  aa = error_matrix_prior["a"],
-                  bb = error_matrix_prior["b"]))}
+                list(shape_epsilon=shape_epsilon))}
   
   monitor= c("pi_gs", if (is.na(tildeepsilon)) {"tildeepsilon"})
   

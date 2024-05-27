@@ -64,7 +64,7 @@ list(
   tar_target(
     name = mcmc_output,
     command = do.call(
-      what = desman_fixed_variants,
+      what = mcmc_fixed_variants,
       args = c(
         list(
           n_vsa = ln_vsa[[1]],
@@ -79,7 +79,7 @@ list(
   tar_target(
     name = mcmc_output_fixed_epsilon,
     command = do.call(
-      what = desman_fixed_variants,
+      what = mcmc_fixed_variants,
       args = c(
         list(
           n_vsa = ln_vsa[[1]],

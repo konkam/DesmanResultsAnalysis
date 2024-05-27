@@ -45,7 +45,7 @@ list(
       translate_dna_string_vector_to_string_matrix()|>
       translate_dna_matrix_to_binary_array()),
   tar_target(name = mcmc_output,
-             command = desman_fixed_variants(ln_vsa[[1]][,1,,drop=FALSE],
+             command = mcmc_fixed_variants(ln_vsa[[1]][,1,,drop=FALSE],
                                                        tau_vga,
                                                        G=dim(tau_vga)[2]-1,
                                              tildeepsilon=NA,
@@ -57,7 +57,7 @@ list(
                                              sample = 1000,
                                              adapt=500)),
   tar_target(name = mcmc_output_fixed_epsilon,
-             command = desman_fixed_variants(ln_vsa[[1]][,1,,drop=FALSE],
+             command = mcmc_fixed_variants(ln_vsa[[1]][,1,,drop=FALSE],
                                              tau_vga,
                                              G=dim(tau_vga)[2]-1,
                                              tildeepsilon=.0001,
