@@ -4,11 +4,11 @@
 #' @param gs a character string. If "jags", the gibbs sampler used will be jags, stan if "stan."
 #' @param block_rho a boolean. If TRUE, dictionnary is sampled simultaneously for all variants at each position.
 #' @examples
-#' cat(mcmc_relax_model_string_fixed_variants_f(block_rho=TRUE))
+#' cat(mcmc_relax_model_string_fixed_variants_f())
 #' 
-mcmc_relax_model_string_fixed_variants_f <- function(block_rho=TRUE,gs="jags") {
-  paste0(
-    "
+mcmc_relax_model_string_fixed_variants_f <- function(gs="jags") {
+  
+"
 model {
   # Likelihood
   for (v in 1:V){
@@ -18,16 +18,12 @@ model {
   }
   
   # Mangled variants
-  for (v in 1:V){",
-    if(block_rho){"block {
-        "},
-    "for (g in 1:G){
-        tau[v, g,1:4 ] ~ ddirich(rep(alpha_rho,4))
-        rho[v,g,1:4]=(1-4*tildeepsilon/3)*tau[v, g, 1:4]+(tildeepsilon/3)*rep(1,4)
-    }",
-    if(block_rho){"
-        }"},
-    "}
+  for (v in 1:V){
+    for (g in 1:G){
+          tau[v, g,1:4 ] ~ ddirich(rep(alpha_rho,4))
+          rho[v,g,1:4]=(1-4*tildeepsilon/3)*tau[v, g, 1:4]+(tildeepsilon/3)*rep(1,4)
+    }
+  }
   }
   # Latent multinomial observation probability
   for (v in 1:V){
@@ -48,7 +44,7 @@ model {
     pi_gs[1:G, s] ~ ddirch(rep(alpha_pi,G))
   }
   
-  tildeepsilon~ddirch(shape_epsilon)")}
+  tildeepsilon~ddirch(shape_epsilon)"}
 
 
 #' @description
@@ -59,7 +55,7 @@ model {
 #' @param shape_rho a length two vector.
 #' @param alpha_pi
 #' @examples
-#' tau_pi_n <- sim_tau_pi_n(v = 50, g = 5, s = 3, n = 1000, alpha0 = 1)
+#' tau_pi_n <- sim_tau_pi_epsilon_n(v = 50, g = 5, s = 3, n = 1000, alpha_pi = 1)
 #' gs="jags"
 #' block_tau=FALSE
 #' shape_rho=c(1,100)

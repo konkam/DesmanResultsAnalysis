@@ -22,9 +22,9 @@ sim_tau_vga <- function(v, g) {
 }
 
 #' @examples
-#' sim_pi_gs(g = 3, s=5,alpha0=.1)
-sim_pi_gs <- function(g, s, alpha0 = 1) {
-  rdirichlet(alpha = rep(alpha0, g), n_samples = s) |> t()
+#' sim_pi_gs(g = 3, s=5,alpha_pi=.1)
+sim_pi_gs <- function(g, s, alpha_pi = 1) {
+  rdirichlet(alpha = rep(alpha_pi, g), n_samples = s) |> t()
 }
 
 epsilon_ba_f <- function(error_rate){diag(x = 1 - error_rate, nrow = 4) + 
@@ -42,7 +42,7 @@ sim_n_vsa <- function(n=1000,# expeted sample size
                       g = NULL,
                       s = NULL,
                       error_rate = .001,
-                      alpha0 = 1) {
+                      alpha_pi = 1) {
   if (is.null(tau_vga)) {
     tau_vga <- sim_variants(v = v, g = g)
   } else {
@@ -50,7 +50,7 @@ sim_n_vsa <- function(n=1000,# expeted sample size
     g <- dim(tau_vga)[2]
   }
   if (is.null(pi_gs)) {
-    pi_gs <- sim_pi_gs(g = g, s = s, alpha0 = alpha0)
+    pi_gs <- sim_pi_gs(g = g, s = s, alpha_pi = alpha_pi)
   } else {
     s <- dim(pi_gs)[2]
   }
@@ -79,11 +79,11 @@ sim_n_vsa <- function(n=1000,# expeted sample size
 }
 
 #' @examples
-#' g = 5;v = 50; s = 3; n = 100; alpha0 = .1
-#' sim_tau_pi_epsilon_n(g = 5, v = 50, s = 3, n = 100, alpha0 = 1)
-sim_tau_pi_epsilon_n <- function(v, g, s, n, error_rate = .001, alpha0 = 1) {
+#' g = 5;v = 50; s = 3; n = 100; alpha_pi = .1
+#' sim_tau_pi_epsilon_n(g = 5, v = 50, s = 3, n = 100, alpha_pi = 1)
+sim_tau_pi_epsilon_n <- function(v, g, s, n, error_rate = .001, alpha_pi = 1) {
   tau_vga <- sim_tau_vga(v = v, g = g)
-  pi_gs <- sim_pi_gs(g = g, s = s, alpha0 = alpha0)
+  pi_gs <- sim_pi_gs(g = g, s = s, alpha_pi = alpha_pi)
   epsilon_ba=epsilon_ba_f(error_rate)
   n_vsa <- sim_n_vsa(n = n, tau_vga = tau_vga, pi_gs = pi_gs, error_rate = error_rate)
   list(tau_vga = tau_vga, pi_gs = pi_gs, epsilon_ba=epsilon_ba,n_vsa = n_vsa)

@@ -52,7 +52,7 @@ list(
                                                        error_rate = 0.001,
                                                        prior_std = 0.01,
                                                        n_chains=2,
-                                                       alpha0=.1,
+                                                       alpha_pi=.1,
                                              burnin = 40,
                                              sample = 1000,
                                              adapt=500)),
@@ -64,4 +64,4 @@ list(
                                              error_rate = 0.001,
                                              prior_std = 0.01,
                                              n_chains=2,
-                                             alpha0=.1)))
+                                             alpha_pi=.1)))

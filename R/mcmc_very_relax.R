@@ -58,7 +58,7 @@ model {
 #' @param error_rate = 0.001 controls the dirichlet prior on tildeepsilon
 #' @param prior_std = 0.01 controls the dirichlet prior on tildeepsilon
 #' @examples
-#' tau_pi_n <- sim_tau_pi_n(v = 50, g = 5, s = 3, n = 1000, alpha0 = 1)
+#' tau_pi_n <- sim_tau_pi_epsilon_n(v = 50, g = 5, s = 3, n = 1000, alpha_pi = 1)
 #' gs="jags"
 #' block_rho=FALSE
 #' shape_rho=c(1,100)

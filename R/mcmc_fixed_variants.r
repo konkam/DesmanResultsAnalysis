@@ -5,6 +5,7 @@
 #' @param gs a character string. If "jags", the gibbs sampler used will be jags, stan if "stan."
 #' @examples
 #' cat(model_string_fixed_variants_f(NA))
+#' cat(model_string_fixed_variants_f(.1))
 model_string_fixed_variants_f <- 
   function(tildeepsilon = NA,
           gs="jags") {
@@ -161,12 +162,11 @@ error_matrix_prior_specification <- function(error_rate, prior_std) {
 #' @param error_rate = 0.001 controls the dirichlet prior on tildeepsilon
 #' @param prior_std = 0.01 controls the dirichlet prior on tildeepsilon
 #' @examples
-#' tau_pi_n <- sim_tau_pi_n(v = 50, g = 5, s = 3, n = 1000, alpha0 = 1)
+#' tau_pi_n <- sim_tau_pi_epsilon_n(v = 50, g = 5, s = 3, n = 1000, alpha_pi = 1)
 #' mcmc_fixed_variants(
 #'   n_vsa = tau_pi_n$n_vsa,
 #'   tau_vga = tau_pi_n$tau_vga,
-#'   G = 12
-#' )
+#'   G = 12)
 mcmc_fixed_variants <- function(n_vsa,
                                   tau_vga,
                                   G,
@@ -175,7 +175,7 @@ mcmc_fixed_variants <- function(n_vsa,
                                   error_rate = 0.001,
                                   prior_std = 0.01,
                                   n_chains = n_chains,
-                                  alpha0 = 1,
+                                  alpha_pi = 1,
                                   ...) {
   V <- dim(n_vsa)[1]
   S <- dim(n_vsa)[2]
@@ -187,7 +187,7 @@ mcmc_fixed_variants <- function(n_vsa,
   data_list <- list(
     V = V,G = G,S = S,      n_vsa = n_vsa,
     tau_vga = tau_vga,
-    alpha = rep(alpha0, G),
+    alpha = rep(alpha_pi, G),
     #epsilon = 2 * tildeepsilon * diag(4) + (1 - tildeepsilon),
     nvs = n_vsa |> apply(MARGIN = c(1, 2), FUN = sum))
   

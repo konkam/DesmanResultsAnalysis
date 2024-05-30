@@ -42,7 +42,7 @@ list(
       error_rate = 0.001,
       prior_std = 0.01,
       n_chains = 2,
-      alpha0 = .1
+      alpha_pi = .1
     )
   ),
   tar_target(fixed_tildeepsilon, .0001),
