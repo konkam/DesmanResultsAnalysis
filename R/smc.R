@@ -12,8 +12,7 @@ reorder_reads<-function(n_vsa,seed=1){
     dplyr::mutate(rank=rank(runif(dplyr::n())))|>
     dplyr::arrange(rank)|>
     dplyr::mutate(lambda_threshold=dplyr::row_number()/dplyr::n())|>
-    dplyr::select(-rank,-V1)
-}
+    dplyr::select(-rank,-V1)}
 
 
 #'@examples
