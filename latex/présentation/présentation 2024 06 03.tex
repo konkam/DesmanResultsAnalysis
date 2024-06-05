@@ -1,0 +1,592 @@
+\documentclass{beamer}
+
+\usepackage[english]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage{hyperref, % clickable links
+    graphicx, % include images
+    listings, % for code and formatting
+    caption, % customization of captions in figures and tables
+    stackengine, % custom layouts 
+    amsmath, % math env
+    xcolor, % extend color support
+    multicol, % multiple columns layout
+    booktabs, % high quality tables
+    lipsum % remove it
+}
+\usepackage{listings}
+\usepackage[listings,skins]{tcolorbox}
+
+\usepackage{Ensae_beamer} % customized style
+
+
+\usepackage{graphicx}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{pifont}
+    \usetikzlibrary{positioning}
+    \usetikzlibrary{backgrounds}
+    \usetikzlibrary{arrows.meta}
+\usetikzlibrary{3d, calc}
+
+
+\usepackage{graphicx}
+\usepackage[textwidth=8em,textsize=small]{todonotes}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{float}
+\usepackage{natbib}
+\usepackage{blkarray}\usepackage{bbold}
+\usepackage{ulem} %To strike out things using \sout
+\usepackage{econometrics} % for bold greek letters, e.g. \valpha instead of \alpha
+\usepackage{enumerate}
+\usepackage{xcolor}  % Coloured text etc.
+% 
+\usepackage{multirow}
+\usepackage{todonotes}
+\newcommand{\afaire}[1]{\todo[linecolor=red,backgroundcolor=red!25,bordercolor=red]{#1}}
+\usepackage{stmaryrd}
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+
+\usepackage{collcell}
+\usepackage{colortbl,dcolumn}
+
+\usepackage{dsfont}
+
+\newcommand{\code}[1]{\colorbox{light-gray}{\texttt{#1}}}
+
+\newcommand\thevector[4]{
+\begin{tikzpicture}
+\clip (-0.09,-0.13) rectangle + (.47,.32);
+ \node [inner sep=0,outer sep=0,inner frame sep=0pt,tight background,draw=none] (first) at (0,0)  {$#1$};
+\node [inner sep=0,outer sep=0,inner frame sep=0pt,tight background,draw=none,scale=.8] (second) at (0.135,0.05) {$#2$};
+\node [inner sep=0,outer sep=0,inner frame sep=0pt,tight background,draw=none,scale=.64] (third) at (0.24,0.09) {$#3$};
+\node [inner sep=0,outer sep=0,inner frame sep=0pt,tight background,draw=none,scale=.512] (fourth) at (0.33,0.125) {$#4$};  
+\end{tikzpicture}
+}
+\newcommand\A{\thevector{\mathbf{1}}{0}{0}{0}}
+\newcommand\C{\thevector{0}{\mathbf{1}}{0}{0}}
+\newcommand\G{\thevector{0}{0}{\mathbf{1}}{0}}
+\newcommand\T{\thevector{0}{0}{0}{\mathbf{1}}}
+
+ 
+\def\cmd#1{\texttt{\color{red}\footnotesize $\backslash$#1}}
+\def\env#1{\texttt{\color{blue}\footnotesize #1}}
+
+% ------ CODE COLOR DEFINITION ------ %
+
+\definecolor{codered}{rgb}{0.6,0,0}
+\definecolor{codeblue}{rgb}{0,0,0.8}
+\definecolor{codegreen}{rgb}{0,0.5,0}
+\definecolor{almostwhite}{gray}{0.55}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstset{
+    basicstyle=\ttfamily\small,
+    keywordstyle=\bfseries\color{codeblue},
+    emphstyle=\ttfamily\color{codered},   % Custom highlighting style
+    stringstyle=\color{codepurple},
+    numbers=left,
+    numberstyle=\small\color{almostwhite},
+    rulesepcolor=\color{red!20!green!20!blue!20},
+    frame=shadowbox,
+    commentstyle=\color{codegreen},
+    captionpos=b    
+}
+\newcommand{\fr}[1]{#1}
+\newcommand{\en}[1]{}
+
+
+% ------------- PRESENTATION INFO --------------- %
+\newcommand{\fullconference}{Discussion}
+\newcommand{\shortconference}{Projects}
+\newcommand{\contact}{}
+
+\author[Daniel Bonnéry]{Daniel Bonnéry}
+\institute[]{}
+\title[Reconstitution de séquences de variants ]{Une méthode d’échantillonnage pour la reconstitution de séquences de variants de gènes d'antibiorésistance depuis des données métagénomiques}
+
+\date[2024/09/30]{Séminaire, \small 3 juin 2024}
+\begin{document}
+
+% ------------ TITLE SLIDE --------------- %
+{
+% Remove headline and footline from first slide
+\setbeamertemplate{footline}{} 
+\setbeamertemplate{headline}{} 
+
+
+\begin{frame}\label{start}
+    \titlepage
+        
+    \begin{figure}
+            \includegraphics[scale=0.15]{images/ensae.png} 
+    \end{figure}
+\end{frame}
+}
+\begin{frame}
+        Daniel Bonnéry$^*$ (Ensae)\\
+        Guillaume Kon Kam King (Inrae)\\
+        Anne-Laure Abraham (Inrae)\\
+	Ouleye Sidibe (Inrae)\\
+	Sebastien Leclercq (Inrae)\\
+        Nicolas Chopin (Crest-Ensae)
+\end{frame}
+\begin{frame}{Contents}
+    \tableofcontents[sectionstyle=show, subsectionstyle=show/shaded/hide, subsubsectionstyle=show/shaded/hide]
+\end{frame}
+
+\section{\fr{Le modèle paramétrique et la question statistique}\en{The parametric model and the statistical question}}
+\subsection{Observations}
+\begin{frame}{Observations}
+
+We observe a 3 dimensional array of counts.
+$$\left(n_{v,s,a}\right)_{\footnotesize\begin{array}{c}
+v\in\{1,\ldots,V\}\\
+s\in\{1,\ldots,S\}\\
+a\in \{1,\ldots,4\}\end{array}}$$
+
+\begin{itemize}
+\item $(n_{v,s,a})$ : \fr{comptages des nucléotides}\en{counts of nucleotides}
+    \begin{itemize}
+\item \fr{à la position}\en{at position} $v$
+\item \fr{dans l'échantillon}\en{in sample} $s$
+\item \fr{de type}\en{of type} $a$ :
+    \begin{itemize}
+    \item $a=1=A=(1,0,0,0)$
+    \item $a=2=C=(0,1,0,0)$
+    \item $a=3=G=(0,0,1,0)$
+    \item $a=4=T=(0,0,0,1)$
+    \end{itemize}
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+    $$n_{.,s=1,.}=\begin{blockarray}{ccccc}
+    &a=A&a=C&a=G&a=T&\\
+    \begin{block}{c(cccc)}
+ {\scriptscriptstyle v=1}&600&400&0&0\\   
+ v=2&400&600&1&0\\
+    \end{block}
+\end{blockarray} $$
+
+
+$$n_{.,s=2,.}=\begin{blockarray}{ccccc}
+    &a=A&a=C&a=G&a=T&\\
+    \begin{block}{c(cccc)}
+{\scriptscriptstyle v=1}&200&800&0&1\\   
+  {\scriptscriptstyle v=2}&800&200&0&0\\
+    \end{block}
+\end{blockarray} $$
+
+\end{frame}
+
+\subsection{Variants}
+
+\begin{frame}
+\en{It looks like we have two variants in these 2 samples:}
+\fr{Il semblerait qu'il y a deux variants dans chacun des deux échantillons}
+
+$$\tau=\begin{blockarray}{ccc}
+    &&\\&\scriptscriptstyle g=1&\scriptscriptstyle g=2\\
+    \begin{block}{c(cc)}
+ {\scriptscriptstyle v=1}&A&C\\   
+  {\scriptscriptstyle v=2}&C&A\\   
+    \end{block}
+\end{blockarray} =    \begin{blockarray}{ccc}
+    &{\!\!\!\!a=}1^{2^{3^4}}&\\
+    &\scriptscriptstyle g=1&\scriptscriptstyle g=2\\
+    \begin{block}{c(cc)}
+ {\scriptscriptstyle v=1}&\A&\C\\   
+ {\scriptscriptstyle v=2}&\C&\A\\   
+    \end{block}
+\end{blockarray} $$
+
+\begin{itemize}
+    \item $\tau_{v,g,a}$ \fr{indique si}\en{indicates if}
+        \begin{itemize}
+            \item \en{at  position}\fr{à la position} $v$
+            \item \en{the nucleotide of variant}\fr{le nucléotide du variant} $g$
+            \item \fr{est}\en{is} $a$.
+        \end{itemize}
+\end{itemize}
+
+
+
+\end{frame}
+
+\subsection{Proportions}
+\begin{frame}
+        $$\pi=\begin{blockarray}{ccc}
+    &\scriptscriptstyle s=1&\scriptscriptstyle s=2\\
+    \begin{block}{c(cc)}
+ {\scriptscriptstyle g=1}&0.6&0.2\\   
+ {\scriptscriptstyle 
+ g=2}&.04&0.8\\   
+    \end{block}
+\end{blockarray} $$
+$\pi_{g,s}$ est la proportion de
+ \begin{itemize}
+    \item variant $g$
+    \item dans l'échantillon $s$.
+\end{itemize}
+\end{frame}
+
+\subsection{\en{Measurement errors}\fr{Erreur de mesure}}
+\begin{frame}{\en{Measurement errors}\fr{Erreur de mesure}}
+\en{The variable $\epsilon_{b,a}$ is the probability that the measurment of a nucleotide of type $b$ reads $a$}
+\fr{La variable $\epsilon_{b,a}$ est la probabilité que la mesure d'un nucleotide de type $b$ donne  $a$}
+  $$\epsilon=\begin{blockarray}{ccccc}
+    &\scriptscriptstyle a=1&\scriptscriptstyle a=2&\scriptscriptstyle a=3&\scriptscriptstyle a=4\\
+    \begin{block}{c(cccc)}
+ {\scriptscriptstyle b=1}&\mathbf{0.91}&0.03&0.03&0.03\\   
+ {\scriptscriptstyle 
+ b=2}&0.03&\mathbf{0.91}&0.03&0.03\\   
+  {\scriptscriptstyle 
+ b=3}&0.02&0.02&\mathbf{0.94}&0.02\\   
+  {\scriptscriptstyle 
+ b=4}&0.05&0.04&0.01&\mathbf{0.90}\\   
+    \end{block}
+\end{blockarray} $$
+
+
+\end{frame}
+\subsection{\fr{Distribution du tableau de comptages}\en{Distribution of the counts}}
+\begin{frame}{\fr{Distribution du tableau de comptages}\en{Distribution of the counts}}
+    
+\begin{eqnarray*}\lefteqn{\mathcal{L}\left(n | \pi, \tau,\epsilon \right)}\nonumber\\& =& \prod_{v=1}^{V} \prod_{s = 1}^{S} (n_{v,s,+})!\times\frac{\prod_{a = 1}^{4} \left( \sum_{g = 1}^{G}\sum_{b=1}^{4} \tau_{v,g,b}\epsilon_{b,a} \pi_{g,s}  \right)^{n_{v,s,a}}}{\prod_{a = 1}^{4}n_{v,s,a}!}\end{eqnarray*}
+\end{frame}
+
+\subsection{\fr{Approche bayesienne}}
+\begin{frame}{\en{Approche bayesienne}}
+\fr{Quelle est la loi de probabilité du résultat du lancé d'un dé sachant que le résultat est pair ?
+{\bf A priori}, le dé est non pipé, et la loi $\eta$ du résultat est uniforme.
+}
+
+\end{frame}
+\begin{frame}{\en{Approche bayesienne (2)}}
+\fr{Règle de Bayes:}
+$$\eta(\{x\}|\{2,4,6\})=\frac{\eta(\{x\}\cap\{2,4,6\})}{\eta(\{2\})+\eta(\{4\})+\eta(\{6\})}$$
+\end{frame}
+\begin{frame}{}
+\fr{Notre problème est similaire. Une loi sur le vecteur de variables aléatoires }$(n,\pi,\tau,\epsilon)$
+\fr{est construit à partir de lois a priori sur }$\tau$,$\pi$ \fr{et}\en{and} $\epsilon$, \fr{et à partir de la loi de $n$ sachant ces paramêtres.}
+
+$$\eta(n,\pi,\tau,\epsilon)=  \eta(n\mid \tau,\pi,\epsilon)\times\eta(\tau)\times\eta(\pi)\times\eta(\epsilon)$$
+
+La solution de notre problème est:
+
+$$\eta(\pi,\tau,\epsilon\mid n)=\frac{\eta(n,\pi,\tau,\epsilon)}{\int \eta(n,\pi,\tau,\epsilon) \mathrm{d}\tau~\mathrm{d}\pi~\mathrm{d}\epsilon}$$
+
+
+\end{frame}
+
+
+\section{Desman}
+\subsection{Présentation}
+\begin{frame}
+
+
+Quince, C., Delmont, T.~O., Raguideau, S., Alneberg, J., Darling, A.~E.,
+  Collins, G., and Eren, A.~M. (2017).
+
+Desman: a new tool for de novo extraction of strains from
+  metagenomes.
+
+{\em Genome biology}, 18:1--22.
+
+\end{frame}
+\begin{frame}
+\begin{itemize}
+\item Desman est un algorithme d'échantillonage qui permet d'obtenir un échantillon dont les propriétés sont proches d'un échantillon iid de la loi a posteriori de ($\tau$,$\pi$,$\epsilon$).
+\item Il est basé sur des méthodes de Monte Carlo par chaînes de Markov
+\item obtenues par échantillonnage de Gibbs
+\item après introduction de variables latentes pour obtenir un maximum de lois conjuguées et éviter de devoir tirer avec Metropolis Hastings
+\end{itemize}
+\end{frame}
+\subsection{Algorithme de Gibbs}
+\begin{frame}{Algorithme de Gibbs}
+
+    \begin{algorithm}[H]
+        \caption{Algorithme de Gibbs}
+        \begin{algorithmic}[1]
+            \State Initialiser $\mathbf{\Theta}^{(0)} = (\Theta_1^{(0)}, \Theta_2^{(0)}, \ldots, \Theta_I^{(0)})$
+            \For{$t = 1$ to $T$}
+                \For{$i = 1$ to $I$}
+                    \State Échantillonner 
+                    \State \quad$\Theta_i^{(t)} \sim \eta\left(\Theta_i \mid \Theta_1^{(t)}, \ldots, \Theta_{i-1}^{(t)}, \Theta_{i+1}^{(t-1)}, \ldots, \Theta_n^{(t-1)}\right)$
+                \EndFor
+            \EndFor
+        \end{algorithmic}
+    \end{algorithm}
+    
+    
+\en{The transition kernel is the distribution}\fr{On appelle noyau de transition la distribution } $P^{\Theta^{(t+1)}\mid\Theta^{(t)}}$ 
+\end{frame}
+
+\begin{frame}{Explications}
+    \begin{itemize}
+        \item L'algorithme commence par une initialisation de $\mathbf{\Theta}^{(0)}$.
+        \item À chaque étape $t$, chaque variable $\Theta_i$ est mise à jour en échantillonnant de sa distribution conditionnelle.
+        \item Le processus est répété pour un nombre d'itérations $T$.
+        \item En fin de compte, les échantillons $\mathbf{\Theta}^{(T)}$ sont utilisés pour estimer la distribution cible.
+    \end{itemize}
+\end{frame}
+
+
+
+\begin{frame}
+$$\Theta_i^{(t)} \sim \eta\left(\Theta_i \mid \Theta_1^{(t)}, \ldots, \Theta_{i-1}^{(t)}, \Theta_{i+1}^{(t-1)}, \ldots, \Theta_n^{(t-1)}\right)$$
+Comment faire ?
+
+\begin{enumerate}
+\item Lois conjuguées
+\item Metropolis Hasting
+\end{enumerate}
+\end{frame}
+
+\subsection{Les étapes de Gibbs dans Desman}
+\begin{frame}
+    
+\begin{algorithm}[H]
+\caption{\en{MCMC kernel}\fr{Noyau MCMC}}\label{alg:mcmck}
+\begin{algorithmic}
+\Procedure{$M$}{$n,\Theta=(\tau,\pi,\epsilon);\alpha_\pi,\alpha_\epsilon,e$}
+    % \State Compute $\ell\left(n,\gamma^{(i-1)},\tau^{(i-1)},\epsilon^{(i-1)}\right)$\hfill\code{self.ll}
+    % \State Compute $\ell p\left(n,\gamma^{(i-1)},\tau^{(i-1)},\epsilon^{(i-1)}\right)$\hfill\code{self.lp}
+\State $(\nu,\mu)\gets{\mathrm{sample}_{(\nu,\mu)}(n,\Theta)}$
+\State $\pi\gets\mathrm{sample}_\pi(\mu;\alpha_\pi)$
+\State{$\tau\gets\mathrm{sample}_\tau(n,\tau,\pi,\epsilon)$}{} 
+\State{$\epsilon\gets\mathrm{sample}_\epsilon(\nu;\alpha_\epsilon)$}{} 
+\State Return $\left(\tau,\pi,\epsilon\right)$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\end{frame}
+
+\subsection{Identification d'un problème}
+\begin{frame}
+L'étape de Gibbs correspondante à $\tau$ semble problématique: $\tau$ ne varie pas avec $t$.
+\end{frame}
+
+
+\subsection{Diagnostics}
+
+
+\begin{frame}
+    $$n_{.,s=1,.}=\begin{blockarray}{ccccc}
+    &a=A&a=C&a=G&a=T&\\
+    \begin{block}{c(cccc)}
+ {\scriptscriptstyle v=1}&600&400&0&0\\   
+ v=2&400&600&1&0\\
+    \end{block}
+\end{blockarray} $$
+
+
+$$n_{.,s=2,.}=\begin{blockarray}{ccccc}
+    &a=A&a=C&a=G&a=T&\\
+    \begin{block}{c(cccc)}
+{\scriptscriptstyle v=1}&200&800&0&1\\   
+  {\scriptscriptstyle v=2}&800&200&0&0\\
+    \end{block}
+\end{blockarray} $$
+
+$$\overset{t=1}{\begin{blockarray}{ccc}
+    &&\\&\scriptscriptstyle g=1&\scriptscriptstyle g=2\\
+    \begin{block}{c(cc)}
+ {\scriptscriptstyle v=1}&A&C\\   
+  {\scriptscriptstyle v=2}&A&C\\   
+    \end{block}
+\end{blockarray}} \to \overset{t=2}{\begin{blockarray}{ccc}
+    &&\\&\scriptscriptstyle g=1&\scriptscriptstyle g=2\\
+    \begin{block}{c(cc)}
+ {\scriptscriptstyle v=1}&A&C\\   
+  {\scriptscriptstyle v=2}&C&C\\   
+    \end{block}
+\end{blockarray}} \to \overset{t=3}{\begin{blockarray}{ccc}
+    &&\\&\scriptscriptstyle g=1&\scriptscriptstyle g=2\\
+    \begin{block}{c(cc)}
+ {\scriptscriptstyle v=1}&A&C\\   
+  {\scriptscriptstyle v=2}&C&A\\   
+    \end{block}
+\end{blockarray}}$$
+\end{frame}
+
+\section{\en{Improvements}\fr{Stratégies}}
+
+
+
+
+
+
+\subsection{Block sampling}
+
+\begin{frame}
+Il s'agit d'échantillonner en block $\tau_{v,.,.}$:
+
+
+$$\overset{t=1}{\begin{blockarray}{ccc}
+    &&\\&\scriptscriptstyle g=1&\scriptscriptstyle g=2\\
+    \begin{block}{c(cc)}
+ {\scriptscriptstyle v=1}&A&C\\   
+  {\scriptscriptstyle v=2}&A&C\\   
+    \end{block}
+\end{blockarray}}  \to \overset{t=2}{\begin{blockarray}{ccc}
+    &&\\&\scriptscriptstyle g=1&\scriptscriptstyle g=2\\
+    \begin{block}{c(cc)}
+ {\scriptscriptstyle v=1}&A&C\\   
+  {\scriptscriptstyle v=2}&C&A\\   
+    \end{block}
+\end{blockarray}}$$
+
+Problème:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lr}
+  \hline
+$4^{1}$&$4$\\$4^{2}$&$16$\\$4^{3}$&$64$\\$4^{4}$&$256$\\$4^{5}$&$1~024$\\$4^{10}$&$1~048~576$\\$4^{15}$&$1~073~741~824$\\$4^{20}$&$1~099~511~627~776$\\   \hline
+\end{tabular}
+\end{table}
+
+\end{frame}
+
+\subsection{Fixed variants}
+
+\begin{frame}
+Il s'agit de remplacer la distribution a priori de $\tau$ par 
+$\mathrm{Uniform}(\mathcal{T})$
+\begin{itemize}
+\item Metropolis Hasting est évité.
+\item Satisfaisant lorsque les variants sont connus
+\item Ne répond pas à l'objectif initial de détection.
+\end{itemize}
+\end{frame}
+\subsection{Cibler $\rho$}
+
+\begin{frame}
+
+
+\begin{eqnarray*}\lefteqn{\mathcal{L}\left(n | \pi, \tau,\epsilon \right)}\nonumber\\& =& \prod_{v=1}^{V} \prod_{s = 1}^{S} (n_{v,s,+})!\times\frac{\prod_{a = 1}^{4} \left( \sum_{g = 1}^{G}\sum_{b=1}^{4} \tau_{v,g,b}\epsilon_{b,a} \pi_{g,s}  \right)^{n_{v,s,a}}}{\prod_{a = 1}^{4}n_{v,s,a}!}\nonumber\\
+& =&\prod_{v=1}^{V} \prod_{s = 1}^{S} (n_{v,s,+})!\times\frac{\prod_{a = 1}^{4} \left( \sum_{g = 1}^{G} \rho_{v,g,a} \pi_{g,s}  \right)^{n_{v,s,a}}}{\prod_{a = 1}^{4}n_{v,s,a}!}\end{eqnarray*}
+
+avec
+
+$$\rho_{v,g,a}=\sum_{b=1}^4\tau_{vgb}\epsilon_{ba}$$
+\end{frame}
+\begin{frame}
+ $$\rho_{.,g,.}=\begin{blockarray}{ccccc}
+    &\scriptscriptstyle A&\scriptscriptstyle C&\scriptscriptstyle G&\scriptscriptstyle T\\
+    \begin{block}{c(cccc)}
+ {\scriptscriptstyle v=1}&0.03&\mathbf{0.91}&0.03&0.03\\   
+ {\scriptscriptstyle 
+ \vdots}&\vdots&\vdots&\vdots&\vdots\\   
+  {\scriptscriptstyle 
+ v=V}&0.05&0.04&\mathbf{0.90}&0.01\\   
+    \end{block}
+\end{blockarray} $$
+\begin{itemize}
+\item On utilise un hyperparamêtre de forme très petit pour la loi de Dirichlet, ce qui assure la concentration des $\rho_{v,g,.}$ autour des sommets A,C,G, ou T.
+\item On garde des lois conjuguées pour $\rho$.
+\item La mise à jour se fait naturellement par block.
+\item Rajout d'un a priori non conjugué sur l'hyperparamêtre de forme.
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]
+\input{"4-simplex.tikz"}
+\end{frame}
+
+
+
+
+\begin{frame}
+\begin{figure}[H]
+
+     \begin{subfigure}[b]{0.49\textwidth}
+\includegraphics[width=\textwidth,trim={3.7cm 0 7 0},clip]{simplex1.png}
+\caption{$\alpha=0.1~\mathds{1}_3$}
+\end{subfigure}%
+     \begin{subfigure}[b]{0.49\textwidth}
+\includegraphics[width=\textwidth,,trim={3.7cm 0 7 0},clip]{simplex2.png}
+\caption{$\alpha=0.01~\mathds{1}_3$}
+     \end{subfigure}
+\caption{ \fr{Échantillon de distribution de Dirichlet sur un 3-simplexe} \en{Dirichlet sample on the 3-simplex}}
+\end{figure}
+\end{frame}
+
+\subsection{SMC and Tempering}
+
+\begin{frame}[fragile]
+\includegraphics[scale=.55]{smc.png}
+%\input{SMC.tikz}
+\end{frame}
+
+
+\begin{frame}[fragile]
+\includegraphics[scale=.55]{tempering.png}
+%\input{SMC.tikz}
+\end{frame}
+
+\begin{frame}
+Stratégies de tempering:
+\begin{itemize}
+\item Puissance de la vraisemblance
+\item Data tempering
+\item Paramêtre de tempering naturel.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+Stratégie retenue
+\begin{itemize}
+\item Cibler $\tau$, $\epsilon$ et $\pi$
+\item Relaxer $\tau$
+\item Le paramêtre de forme sur $\tau$ devient le paramêtre de tempering naturel.
+\end{itemize}
+\end{frame}
+
+
+
+
+\begin{frame}[plain]
+
+
+\includegraphics[scale=.47]{models.png}
+\end{frame}
+
+\section{\en{Work in progress}\fr{Travaux en cours}}
+\begin{frame}
+\begin{itemize}
+\item Développement d'algorithmes en R basés sur jags.
+\item SMC
+\item tempering.
+\item \fr{Choix de modèle}\en{Model choice} ($G$)
+\item ESS
+\item Exploitation des trajectoires de particules obtenues.
+\end{itemize}
+\end{frame}
+
+
+
+
+\begin{frame}[allowframebreaks]
+
+\nocite{*}
+\bibliographystyle{apalike} 
+
+\bibliography{biblio} 
+
+\end{frame} 
+
+
+
+\end{document}

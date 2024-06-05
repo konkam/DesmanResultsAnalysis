@@ -1,0 +1,22 @@
+\begin{thebibliography}{}
+
+\bibitem[Dau and Chopin, 2022]{dau2022waste}
+Dau, H.-D. and Chopin, N. (2022).
+\newblock Waste-free sequential monte carlo.
+\newblock {\em Journal of the Royal Statistical Society Series B: Statistical
+  Methodology}, 84(1):114--148.
+
+\bibitem[Malsiner-Walli et~al., 2017]{malsiner2017identifying}
+Malsiner-Walli, G., Fr{\"u}hwirth-Schnatter, S., and Gr{\"u}n, B. (2017).
+\newblock Identifying mixtures of mixtures using bayesian estimation.
+\newblock {\em Journal of Computational and Graphical Statistics},
+  26(2):285--295.
+
+\bibitem[Quince et~al., 2017]{quince2017desman}
+Quince, C., Delmont, T.~O., Raguideau, S., Alneberg, J., Darling, A.~E.,
+  Collins, G., and Eren, A.~M. (2017).
+\newblock Desman: a new tool for de novo extraction of strains from
+  metagenomes.
+\newblock {\em Genome biology}, 18:1--22.
+
+\end{thebibliography}
