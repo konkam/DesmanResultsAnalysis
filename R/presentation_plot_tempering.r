@@ -1,4 +1,4 @@
-# Load necessary libraries
+plot_tempering<-function(){# Load necessary libraries
 library(ggplot2)
 library(dplyr)
 
@@ -44,3 +44,4 @@ library(tikzDevice)
 tikz("tempering.tex", standAlone = TRUE, width = 8, height = 4)
 print(tempering_plot)
 dev.off()
+}
