@@ -13,9 +13,10 @@
 #'bar_epsilon_1_mean=.01,
 #'alpha_pi=1,
 #'n_chains = 4,
-#'burnin=10,
-#'adapt=30,
-#'sample=5000)->smc_sample
+#'burnin=0,
+#'adapt=0,
+#'sample=40,
+#'thin=250)->smc_sample
 #'smc_sample$smc_samples->smc_samples
 #'reorder_g=smc_reorder(smc_samples,n_vsa)
 #'importance_g_it=
@@ -27,7 +28,7 @@
 #'plot_pi_tau_from_sample(n_vsa,v=1:2,
 #'importance_g_it=importance_g_it,
 #'reorder_g=reorder_g,
-#'true_parameter=tau_pi_n,t_step=100)
+#'true_parameter=tau_pi_n,t_step=1)
 #'tau_pi_n$tau_vgb[1:2,,]|>translate_dna_binary_array_to_string_vector()
 #'tau_pi_n$pi_gs|>plyr::aaply(1,sum)
 #'tau_pi_n$pi_gs
