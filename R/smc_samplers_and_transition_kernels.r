@@ -1,4 +1,3 @@
-
 g_neq_g_f=function(g){1-diag(g)}
 
 
@@ -7,8 +6,8 @@ g_neq_g_f=function(g){1-diag(g)}
 #'n=1000;v=20;g=5;s=3;alpha_pi=.1
 #'sim_tau_pi_epsilon_n(v=v, g=g, s=s, n=n, error_rate = .001, alpha_pi=alpha_pi)|>attach()
 #'epsilon_ba=.999*diag(4)+.001/3*(1-diag(4))
-sampler_tau<-function(tau_vga,pi_gs,epsilon_ba,n_vsa,
-                      v=dim(tau_vga)[1],
+sampler_tau<-function(tau_vgb,pi_gs,epsilon_ba,n_vsa,
+                      v=dim(tau_vgb)[1],
                       #s=dim(pi_gs)[2],
                       g=dim(pi_gs)[1],
                       g_neq_g=g_neq_g_f(g)){
@@ -17,7 +16,7 @@ sampler_tau<-function(tau_vga,pi_gs,epsilon_ba,n_vsa,
     equation_string="vsgac,vsc->vga",
     log(
       einsum::einsum("v,gs,ac->vsgac",1:v,pi_gs,epsilon_ba)+
-        einsum::einsum("a,gh,vhb,hs,bc->vsgac",rep(1,4),g_neq_g,tau_vga,pi_gs,epsilon_ba)),
+        einsum::einsum("a,gh,vhb,hs,bc->vsgac",rep(1,4),g_neq_g,tau_vgb,pi_gs,epsilon_ba)),
     n_vsa)|>
     plyr::aaply(1:2,function(x){exp(x-max(x))})|>
     plyr::aaply(1:2,function(xi){sample(nucleotides,1,prob = xi)})|>
@@ -46,13 +45,13 @@ sampler_tau_i<-function(tau_ivga,pi_igs,epsilon_iba,n_vsa,
 #'n=1000;v=20;g=5;s=3;alpha_pi=.1
 #'sim_tau_pi_epsilon_n(v=v, g=g, s=s, n=n, error_rate = .001, alpha_pi=alpha_pi)|>attach()
 #'epsilon_ba=.999*diag(4)+.001/3*(1-diag(4))
-#'sampler_xi(tau_vga,pi_gs,epsilon_ba)
-sampler_xi<-function(tau_vga,pi_gs,epsilon_ba,
-                     v=dim(tau_vga)[1],
+#'sampler_xi(tau_vgb,pi_gs,epsilon_ba)
+sampler_xi<-function(tau_vgb,pi_gs,epsilon_ba,
+                     v=dim(tau_vgb)[1],
                      s=dim(pi_gs)[2],
                      g=dim(pi_gs)[1]){
   ns<-  einsum::einsum("vsa,b,g->vsabg",n_vsa,rep(1,4),rep(1,g))
-  ms<-einsum::einsum("vgb,gs,ba->vsabg",tau_vga,pi_gs,epsilon_ba)
+  ms<-einsum::einsum("vgb,gs,ba->vsabg",tau_vgb,pi_gs,epsilon_ba)
   nms=abind::abind(ns,ms,along=6)
   nm=nms[1,1,1,,,,drop=FALSE]|>abind::adrop(1:3)
   nms|>plyr::aaply(1:3,function(nm){
@@ -63,7 +62,7 @@ sampler_xi<-function(tau_vga,pi_gs,epsilon_ba,
 
 
 sampler_xi_i<-function(i,tau_ivga,pi_igs,epsilon_iba,
-                       v=dim(tau_vga)[1],
+                       v=dim(tau_vgb)[1],
                        s=dim(pi_gs)[2],
                        g=dim(pi_gs)[1]){
   ns<-  einsum::einsum("i,vsa,b,g->vsabg",rep(1,i),n_vsa,rep(1,4),rep(1,g))
@@ -87,7 +86,7 @@ mu_i_from_xi_i<-function(xi){einsum::einsum("ivsabg->ivsag",xi)}
 #'@examples
 #'n=1000;v=20;g=5;s=3;alpha_pi=.1
 #'sim_tau_pi_epsilon_n(v=v, g=g, s=s, n=n, error_rate = .001, alpha_pi=alpha_pi)|>attach()
-#'xi=sampler_xi(tau_vga,pi_gs,epsilon_ba)
+#'xi=sampler_xi(tau_vgb,pi_gs,epsilon_ba)
 #'mu_vsag=mu_from_xi(xi)
 #'rep_alpha_pi=rep(alpha_pi,g)
 #'sampler_pi(mu_vsag,rep_alpha_pi)
@@ -123,16 +122,21 @@ a_neq_b=g_neq_g_f(4)
 #'sim_tau_pi_epsilon_n(v=v, g=g, s=s, n=n, error_rate = .001, alpha_pi=alpha_pi)|>attach()
 #'
 #'nu_vsab=nu_from_xi(xi)
-#'shape_alpha_epsilon=c(1,10)
+#'alpha_epsilon=c(1,10)
 #'
-#'sampler_epsilon_star(nu_vsab,shape_alpha_epsilon)
+#'sampler_epsilon_star(nu_vsab,alpha_epsilon)
 
-sampler_epsilon_star<-function(nu_vsab,shape_alpha_epsilon){
-  tilde_epsilon=rbeta(1,
-                      shape1=shape_alpha_epsilon[1]+einsum::einsum("vsab,ab->",nu_vsab,a_neq_b),
-                      shape2=shape_alpha_epsilon[2]+einsum::einsum("vsaa->",nu_vsab))
-  (1-4/3*tilde_epsilon)*diag(4)+(tilde_epsilon/3)
-}
+sampler_bar_epsilon_1_0<-function(alpha_epsilon){
+  rbeta(1,shape1=alpha_epsilon[1],shape2=alpha_epsilon[2])}
+
+sampler_bar_epsilon<-function(nu_vsab,alpha_epsilon){
+  bar_epsilon1=rbeta(1,
+                      shape1=alpha_epsilon[1]+einsum::einsum("vsab,ab->",nu_vsab,a_neq_b),
+                      shape2=alpha_epsilon[2]+einsum::einsum("vsaa->",nu_vsab))}
+
+sampler_epsilon_star<-function(nu_vsab,alpha_epsilon){
+  bar_epsilon1=sampler_bar_epsilon(nu_vsab,alpha_epsilon)
+  (1-4/3*bar_epsilon1)*diag(4)+(bar_epsilon1/3)}
 
 
 
@@ -144,19 +148,19 @@ sampler_epsilon_star<-function(nu_vsab,shape_alpha_epsilon){
 
 
 
-desman_kernel<-function(n_vsa,tau_vga,pi_gs,epsilon_ba,rep_alpha_pi,delta){
-  xi_vsabg=sampler_xi(tau_vga=tau_vga,
+desman_kernel<-function(n_vsa,tau_vgb,pi_gs,epsilon_ba,rep_alpha_pi,delta){
+  xi_vsabg=sampler_xi(tau_vgb=tau_vgb,
                       pi_gs=pi_gs,
                       epsilon_ba = epsilon_ba)
   nu_vsab<-nu_from_xi(xi=xi_vsabg)
   mu_vsab<-mu_from_xi(xi=xi_vsabg)
   pi_gs<-sampler_pi(mu_vsag = mu_vsab,alpha_pi = rep_alpha_pi)
   w1<-smc_b_prime(n_vsa_lambda,tau_ivga,pi_igs,epsilon_iba)
-  tau_vga<-sampler_tau(n_vsa = n_vsa,tau_vga = tau_vga,pi_gs = pi_gs,epsilon_ba = epsilon_ba)
+  tau_vgb<-sampler_tau(n_vsa = n_vsa,tau_vgb = tau_vgb,pi_gs = pi_gs,epsilon_ba = epsilon_ba)
   w2<-smc_b_prime(n_vsa_lambda,tau_ivga,pi_igs,epsilon_iba)
   epsilon_ba<-sampler_epsilon_star(nu_vsab,delta)
   w3<-smc_b_prime(n_vsa_lambda,tau_ivga,pi_igs,epsilon_iba)
-  list(tau_vga=tau_vga,pi_gs=pi_gs,epsilon_ba=epsilon_ba,w1=w1,w2=w2,w3=w3)
+  list(tau_vgb=tau_vgb,pi_gs=pi_gs,epsilon_ba=epsilon_ba,w1=w1,w2=w2,w3=w3)
 }
 
 smc_kernel_i<-function(i,g,n_vsa,tau_ivga,pi_igs,epsilon_iba,rep_alpha_pi,delta,g_neq_g =g_neq_g_f(g)){

@@ -1,10 +1,10 @@
 
 #'@examples
 #'tar_load(mcmc_output)
-#'plot_tilde_epsilon(mcmc_output)
-plot_tilde_epsilon<-function(mcmc_output,error_rate){
+#'plot_bar_epsilon(mcmc_output)
+plot_bar_epsilon<-function(mcmc_output,error_rate){
   mcmc_output|>
-    mcmc_output_df(variable_name = "tildeepsilon[2]")|>
+    mcmc_output_df(variable_name = "bar_epsilon[2]")|>
   ggplot(aes(x = iteration,group=as.factor(variable),col=as.factor(variable),y=value)) +
   theme_bw() +
   geom_line()+

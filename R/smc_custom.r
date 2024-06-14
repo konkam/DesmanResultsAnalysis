@@ -21,7 +21,6 @@ reorder_reads<-function(n_vsa,seed=1){
 #'n_vsa_df<-reorder_reads(n_vsa)
 #'n_vsa_lambda=sub_sample_counts(n_vsa_df,lambda=.5)
 #'sub_sample_counts(n_vsa_df,lambda=0)
-
 sub_sample_counts<-function(n_vsa_df,lambda){
   n_vsa_df|>
     dplyr::filter(lambda_threshold<=lambda)|>
@@ -105,7 +104,7 @@ unaccounted_for_f<-function(n_vsa_df,lambda){
 #'sim_tau_pi_epsilon_n(v=v, g=g, s=s, n=n, error_rate = .001, alpha_pi=alpha_pi)->sim2
 #'n_vsa_df<-reorder_reads(sim1$n_vsa)
 #'n_vsa_lambda=sub_sample_counts(n_vsa_df,lambda=.5)
-#'tau_ivga=abind::abind(sim1$tau_vga,sim2$tau_vga,along=4)|>aperm(c(4,1:3))
+#'tau_ivga=abind::abind(sim1$tau_vgb,sim2$tau_vgb,along=4)|>aperm(c(4,1:3))
 #'pi_igs=abind::abind(sim1$pi_gs,sim2$pi_gs,along=3)|>aperm(c(3,1:2))
 #'epsilon_iba=abind::abind(sim1$epsilon_ba,sim2$epsilon_ba,along=3)|>aperm(c(3,1:2))
 #'smc_logb_prime(n_vsa_lambda,tau_ivga,pi_igs,epsilon_iba)
@@ -126,7 +125,7 @@ smc_b_prime<-function(n_vsa_lambda,tau_ivga,pi_igs,epsilon_iba){
 #'           sim_tau_pi_epsilon_n(v=v, g=g, s=s, n=n, error_rate = .001, alpha_pi=alpha_pi))->sim
 #'n_vsa_df<-reorder_reads(sim_tau_pi_epsilon_n(v=v, g=g, s=s, n=n, error_rate = .001, alpha_pi=alpha_pi)$n_vsa)
 #'n_vsa_lambda=sub_sample_counts(n_vsa_df,lambda=.5)
-#'tau_ivga=plyr::llply(sim,'[[',"tau_vga")|>c(list(along=4))|>do.call(what=abind::abind)
+#'tau_ivga=plyr::llply(sim,'[[',"tau_vgb")|>c(list(along=4))|>do.call(what=abind::abind)
 #'pi_igs=plyr::llply(sim,'[[',"pi_gs")|>c(list(along=3))|>do.call(what=abind::abind)
 #'epsilon_iba=plyr::llply(sim,'[[',"epsilon_ba")|>c(list(along=3))|>do.call(what=abind::abind)
 #'smc_ess(n_vsa_lambda,tau_ivga,pi_igs,epsilon_iba)
@@ -145,7 +144,7 @@ smc_ess<-function(n_vsa_lambda,tau_ivga,pi_igs,epsilon_iba){
 #'           n_vsa=sim_tau_pi_epsilon_n(v=v, g=g, s=s, n=n, error_rate = .001, alpha_pi=alpha_pi)$n_vsa
 #'n_vsa_df<-reorder_reads(n_vsa)
 #'n_vsa_lambda=sub_sample_counts(n_vsa_df,lambda=.5)
-#'tau_ivga=plyr::llply(sim,'[[',"tau_vga")|>c(list(along=4))|>do.call(what=abind::abind)
+#'tau_ivga=plyr::llply(sim,'[[',"tau_vgb")|>c(list(along=4))|>do.call(what=abind::abind)
 #'pi_igs=plyr::llply(sim,'[[',"pi_gs")|>c(list(along=3))|>do.call(what=abind::abind)
 #'epsilon_iba=plyr::llply(sim,'[[',"epsilon_ba")|>c(list(along=3))|>do.call(what=abind::abind)
 #'ess_min=3
@@ -234,7 +233,7 @@ smc_new_setup<-function(ess_min,
 #'plyr::rlply(100,
 #'           sim_tau_pi_epsilon_n(v=v, g=g, s=s, n=n, error_rate = .001, alpha_pi=alpha_pi))->sim
 #'n_vsa=sim_tau_pi_epsilon_n(v=v, g=g, s=s, n=n, error_rate = .001, alpha_pi=alpha_pi)$n_vsa
-#'tau_ivga=plyr::llply(sim,'[[',"tau_vga")|>c(list(along=4))|>do.call(what=abind::abind)
+#'tau_ivga=plyr::llply(sim,'[[',"tau_vgb")|>c(list(along=4))|>do.call(what=abind::abind)
 #'pi_igs=plyr::llply(sim,'[[',"pi_gs")|>c(list(along=3))|>do.call(what=abind::abind)
 #'epsilon_iba=plyr::llply(sim,'[[',"epsilon_ba")|>c(list(along=3))|>do.call(what=abind::abind)
 #'ess_min=3
@@ -332,7 +331,7 @@ resample_array<-function(the_array,dimension=1,selection=1:(dim(the_array)[dimen
 #'i=100
 #'init=list(pi_igs=plyr::raply(i,sim$pi_gs),
 #'epsilon_iba=plyr::raply(i,sim$epsilon_ba),
-#'tau_ivga=plyr::raply(i,sim$tau_vga))
+#'tau_ivga=plyr::raply(i,sim$tau_vgb))
 #'n_vsa_df=reorder_counts(n_vsa = n_vsa,seed=seed)
 #'n_vsa_lambda=sub_sample_counts(n_vsa_df,lambda=.5)
 #'delta=1e-3
@@ -362,7 +361,7 @@ smc_sampler<-function(n_vsa,
                       t_max,
                       ess_min,
                       smc_kernel=desman_kernel,
-                      tildeepsilon=.1,
+                      bar_epsilon=.1,
                       shape_epsilon=c(1,1000),
                       alpha_pi=.1,
                       trace_all=TRUE,
@@ -377,7 +376,7 @@ smc_sampler<-function(n_vsa,
   s=dim(n_vsa)[2]
   new=if(is.null(init)){{
     epsilon_iba=rbeta(i,shape_epsilon[1],shape_epsilon[2])|>plyr::aaply(1,epsilon_ba_f)
-    tau_ivga <- plyr::raply(i,sim_tau_vga(v = v, g = g))
+    tau_ivga <- plyr::raply(i,sim_tau_vgb(v = v, g = g))
     pi_igs <- plyr::raply(i,sim_pi_gs(g = g, s = s, alpha_pi = alpha_pi))
     list(epsilon_iba=epsilon_iba,tau_ivga=tau_ivga,pi_igs=pi_igs)}}else{init}
   
@@ -411,7 +410,7 @@ smc_sampler<-function(n_vsa,
                                       epsilon_iba[i,,],
                                       rep_alpha_pi,
                                       delta)}))|>
-      (function(x){plyr::alply(c("tau_vga","pi_gs","epsilon_ba"),1,function(parameter){
+      (function(x){plyr::alply(c("tau_vgb","pi_gs","epsilon_ba"),1,function(parameter){
         plyr::laply(x,`[[`,parameter)})})()|>
       setNames(c("tau_ivga","pi_igs","epsilon_iba"))
     
@@ -446,7 +445,4 @@ smc_sampler<-function(n_vsa,
     
   }
   list(sample=new,traces=if(trace_all){traces}else{NULL})
-  
   }
-  
-  

@@ -15,20 +15,20 @@ library(tidyverse)
 
 ```{r,eval=TRUE,echo=TRUE}
 
-tau_vga_s=c("aaaaaa","aaaccc","cccaaa","cccttt","cccggg")|>
+tau_vgb_s=c("aaaaaa","aaaccc","cccaaa","cccttt","cccggg")|>
   translate_dna_string_vector_to_string_matrix()
-tau_vga=tau_vga_s|>
+tau_vgb=tau_vgb_s|>
   translate_dna_matrix_to_binary_array()
 
-tau_vga1_s=c("accaaa","caaggg","caaatt","caataa","accccc")|>
+tau_vgb1_s=c("accaaa","caaggg","caaatt","caataa","accccc")|>
   translate_dna_string_vector_to_string_matrix()
-tau_vga1=tau_vga1_s|>
+tau_vgb1=tau_vgb1_s|>
   translate_dna_matrix_to_binary_array()
 
 pi_gs<-matrix(c(.2,.3,.1,.1,.2),5,1)
 
-tau_vga_s
-tau_vga1_s
+tau_vgb_s
+tau_vgb1_s
 pi_gs
 
 
@@ -36,9 +36,9 @@ error_rate <- .0001
 epsilon_ba <- epsilon_ba_f(error_rate)
 
 
-n_vsa=sim_n_vsa(tau_vga=tau_vga,n = 10000,pi_gs = pi_gs,error_rate = error_rate)
+n_vsa=sim_n_vsa(tau_vgb=tau_vgb,n = 10000,pi_gs = pi_gs,error_rate = error_rate)
 drop(n_vsa)|> (function(x){dimnames(x)[[2]]<-nucleotides;x})()
-g=dim(tau_vga)[2]
+g=dim(tau_vgb)[2]
 s=1
 
 ```
@@ -46,12 +46,12 @@ What if we start from the dictionnary that was used to simulate the data ?
 We do not move:
 ```{r,eval=TRUE,echo=TRUE}
 
-plyr::raply(10,sampler_tau(tau_vga,pi_gs,epsilon_ba,n_vsa,
-                      v=dim(tau_vga)[1],
+plyr::raply(10,sampler_tau(tau_vgb,pi_gs,epsilon_ba,n_vsa,
+                      v=dim(tau_vgb)[1],
                       g=dim(pi_gs)[1],
                       g_neq_g=g_neq_g_f(g))|>unname()|>
               translate_dna_binary_array_to_string_vector())|>rbind(
-tau_vga|>
+tau_vgb|>
   translate_dna_binary_array_to_string_vector()|>unname())
 
 ```
@@ -62,12 +62,12 @@ We do not move either:
 ```{r,eval=TRUE,echo=TRUE}
 
 
-plyr::raply(10,sampler_tau(tau_vga1,pi_gs,epsilon_ba,n_vsa,
-                           v=dim(tau_vga)[1],
+plyr::raply(10,sampler_tau(tau_vgb1,pi_gs,epsilon_ba,n_vsa,
+                           v=dim(tau_vgb)[1],
                            g=dim(pi_gs)[1],
                            g_neq_g=g_neq_g_f(g))|>unname()|>
               translate_dna_binary_array_to_string_vector())|>rbind(
-                tau_vga1|>
+                tau_vgb1|>
                   translate_dna_binary_array_to_string_vector()|>unname())
   
   
@@ -80,7 +80,7 @@ Simpler simulation
 
 #################################################################################
 
-tau_vga=c("ac","ca")|>
+tau_vgb=c("ac","ca")|>
   translate_dna_string_vector_to_string_matrix()|>
   translate_dna_matrix_to_binary_array()
 
@@ -91,7 +91,7 @@ rdirichlet(c(100,100),1)
 
 #################################################################################
 
-tau_vga=c("aa","cc","ac","ca")|>
+tau_vgb=c("aa","cc","ac","ca")|>
   translate_dna_string_vector_to_string_matrix()|>
   translate_dna_matrix_to_binary_array()
 
@@ -101,9 +101,9 @@ pi_gs0<-matrix(c(.1,.1,.4,.4),4,1)
 
 
 alpha_g=.0001
-n_vsa=sim_n_vsa(tau_vga=tau_vga,n = 10000,pi_gs = pi_gs,error_rate = .0001)
+n_vsa=sim_n_vsa(tau_vgb=tau_vgb,n = 10000,pi_gs = pi_gs,error_rate = .0001)
 
-  xi_vsabg=sampler_xi(tau_vga=tau_vga,
+  xi_vsabg=sampler_xi(tau_vgb=tau_vgb,
                       pi_gs=pi_gs,
                       epsilon_ba = epsilon_ba)
   nu_vsab<-nu_from_xi(xi=xi_vsabg)
@@ -122,7 +122,7 @@ n_vsa=sim_n_vsa(tau_vga=tau_vga,n = 10000,pi_gs = pi_gs,error_rate = .0001)
 set.seed(1)
 tau_pi_n <- sim_tau_pi_epsilon_n(v = 6, g = 5, s = 3, n = 1000, alpha_pi = .1)
 
-tau_pi_n$tau_vga|> translate_dna_binary_array_to_string_vector()
+tau_pi_n$tau_vgb|> translate_dna_binary_array_to_string_vector()
 tau_pi_n$pi_gs
 tau_pi_n$n_vsa|>display_n_vsa()
 ```
@@ -143,20 +143,20 @@ summary_1<-function(tau_pi_n,mcmc_output){
 
 x=mcmc_output_array(mcmc_output,"pi","gs")[,1,1,1];iter=sort(c(1,5000,10000,  min(which(x==x[10000]))))
   
-tau_vga=tau_pi_n$tau_vga|>translate_dna_binary_array_to_string_vector()|>(`[`)(order(tau_pi_n$pi_gs[,1],decreasing=TRUE))
-tildeepsilon=tau_pi_n$epsilon_ba[2]*3
+tau_vgb=tau_pi_n$tau_vgb|>translate_dna_binary_array_to_string_vector()|>(`[`)(order(tau_pi_n$pi_gs[,1],decreasing=TRUE))
+bar_epsilon=tau_pi_n$epsilon_ba[2]*3
 pi_gs=tau_pi_n$pi_gs|>(`[`)(order(tau_pi_n$pi_gs[,1],decreasing=TRUE),)
 mcmc_pi=mcmc_output_array(mcmc_output,"pi","gs")[iter,,,1]
 the_order=mcmc_pi[,,1]|>plyr::aaply(1,order,decreasing=TRUE)
-mcmc_tildeepsilon=mcmc_output_array(mcmc_output,"tildeepsilon")[iter,2,1]
+mcmc_bar_epsilon=mcmc_output_array(mcmc_output,"bar_epsilon")[iter,2,1]
 mcmc_tau=mcmc_output_array(mcmc_output,"tau","vga")[iter,,,,1]|>plyr::aaply(1,translate_dna_binary_array_to_string_vector)
 for (i in 1:length(iter)){mcmc_tau[i,]=mcmc_tau[i,the_order[i,]]}
 for (i in 1:length(iter)){mcmc_pi[i,,]=mcmc_pi[i,the_order[i,],]}
 
 
-return(list(tau_vga=rbind(tau_vga,mcmc_tau),
+return(list(tau_vgb=rbind(tau_vgb,mcmc_tau),
             pi_gs=rbind(pi_gs[,1],mcmc_pi[,,1]),
-            tildeepsilon=c(tildeepsilon,mcmc_tildeepsilon)))}
+            bar_epsilon=c(bar_epsilon,mcmc_bar_epsilon)))}
 
 ```
 
@@ -166,7 +166,7 @@ return(list(tau_vga=rbind(tau_vga,mcmc_tau),
  mcmc_output=mcmc_desman_run(
    n_vsa = tau_pi_n$n_vsa,
    gs="jags",
-   tildeepsilon = .01,
+   bar_epsilon = .01,
    G = 5,
    n_chains = 2)
 
@@ -180,7 +180,7 @@ summary_1(tau_pi_n = tau_pi_n,mcmc_output = mcmc_output)
    n_vsa = tau_pi_n$n_vsa,
    gs="jags",
    block_tau=TRUE,
-   tildeepsilon = NA,
+   bar_epsilon = NA,
    G = 5,
    n_chains = 2)
 

@@ -4,19 +4,19 @@ Problem with tau sampler
 # Simulate data
 
 ``` r
-tau_vga_s=c("aaaaaa","aaaccc","cccaaa","cccttt","cccggg")|>
+tau_vgb_s=c("aaaaaa","aaaccc","cccaaa","cccttt","cccggg")|>
   translate_dna_string_vector_to_string_matrix()
-tau_vga=tau_vga_s|>
+tau_vgb=tau_vgb_s|>
   translate_dna_matrix_to_binary_array()
 
-tau_vga1_s=c("accaaa","caaggg","caaatt","caataa","accccc")|>
+tau_vgb1_s=c("accaaa","caaggg","caaatt","caataa","accccc")|>
   translate_dna_string_vector_to_string_matrix()
-tau_vga1=tau_vga1_s|>
+tau_vgb1=tau_vgb1_s|>
   translate_dna_matrix_to_binary_array()
 
 pi_gs<-matrix(c(.2,.3,.1,.1,.2),5,1)
 
-tau_vga_s
+tau_vgb_s
 ```
 
     ##    g
@@ -29,7 +29,7 @@ tau_vga_s
     ##   6 "a" "c" "a" "t" "g"
 
 ``` r
-tau_vga1_s
+tau_vgb1_s
 ```
 
     ##    g
@@ -57,7 +57,7 @@ error_rate <- .0001
 epsilon_ba <- epsilon_ba_f(error_rate)
 
 
-n_vsa=sim_n_vsa(tau_vga=tau_vga,n = 10000,pi_gs = pi_gs,error_rate = error_rate)
+n_vsa=sim_n_vsa(tau_vgb=tau_vgb,n = 10000,pi_gs = pi_gs,error_rate = error_rate)
 drop(n_vsa)|> (function(x){dimnames(x)[[2]]<-nucleotides;x})()
 ```
 
@@ -71,7 +71,7 @@ drop(n_vsa)|> (function(x){dimnames(x)[[2]]<-nucleotides;x})()
     ##   6 3268 3333 2253 1146
 
 ``` r
-g=dim(tau_vga)[2]
+g=dim(tau_vgb)[2]
 s=1
 ```
 
@@ -79,12 +79,12 @@ What if we start from the dictionnary that was used to simulate the data
 ? We do not move:
 
 ``` r
-plyr::raply(10,sampler_tau(tau_vga,pi_gs,epsilon_ba,n_vsa,
-                      v=dim(tau_vga)[1],
+plyr::raply(10,sampler_tau(tau_vgb,pi_gs,epsilon_ba,n_vsa,
+                      v=dim(tau_vgb)[1],
                       g=dim(pi_gs)[1],
                       g_neq_g=g_neq_g_f(g))|>unname()|>
               translate_dna_binary_array_to_string_vector())|>rbind(
-tau_vga|>
+tau_vgb|>
   translate_dna_binary_array_to_string_vector()|>unname())
 ```
 
@@ -105,12 +105,12 @@ What if we start from a dictionnary that was different from the one used
 to simulate the data ? We do not move either:
 
 ``` r
-plyr::raply(10,sampler_tau(tau_vga1,pi_gs,epsilon_ba,n_vsa,
-                           v=dim(tau_vga)[1],
+plyr::raply(10,sampler_tau(tau_vgb1,pi_gs,epsilon_ba,n_vsa,
+                           v=dim(tau_vgb)[1],
                            g=dim(pi_gs)[1],
                            g_neq_g=g_neq_g_f(g))|>unname()|>
               translate_dna_binary_array_to_string_vector())|>rbind(
-                tau_vga1|>
+                tau_vgb1|>
                   translate_dna_binary_array_to_string_vector()|>unname())
 ```
 
@@ -132,7 +132,7 @@ Simpler simulation
 ``` r
 #################################################################################
 
-tau_vga=c("ac","ca")|>
+tau_vgb=c("ac","ca")|>
   translate_dna_string_vector_to_string_matrix()|>
   translate_dna_matrix_to_binary_array()
 
@@ -146,7 +146,7 @@ rdirichlet(c(100,100),1)
 ``` r
 #################################################################################
 
-tau_vga=c("aa","cc","ac","ca")|>
+tau_vgb=c("aa","cc","ac","ca")|>
   translate_dna_string_vector_to_string_matrix()|>
   translate_dna_matrix_to_binary_array()
 
@@ -156,9 +156,9 @@ pi_gs0<-matrix(c(.1,.1,.4,.4),4,1)
 
 
 alpha_g=.0001
-n_vsa=sim_n_vsa(tau_vga=tau_vga,n = 10000,pi_gs = pi_gs,error_rate = .0001)
+n_vsa=sim_n_vsa(tau_vgb=tau_vgb,n = 10000,pi_gs = pi_gs,error_rate = .0001)
 
-  xi_vsabg=sampler_xi(tau_vga=tau_vga,
+  xi_vsabg=sampler_xi(tau_vgb=tau_vgb,
                       pi_gs=pi_gs,
                       epsilon_ba = epsilon_ba)
   nu_vsab<-nu_from_xi(xi=xi_vsabg)
@@ -172,7 +172,7 @@ n_vsa=sim_n_vsa(tau_vga=tau_vga,n = 10000,pi_gs = pi_gs,error_rate = .0001)
 set.seed(1)
 tau_pi_n <- sim_tau_pi_epsilon_n(v = 6, g = 5, s = 3, n = 1000, alpha_pi = 1)
 
-tau_pi_n$tau_vga|> translate_dna_binary_array_to_string_vector()
+tau_pi_n$tau_vgb|> translate_dna_binary_array_to_string_vector()
 ```
 
     ##        1        2        3        4        5 

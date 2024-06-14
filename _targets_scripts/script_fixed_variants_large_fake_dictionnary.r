@@ -21,7 +21,7 @@ options(clustermq.scheduler = "multicore")
 # Install packages {{future}}, {{future.callr}}, and {{future.batchtools}} to allow use_targets() to configure tar_make_future() options.
 
 # Run the R scripts in the R/ folder with your custom functions:
-"R"|>list.files(full.names = TRUE)|>sapply(FUN = source)
+"R"|>list.files(full.names = TRUE)|>sapply(FUN = source)->noprint
 desman_input_file<-"/work_projet/ala/metachick-fugace/Analyses_Ouléye/DESMAN_2023/DESMAN_iterAddPost/DESMAN_erm_F__3_M17808/freq2Desman.txt"
 
 
@@ -40,15 +40,15 @@ list(
   tar_target(name =ln_vsa,
     command = desman_input_file|>get_data_from_server()|>read_desman_input_files()),
   tar_target(
-    name=tau_vga,
+    name=tau_vgb,
     command =variants|>
       translate_dna_string_vector_to_string_matrix()|>
       translate_dna_matrix_to_binary_array()),
   tar_target(name = mcmc_output,
              command = mcmc_fixed_variants(ln_vsa[[1]][,1,,drop=FALSE],
-                                                       tau_vga,
-                                                       G=dim(tau_vga)[2]-1,
-                                             tildeepsilon=NA,
+                                                       tau_vgb,
+                                                       G=dim(tau_vgb)[2]-1,
+                                             bar_epsilon=NA,
                                                        error_rate = 0.001,
                                                        prior_std = 0.01,
                                                        n_chains=2,
@@ -58,9 +58,9 @@ list(
                                              adapt=500)),
   tar_target(name = mcmc_output_fixed_epsilon,
              command = mcmc_fixed_variants(ln_vsa[[1]][,1,,drop=FALSE],
-                                             tau_vga,
-                                             G=dim(tau_vga)[2]-1,
-                                             tildeepsilon=.0001,
+                                             tau_vgb,
+                                             G=dim(tau_vgb)[2]-1,
+                                             bar_epsilon=.0001,
                                              error_rate = 0.001,
                                              prior_std = 0.01,
                                              n_chains=2,

@@ -1,0 +1,1248 @@
+\documentclass{article}
+\usepackage{titlesec}
+\setcounter{secnumdepth}{4}
+\usepackage{color}
+\usepackage{stmaryrd}
+\usepackage[a4paper, margin=1cm,footskip=.5cm]{geometry}
+
+\usepackage{graphicx}
+\usepackage[textwidth=8em,textsize=small]{todonotes}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{float}
+\usepackage{natbib}
+\usepackage{blkarray}\usepackage{bbold}
+\usepackage{ulem} %To strike out things using \sout
+%\usepackage{econometrics} % for bold greek letters, e.g. \valpha instead of \alpha
+\usepackage{enumerate}
+\usepackage{xcolor}  % Coloured text etc.
+% 
+\usepackage{multirow}
+\usepackage{todonotes}
+\newcommand{\afaire}[1]{\todo[linecolor=red,backgroundcolor=orange!25,bordercolor=red]{#1}}
+\usepackage{stmaryrd}
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+\usepackage{nicematrix}
+\usepackage{fontawesome}
+
+\usepackage{rotating}
+
+\usepackage{collcell}
+\usepackage{colortbl,dcolumn}
+%\algblockx{Step}{EndStep}{\bf method}{}
+
+\algblockx{class}{endclass}{\bf class}{}
+
+\DeclareMathAlphabet{\mymathbb}{U}{BOONDOX-ds}{m}{n}
+
+
+\algnewcommand\algorithmicentry{\textbf{entries}}
+\algdef{SE}[FUNCTION]{Entries}{EndEntries}%
+   [1]{\algorithmicentry}%
+   {}%
+   
+\algnewcommand\algorithmicstep{\textbf{step}}
+\algdef{SE}[FUNCTION]{Step}{EndStep}%
+   [2]{\algorithmicstep\ \textproc{#1}\ifthenelse{\equal{#2}{}}{}{#2}}%
+   {}%
+   
+\usepackage{listings}
+\usepackage[hidelinks]{hyperref}
+%\usepackage{mathdb}
+\usepackage{dsfont}
+\usepackage{multirow}
+\usepackage{pifont}
+    \usetikzlibrary{positioning}
+    \usetikzlibrary{backgrounds}
+    \usetikzlibrary{arrows.meta}
+    \usepackage{caption}
+\usepackage{fontawesome}
+\usepackage{subcaption}
+
+\newcommand\shape\kappa
+
+\definecolor{light-gray}{gray}{0.95}
+
+\newcommand{\code}[1]{\colorbox{light-gray}{\texttt{#1}}}
+
+\newcommand\thevector[4]{
+\begin{tikzpicture}
+\clip (-0.09,-0.13) rectangle + (.47,.32);
+ \node [inner sep=0,outer sep=0,inner frame sep=0pt,tight background,draw=none] (first) at (0,0)  {$#1$};
+\node [inner sep=0,outer sep=0,inner frame sep=0pt,tight background,draw=none,scale=.8] (second) at (0.135,0.05) {$#2$};
+\node [inner sep=0,outer sep=0,inner frame sep=0pt,tight background,draw=none,scale=.64] (third) at (0.24,0.09) {$#3$};
+\node [inner sep=0,outer sep=0,inner frame sep=0pt,tight background,draw=none,scale=.512] (fourth) at (0.33,0.125) {$#4$};  
+\end{tikzpicture}
+}
+
+
+
+\renewcommand\thevector[4]{
+{#1}^{{#2}^{{#3}^{#4}}}
+}
+\newcommand\A{\thevector{\mathbf{1}}{0}{0}{0}}
+\newcommand\C{\thevector{0}{\mathbf{1}}{0}{0}}
+\newcommand\G{\thevector{0}{0}{\mathbf{1}}{0}}
+\newcommand\T{\thevector{0}{0}{0}{\mathbf{1}}}
+
+\newcommand\indexsum[1]{\mathbf{\bar{#1}}}
+\newcommand\indexvec[1]{\mathbf{#1}}
+
+%\algrenewcommand\algorithmicprocedure{\textbf{pseudocode}}
+%\algrenewcommand\algorithmicprocedure{\textbf{pseudocode}}
+\algdef{SE}[SUBALG]{Indent}{EndIndent}{}{\algorithmicend\ }%
+\algtext*{Indent}
+\algtext*{EndIndent}
+\algdef{SE}% flags used internally to indicate we're defining a new block statement
+[STRUCT]% new block type, not to be confused with loops or if-statements
+{Struct}% "\Struct{name}" will indicate the start of the struct declaration
+{EndStruct}% "\EndStruct" ends the block indent
+[1]% There is one argument, which is the name of the data structure
+{\textbf{struct} \textsc{#1}}% typesetting of the start of a struct
+{\textbf{end struct}}% typesetting the end of the struct
+%\usepackage{imakeidx}
+
+%\makeindex[intoc,title=Variables,options = -s index]
+%\indexsetup{%
+%  level=\subsection*,%
+%  toclevel=subsection,%
+%  noclearpage,
+%}
+
+%\makeindex[intoc,title=Parameters,name=parametersindex,options = -s index]
+%\indexsetup{%
+%  level=\subsection*,%
+%  toclevel=subsection,%
+%  noclearpage,
+%}
+%\usepackage[columns=1]{idxlayout}
+%\renewcommand\index[1]{
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
+%Custom specific commands
+
+\newcommand\countdetail{m}
+\title{A tempered Sequential Monte Carlo Method for estimating the number of variants in metagenomic samples}
+\author{Daniel Bonnéry$^*$ (Ensae?), 
+        Guillaume Kon Kam King (Inrae),\\
+        Anne-Laure Abraham (Inrae),
+		Ouleye Sidibe (Inrae),\\
+		Sebastien Leclercq (Inrae),
+        Nicolas Chopin (Crest-Ensae)        
+        }
+\date{}
+
+
+\begin{document}
+\maketitle
+
+
+
+
+\begin{abstract}
+
+
+
+Antibiotic-resistance genes in various bacteria are the focus of intense attention given the global concern around the rise of multi-resistant pathogens. These genes come in several variants, and the precise identification of variants in samples is very useful to track antibiotic-resistance gene propagation. We identify the variants of antibiotic resistance genes and their relative abundances using shotgun metagenomic data collected on multiple samples. We consider a probabilistic approach,  as it is essential to model DNA sequencing errors to distinguish actual variants from noise. We adapt ideas from the DESMAN software by Quince et al. (2017). The model is essentially a hierarchy of finite mixture submodels, which allows sharing of components (sharing of variants) among the different metagenomic samples. A challenge for efficient posterior sampling comes from the fact that the mixture components (which correspond to the variants' genome) take values on a large dimensional discrete space (of long nucleotide sequences), which is difficult to explore and thwarts standard Gibbs sampling or MCMC strategies by causing severe mixing issues. Drawing on recent advances in tempered Sequential Monte Carlo (Dau \&  Chopin 2022), we take advantage of natural tempering parameters in the mixture model to build efficient posterior sampling algorithms and leverage Sequential Monte Carlo estimates of marginal likelihoods to build a model choice framework for estimating the number of variants present in a collection of metagenomic samples.
+
+\vspace{1cm}
+
+\small{
+Dau, H. D., \& Chopin, N. (2022). Waste-free sequential monte carlo. Journal of the Royal Statistical Society Series B: Statistical Methodology, 84(1), 114-148.
+
+Quince, C., Delmont, T. O., Raguideau, S., Alneberg, J., Darling, A. E., Collins, G., \& Eren, A. M. (2017). DESMAN: a new tool for de novo extraction of strains from metagenomes. Genome biology, 18, 1-22.
+}
+
+\end{abstract}
+
+
+
+
+\section{Data}
+
+\subsection{Input data format described in appendix}
+
+
+\section{General statistical model}
+We use the notations as in \cite{quince2017desman}
+in blue: illustrative simulation
+\begin{enumerate}
+\item Haplotypes
+\begin{enumerate}
+    \item $G$ (unknown)\\ 
+     (number of haplotypes, $g$: index of the haplotypes):\\
+     $G\in \mathbb{N}\setminus\{0\}$ $G$ is to be estimated. To simplify inference, G is fixed to integer values from 1 to 15 and estimated via a model choice technique.\\
+    {\color{blue}$G = 5$}.
+    \item $V$ (known)\\
+     number of regions (positions), $v$: region index.\\
+    {\color{blue}$V = 94$}.
+        \item $a,b$ :\\
+         base (nucleotide), element of $\llbracket 1,4 \rrbracket$
+    \item $\tau_{v,g,\indexvec{b}}$ : (unknown)\\
+    value of the nucleotide for haplotype $g$ and position $v$\\
+Prior: $\tau\sim P^{\tau\mid V,G}\Leftrightarrow \forall v,g, \tau_{v,g,\indexvec{b}}\overset{i.i.d}{\sim}\mathrm{Uniform}(\{A,C,G,T\})$=$\mathrm{Uniform}(\{x\in\{0,1\}^4:\sum x_i=1\})$, with $A=(1,0,0,0)$, $C=(0,1,0,0)$ $G=(0,0,1,0)$ ,$T=(0,0,0,1)$ \\
+{\color{blue} We print the values of $\tau_{v,g}$ for $v\in \{1,\cdots,10\}$, $g\in\llbracket 1,G \rrbracket$:\\
+ 
+  $$\tau=\begin{blockarray}{ccccc}
+    g=1&g=2&\cdots&g=G&\\
+    \begin{block}{(cccc)c}
+ G&G&\cdots&G&v=1\\   
+ C&T&\cdots&T&v=2\\   
+ \vdots&\vdots&\ddots&\vdots&\vdots\\   
+ T&A&\cdots&T&v=V\\
+    \end{block}
+\end{blockarray} =    \begin{blockarray}{ccccc}
+    g=1&g=2&\cdots&g=G&\\
+    \begin{block}{(cccc)c}
+ \G&\G&\cdots&\G&v=1\\   
+ \C&\T&\cdots&\T&v=2\\   
+ \vdots&\vdots&\ddots&\vdots&\vdots\\   
+ \T&\A&\cdots&\T&v=V\\
+    \end{block}
+\end{blockarray} $$}
+\end{enumerate}
+    \item Metagenomic samples
+\begin{enumerate}
+    \item $S$ (known)\\
+    number of samples, $s$ index of the sample. \\
+    {\color{blue}$S=3$}
+ \item $\alpha_\pi\in\left(\mathbb{R}^+\right)$. hyperprior
+   
+    \item $\pi_{g,s}$: (unknown, and unknown first dimension)\\
+    proportion of haplotype $g$ in sample $s$ is a vector of {\bf relative abundances} of the $G$ haplotypes in sample $s$.\\
+$\pi_{\indexvec{g},s}\in\{x\in[0,1]^G:\sum x_i=1\}$. \\
+Prior: $\pi|
+    \alpha_\pi,S\sim P^{\pi|\alpha_\pi,S}\Leftrightarrow (\pi_{\indexvec{g},s})_{s=1}^S|
+    \alpha_\pi,S\overset{i.i.d}{\sim}\mathrm{Dirichlet}(\alpha_\pi\mathds{1}_G) $\\
+    {\color{blue}
+$\pi=\begin{blockarray}{cccc}
+    s=1&\cdots&s=S&\\
+    \begin{block}{(ccc)c}
+    1&0.25&0.1&g=1\\
+    0&0.25&0.5&\vdots\\
+    0&0.25&0.2&\vdots\\
+    0&0.25&0.1&\vdots\\
+    0&0&0.1&g=G\\
+    \end{block}
+\end{blockarray}$}
+    
+   
+   \end{enumerate}
+    \item Error
+    \begin{enumerate}
+    \item $\alpha_\epsilon\in\left(\mathbb{R}^+\right)$. $\alpha_\epsilon$ is a hyperprior.
+    \item $\epsilon_{b,a}$ :\\ probability that a base $a$ is observed when the true base is $b$.\\
+    In the model described in the paper, 
+    $\epsilon_{b,.}\mid\alpha_\epsilon,V,G,S,\pi,\tau\overset{i.i.d}{\sim}\mathrm{Dirichlet}(\alpha_\epsilon\mathds{1}_4)$ \\
+    $\epsilon=\begin{bmatrix}
+\epsilon_{1,1}&\cdots&\epsilon_{1,4}\\
+\vdots&&\vdots\\
+\epsilon_{4,1}&\cdots&\epsilon_{4,4}\\
+    \end{bmatrix}$\\
+    Initial values in the Desman program: $\epsilon=.96\times I_4~+~.04 \times (J_4-I_4)/3$.
+    \end{enumerate}
+    \item Counts
+
+    Let denote $\rho$ the array $\left(\rho_{v,g,a}\right)_{v\in\{1,\cdots,V\},g\in\{1,\cdots,G\},a\in\{1,\cdots,4\}}$, where
+$$\rho_{v,g,a}=\sum_{b\in\llbracket 1,4\rrbracket}\tau_{v,g,b}\epsilon_{b,a}$$
+
+and $\phi$ the array $\left(\phi_{v,s,a,g}\right)_{v\in\{1,\cdots,V\},s\in\{1,\cdots,S\},g\in\{1,\cdots,G\},a\in\{1,\cdots,4\}}$, where
+$$\phi_{v,s,a,g}=\rho_{v,g,a}\pi_{g,s}$$
+
+    \begin{enumerate}
+
+\item {\color{red} verifier que Desman a bien 0.4/3}
+    
+\item $n=(n_{v,s,a})_{v\in 1..V,s\in 1..S,a\in 1..4}$ (observed)\\
+\begin{eqnarray}\lefteqn{\mathcal{L}\left(n | \pi, \tau,\epsilon \right)}\nonumber\\& =& \prod_{v=1}^{V} \prod_{s = 1}^{S} (n_{v,s,\indexsum{a}})!\times\frac{\prod_{a = 1}^{4} \left( \sum_{g = 1}^{G}\sum_{b=1}^{4} \tau_{v,g,b}\epsilon_{b,a} \pi_{g,s}  \right)^{n_{v,s,a}}}{\prod_{a = 1}^{4}n_{v,s,a}!}\nonumber\\
+& =&\prod_{v=1}^{V} \prod_{s = 1}^{S} (n_{v,s,\indexsum{a}})!\times\frac{\prod_{a = 1}^{4} \left( \sum_{g = 1}^{G} \rho_{v,g,a} \pi_{g,s}  \right)^{n_{v,s,a}}}{\prod_{a = 1}^{4}n_{v,s,a}!}.\label{eq:likelihood}\end{eqnarray}
+
+    \item $n_{v,s,\indexsum{a}}=\sum_{a\in\llbracket 1,4\rrbracket} n_{v,s,a}$ (observed)\\
+    $n_{v,s,\indexsum{a}}|S,V, G,\pi,\epsilon$\\  
+    `number of trials'
+
+
+    
+    \item$n_{v,s,.}$  (observed) \\counts of bases $a$ at position $v$ observed in sample $s$ \\
+    $n_{v,s,.}\mid G,S,V,\tau,\pi,\epsilon,n_{v,s,\indexsum{a}}\overset{i.i.d}{\sim} \mathrm{Multinomial}\left(\sum_{g\in\llbracket 1,G\rrbracket} \rho_{v,g,.}\pi_{g,s},n_{v,s,\indexsum{a}}\right)$. 
+    \item The value $\nu_{v,s,a,b}$ (unobserved) corresponds to the number of nucleotides of type $b$ present at position $v$ in sample $s$ that were measured as $a$ and satisfies: $\forall v,s$ $\sum_{b\in\llbracket 1,4\rrbracket}\nu_{v,s,a,b}=n_{v,s,a}$. 
+    $(\nu_{v,s,a,.}) \mid n_{v,s,a} \sim \mathrm{Multinomial}\left(\left(\sum_{g\in\llbracket 1,G\rrbracket} \tau_{v,g,b} \pi_{g,s}\epsilon_{b,a}\right)_{b\in\llbracket 1,4\rrbracket},n_{v,s,a}\right).$
+    \item The value $\countdetail_{v,s,a,b,g}$ (unobserved) corresponds to the number of nucleotides of type $b$ present at position $v$ in sample $s$ coming from haplotype $g$ that were measured as $a$ and satisfies: $\forall v,s$ $\sum_{b\in\llbracket 1,4\rrbracket}\countdetail_{v,s,a,b,g}=\nu_{v,s,a,b}$. 
+    $\countdetail_{v,s,a,b,.} \mid \nu_{v,s,a,b} \sim \mathrm{Multinomial}\left(\left(\tau_{v,g,b} \pi_{g,s}\epsilon_{b,a}\right)_{g\in\llbracket 1,G\rrbracket},\nu_{v,s,a,b}\right).$
+    
+    \item The value $\mu_{v,s,a,g}$ corresponds to the real number of nucleotides  measured as nucleotides  of type $a$ present at position $v$ in sample $s$ coming from haplotype $g$ and satisfies: $\forall v,s,$  $\sum_{g\in\llbracket 1,G\rrbracket}\mu_{v,s,a,g}=n_{v,s,a}$. 
+    $\mu_{v,s,a,g}= \sum_{b\in\llbracket 1,4\rrbracket}\countdetail_{v,s,a,b,g}$
+
+\end{enumerate}
+\end{enumerate}
+
+
+
+
+
+
+\section{The Desman algorithm}
+Retranscription de \url{desman_fugace/desman/haploSNP_Sampler.py}
+\begin{algorithm}[H]
+\caption{$\tau$ Sampler \hfill{\code{sampleTau}}}\label{alg:desman_tau}
+\begin{algorithmic}
+%\Struct{}
+\Procedure{$\mathrm{sample}_\tau$}{$\tau,\pi,\epsilon,n$}
+\State $\tau^\star\gets\tau$
+  \For {$v=1..V$}{} 
+  \For {$g=1..G$}{} 
+    \State   $(lp_b)_{b\in\llbracket 1,4\rrbracket}=  \left(\sum_{s,b'}      \log\left(\pi_{g,s}\epsilon_{b,a}+\sum_{g'\neq g,b}\tau^\star_{v,g',b'}\pi_{g',s}\epsilon_{b',a}\right)\times n_{v,s,a}\right)_{b\in\llbracket 1,4\rrbracket}$
+    \State Draw $\tau^\star_{v,g,\indexvec{b}}$ in $\{A,C,G,T\}$ with probabilities proportional to $(\exp(lp_b))_{b\in\llbracket 1,4\rrbracket}$.
+ \EndFor
+ \EndFor
+\State Return $\tau^\star$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+Comments: the $\tau$ sampler draws independently position by position.
+When sampling for one position, the tau sampler recursively and non independently draws, for each haplotype, the nucleotide at that position haplotype by haplotype.
+
+The $\tau$ sampler samples independently.\\
+Example: for $v=3$, $\tau_{3,\indexvec{g},\indexvec{b}}=\begin{blockarray}{cccc}
+\tau_{3,g,1}&\cdots&\cdots&\tau_{3,g,4}\\
+    \begin{block}{(cccc)}
+    0&0&0&1\\
+    0&1&0&0\\
+    \vdots&\vdots&\vdots&\vdots\\
+    0&1&0&0\\
+    \end{block}\end{blockarray}=
+    \begin{blockarray}{cc}
+    \tau_{3,g,\indexvec{b}}&\\
+    \begin{block}{(c)c}
+    T&g=1\\
+    C&\vdots\\
+    \vdots&\vdots\\
+    C&g=G\\
+    \end{block}\end{blockarray}$
+
+For $g=1$,
+$\tau_{3,1,\indexvec{b}}=C=\begin{blockarray}{cccc}
+\tau_{3,1,1}&\cdots&\cdots&\tau_{3,1,4}\\
+    \begin{block}{(cccc)}
+    0&0&0&1\\
+    \end{block}
+    \end{blockarray}$
+
+
+
+\begin{algorithm}[H]
+\caption{$(\nu,\mu)$ Sampler }\label{alg:desman_tau}
+\begin{algorithmic}
+%\Struct{}
+\Procedure{$\mathrm{sample}_{\nu,\mu,\countdetail}$}{$n,\Theta=(\tau,\pi,\epsilon)$}\hfill\code{sampleMu}
+\State $(G,S)\gets\mathrm{dimension}(\pi)$; $(V,G)\gets\mathrm{dimension}(\tau) $
+\For {$v\in\llbracket 1,V \rrbracket$, $g\in\llbracket 1,G \rrbracket$, $s\in\llbracket 1,S \rrbracket$, $a,b,\in\llbracket 1,4\rrbracket$},
+\State $\chi_{v,s,a,b,g}\gets\tau_{v,g,b}\times\pi_{g,s}\times \epsilon_{b,a}${\hfill \code{tau\_gamma\_eta}}
+% \State $M_{v,s,a,b,\indexsum{g}}\gets\sum_{g\in\llbracket 1,G\rrbracket}M_{v,s,a,b,g}${\hfill \code{tau\_gamma\_eta\_gsum}}
+\EndFor
+\For {$v=1..V$}{} 
+    \For {$s=1..S$}{} 
+        % \State $M_{v,s,a,\indexsum{b},\indexsum{g}}=\sum_{b\in\llbracket 1,4\rrbracket} M_{v,s,a,b,\indexsum{g}}${\hfill\code{trans\_matrix}}
+        \For {$a=1..4$}{} 
+            \State Draw $\nu_{v,s,a,\indexvec{b}}$ from $\mathrm{Multinomial}(n_{v,s,a},\chi_{v,s,a,\indexvec{b},\indexsum{g}}/\chi_{v,s,a,\indexsum{b},\indexsum{g}})$
+             \hfill\code{E[v,s,a,:]}
+            \State{$\mu_{v,s,a,\indexvec{g}}\gets\mathbb{0}_G$}
+            \For {$b=1..4$}
+                \State Draw $\countdetail_{v,s,a,b,\indexvec{g}}$ from $\mathrm{Multinomial}(\nu_{v,s,a,b},\chi_{v,s,a,b,\indexvec{g}}/\chi_{v,s,a,b,\indexsum{g}})$ 
+                \State $\mu_{v,s,a,\indexvec{g}}\gets \mu_{v,s,a,\indexvec{g}}+\countdetail_{v,s,a,b,\indexvec{g}}$\hfill\code{mu[v,s,a,:]}
+            \EndFor    
+        \EndFor
+    \EndFor
+\EndFor
+\State Return $(\nu,\mu)$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+
+
+Let $e$ be the numerical precision.
+
+\begin{algorithm}[H]
+\caption{$\pi$ Sampler }\label{alg:desman_tau}
+\begin{algorithmic}
+%\Struct{}
+\Procedure{$\mathrm{sample}_\pi$}{$\mu;\alpha_\pi,e$}\hfill\code{sampleGamma}
+    \For {$s=1..S$}{} 
+        \State Draw $\pi_{\indexvec{g},s}$ from
+        $\mathrm{Dirichlet}(\alpha_\pi\mathds{1}_G+\mu_{+,s,\indexsum{a},\indexvec{g}})$
+    \EndFor
+    \For {$s=1..S$, $g=1..G$} 
+\State $\pi_{g,s}\gets\max(e,\pi_{g,s})$
+    \EndFor
+    \For {$s=1..S$} 
+\State $\pi_{\indexvec{g},s}\gets\pi_{\indexvec{g},s}/\pi_{+,s}$
+    \EndFor
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+
+\begin{algorithm}[H]
+\caption{$\epsilon$ Sampler }\label{alg:desman_tau}
+\begin{algorithmic}
+%\Struct{}
+\Procedure{$\mathrm{sample}_\epsilon$}{$\nu;\delta$}\hfill\code{sampleEta}
+    \For {$b=1..4$}{} 
+        \State Draw $\epsilon^\star_{b,\indexvec{a}}$
+        from $\mathrm{Dirichlet}\left(\alpha_\epsilon\mathds{1}_4+\nu_{+,\indexsum{s},\indexvec{a},b}\right)$
+    \EndFor
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+
+
+\begin{algorithm}[H]
+\caption{MCMC kernel }\label{alg:mcmck}
+\begin{algorithmic}
+\Procedure{$M$}{$n,\Theta=(\tau,\pi,\epsilon);\alpha_\pi,\alpha_\epsilon,e$}
+    % \State Compute $\ell\left(n,\gamma^{(i-1)},\tau^{(i-1)},\epsilon^{(i-1)}\right)$\hfill\code{self.ll}
+    % \State Compute $\ell p\left(n,\gamma^{(i-1)},\tau^{(i-1)},\epsilon^{(i-1)}\right)$\hfill\code{self.lp}
+\State $(\nu,\mu)\gets{\mathrm{sample}_{(\nu,\mu)}(n,\Theta)}$
+\State $\pi\gets\mathrm{sample}_\pi(\mu;\alpha_\pi,e)$
+\State{$\tau\gets\mathrm{sample}_\tau(n,\tau,\pi,\epsilon)$}{} 
+\State{$\epsilon\gets\mathrm{sample}_\epsilon(\nu;\alpha_\epsilon)$}{} 
+\State Return $\left(\tau,\pi,\epsilon\right)$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+
+
+
+
+
+
+
+
+
+
+\begin{algorithm}[H]
+\caption{Haplotype SNP Sampler }\label{alg:haploSNP}
+\begin{algorithmic}
+
+
+
+
+\Procedure{Gibbs}{$n,\alpha_\pi,\alpha_\epsilon,G,I$}\hfill\code{HaploSNP\_Sampler}
+\Entries{}
+\State $n\in\mathbb{N}^{V\times S\times 4}$, with:\hfill\code{self.variants,snps}
+\Indent
+\State $S\in\mathbb{N}\setminus\{0\}$ \hfill\code{self.S,snps.shape[0]}
+\State $V\in\mathbb{N}\setminus\{0\}$ \hfill\code{self.V,snps.shape[1]}
+\EndIndent
+\State $G\in\mathbb{N}\setminus\{0\}$ \hfill\code{G}
+\State $\alpha_\pi\in\mathbb{R}^+$   \hfill\code{alpha\_constant}
+\State  $\alpha_\epsilon\in\mathbb{R^+}$ (default 0.1) \hfill\code{delta\_constant}
+\State $e$ (default $10^{-6}$) \hfill\code{epsilon}
+\State $I\in\mathbb{N}\setminus\{0\}$ (default 250)\hfill\code{max\_iter} 
+
+\EndEntries
+
+
+\Step{Initialisation}{\hfill\code{ \_\_init\_\_}}
+\State Initial values for unobserved variables
+\Indent
+\State Generate $\pi\mid\alpha_\pi=\alpha_\pi,S=S$  \hfill \code{self.gamma}
+\State Generate $\tau\mid V=V,G=G$ \hfill \code{self.tau}
+\State Compute $\epsilon=.96\times I_4~+~.001 \times (J_4-I_4)/3$ \hfill\code{self.eta}
+\State $\Theta^{(0)}\gets (\tau,\pi,\epsilon)$
+\EndIndent
+\EndStep
+\Step{Gibbs MCMC}{\hfill\code{update}}
+\For {$i=1$ to $I$}
+\State{$\Theta^{(i)}\gets M(n,(\Theta^{(i-1)};\alpha,\delta,S,G,V,I)$}
+    
+
+\EndFor    
+\EndStep
+Return $\left(\tau^{(i)},\pi^{(i)},\epsilon^{(i)},\mu^{(i)},E^{(i)},e^{(i)}\right)_{i\in\llbracket 1,I\rrbracket}$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\section{Diagnostics}
+The problem encountered with the algorithm is that at some point in the Gibbs iterations, the procedure $\mathrm{sample}_{\tau}$ almost always returns an unchanged value of $\tau$.
+
+
+\subsection{Problems when sampling the variable $\tau$}
+Assume the following counts are observed probability distribution
+$$n_{\indexvec{v},s=1,\indexvec{a}}=\begin{blockarray}{ccccc}
+    a=A&a=C&a=G&a=T&\\
+    \begin{block}{(cccc)c}
+    50&50&0&0&v=1\\
+    50&50&0&0&v=2\\
+    \end{block}
+\end{blockarray}$$
+If we run Desman with $G=2$, and assume that at iteration $i$, we get 
+$$\tau^{(i)}=\begin{blockarray}{ccc}
+    g=1&g=2&\\
+    \begin{block}{(cc)c}
+    A&C&v=1\\
+    A&C&v=2\\
+    \end{block}
+\end{blockarray}$$ and 
+
+$$\pi^{(i)}=\begin{blockarray}{ccc}
+    g=1&g=2&\\
+    \begin{block}{(cc)c}
+    0.4&0.6&s=1\\
+    \end{block}
+\end{blockarray}$$.
+
+In the next step of the MCMc algorithm, the variable $\tau^{(i+1)}_{1,1,\indexvec{b}}$ is drawn in $\{A,C,G,T\}$ with probabilities
+$(1,0,0,0)$. E.g it remains unchanged with probability one, and the former is true for any element of the array $\tau$. Thus, the algorithm will not update $\tau$, although the posterior distribution is $$0.5~\mathrm{Dirac}\left(\begin{pmatrix}
+    A&C\\
+    A&C\\
+    \end{pmatrix}\right)+0.5~\mathrm{Dirac}\left(\begin{pmatrix}
+    A&C\\
+    C&A\\
+    \end{pmatrix}\right),$$  when imposing that  $\tau$ is lexicographically ordered.
+
+It is important to sample not position and variant by position and variant, but position by position, all variants at once, as the $\tau^{(i+1)}_{v,g,\indexvec{b}}$ is highly correlated to $\tau^{(i+1)}_{v,g',\indexvec{b}}$ conditionally on $n$.
+
+\subsection{Problems when sampling the variable $\pi$}
+The sampling of the variable $\pi$ conditionally on $\tau=\tau^{(i)}$ is not problematic when $\tau$ is a likely value of the parameter.
+When $\tau$
+Assume the following counts are observed 
+$$n_{\indexvec{v},s=1,\indexvec{a}}=\begin{blockarray}{ccccc}
+    a=A&a=C&a=G&a=T&\\
+    \begin{block}{(cccc)c}
+    60&40&0&0&v=1\\
+    40&60&0&0&v=2\\
+    \end{block}
+\end{blockarray}$$
+
+Observations clearly indicate that a likely value for $\tau$ and $\pi$ are :
+$$\tau=\begin{blockarray}{ccc}
+    g=1&g=2&\\
+    \begin{block}{(cc)c}
+    A&C&v=1\\
+    C&A&v=2\\
+    \end{block}
+\end{blockarray},$$ 
+and $$\pi=\begin{blockarray}{ccc}
+    g=1&g=2&\\
+    \begin{block}{(cc)c}
+    0.6&0.4&s=1\\
+    \end{block}
+\end{blockarray}$$.
+and the posterior distribution of $(\tau,\pi)$ should be concentrated around these values.
+
+If we run Desman with $G=2$, and assume that at iteration $i$, we get 
+$$\tau^{(i)}=\begin{blockarray}{ccc}
+    g=1&g=2&\\
+    \begin{block}{(cc)c}
+    A&C&v=1\\
+    A&C&v=2\\
+    \end{block}
+\end{blockarray}$$ and 
+
+$$\pi^{(i)}=\begin{blockarray}{ccc}
+    g=1&g=2&\\
+    \begin{block}{(cc)c}
+    0.5&0.5&s=1\\
+    \end{block}
+\end{blockarray}$$.
+    
+In the next step of the MCMc algorithm, the variable $\pi^{(i+1)}_{\indexvec{g},s=1}$ according to a distribution that is approximately a Dirichlet distribution of parameters $(\alpha_\pi+100,\alpha_\pi+100)$. 
+The variance of such distribution for such a setup is small (around $10^{-3}$ and if the empirical distribution of $\pi^{(i)}_{1,s=1}$ is used to approximate the posterior distribution of $\pi_{1,s=1}$, then it can provide the illusion that a good confidence can be put in the estimated posterior mean.
+
+
+\section{Proposed alternative models and algorithms}
+
+\subsection{Initialisation }
+
+\subsection{Model change 1 }
+We propose the following changes to the model:
+\begin{enumerate}
+    \item Set $\alpha_\epsilon=(1,1000)$ (hyper parameter)
+\item Define an additional variable $\tilde\epsilon$, characterised by its conditional distribution: $\tilde\epsilon\mid V,G,S,\pi,\tau,\alpha_\epsilon\sim \mathrm{beta}(\alpha_\epsilon)$.
+\item Then make the variable $\epsilon$  a function of $\tilde\epsilon$: $\epsilon=\tilde\epsilon/3 (J_4-I_4)+(1-\tilde\epsilon) I_4$.
+\end{enumerate}
+Those changes imply that the distribution of $\tilde\epsilon$ conditional on $\nu$ is a Dirichlet distribution, we then replace the $\epsilon$ sampler accordingly:
+
+
+\begin{algorithm}[H]
+\caption{Modified $\epsilon$ Sampler }\label{alg:desman_tau}
+\begin{algorithmic}
+%\Struct{}
+\Procedure{$\mathrm{sample}^\star_{\epsilon}$}{$\nu;\alpha_\epsilon$}
+        \State Draw $\tilde\epsilon$
+        from $\mathrm{Beta}\left(\alpha_\epsilon+
+        \left(\sum_{a\neq b}\nu_{+,\indexsum{s},a,b},\sum_{a\in\llbracket 1,4\rrbracket}\nu_{+,\indexsum{s},a,a}\right)\right)$
+        \State $\epsilon\gets \tilde\epsilon/3~ (J_4-I_4)+(1-\tilde\epsilon)~ I_4$
+\State \Return $\epsilon$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\caption{Block $\tau$ Sampler }\label{alg:desman_tau}
+\begin{algorithmic}
+%\Struct{}
+\Procedure{$\mathrm{sample}^\star_\tau$}{$\tau,\pi,\epsilon,n$}
+\State $\tau^\star\gets\tau$
+  \For {$v=1..V$}{}\ 
+  \For {$t\in\{A,C,G,T\}^G$}{}{} 
+    \State   $lp_t=  \sum_{s}      \log\left(\sum_{b\in\llbracket 1,4\rrbracket,g\in\llbracket 1,G\rrbracket}\pi_{g,s}t_{g,b}\epsilon_{b,a}\right)\times n_{v,s,a}$
+ \EndFor
+    
+    \State Draw $\tau^\star_{v,\indexvec{g},\indexvec{a}}$ in $\{A,C,G,T\}^G$ with probabilities proportional to $\left(\exp(lp_t)\right)_{t\in\{A,C,G,T\}^G}$.
+ \EndFor
+\State Return $\tau^\star$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+In practice, this can be achieved by using the block statement in jags.
+The following table provides the powers of $4$:
+\begin{table}[H]
+\centering
+\begin{tabular}{lr}
+  \hline
+$4^{1}$&$4$\\$4^{2}$&$16$\\$4^{3}$&$64$\\$4^{4}$&$256$\\$4^{5}$&$1~024$\\$4^{10}$&$1~048~576$\\$4^{15}$&$1~073~741~824$\\$4^{20}$&$1~099~511~627~776$\\   \hline
+\end{tabular}
+\end{table}
+For large values of $G$ the computations are quickly intractable.
+\begin{algorithm}[H]
+\caption{MCMC kernel for Model 1}\label{alg:mcmck}
+\begin{algorithmic}
+\Procedure{$M^\star$}{$n,\Theta=(\tau,\pi,\epsilon);\alpha,\delta,S,G,V,e$}
+\State $(\nu,\mu)\gets{\mathrm{sample}_{(\nu,\mu)}(n,\Theta)}$
+\State $\pi\gets\mathrm{sample}_\pi(\mu;\alpha,e)$
+\State{$\tau\gets\mathrm{sample}_\tau(n,\tau,\pi,\epsilon)$}{} 
+\State{$\epsilon\gets\mathrm{sample}^\star_\epsilon(\nu;\delta)$}{} 
+\State Return $\left(\tau,\pi,\epsilon\right)$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+
+\subsection{Model change 2: Use of a dictionnary}
+
+\subsection{Model change 3: relaxation 1}
+\subsubsection{Dilution of the error and dictionnary parameters}
+
+The difficulty of block sampling $\tau_{v,\indexvec{g},\indexvec{b}}$ for large values of $G$ can be overcome by noticing that the likelihood just depend on $\tau,\epsilon$ via
+$\rho$. We propose to put a Dirichlet prior directly on $\rho$ that will not match exactly the prior on $\rho$ of the original model. More precisely, the constraint of $\rho_{v,g,\indexvec{a}}$ being of the form $(1-\tilde\epsilon)~a~+~ \frac{\tilde\epsilon}3~(\mathds{1}-a)$ for a in $\{A,C,G,T\}$ is loosened. Choosing small values for the shape of the Dirichlet distribution will ensure that the distribution of $\rho$ will be concentrated around the points of the form $(1-\tilde\epsilon)~a~+~ \frac{\tilde\epsilon}3~(\mathds{1}-a)$.
+\begin{enumerate}[1.]
+    \item Haplotypes
+    \begin{enumerate}
+    \item[(a-c)] unchanged
+    \item[(d)] ${\shape}_{\rho}=(1,100)$
+    \item[(e)] $\alpha_{\rho}\sim\mathrm{beta}\left({\shape}_{\rho}\right)$
+    \item[(f)] $$\left(\rho_{v,g,\indexvec{a}}\right)_{v\in\{1,\cdots,V\},g\in\{1,\cdots,G\}}|\alpha_{\rho}\overset{i.i.d }{\sim}\mathrm{Dirichlet}(\alpha_{\rho}\mathds{1}_4)$$
+    \item[(g)] 
+    $\tau_{v,g,\indexvec{b}}=\arg\max\{ <\rho_{v,g,a}|a>:(a\in\{A,C,G,T\}\}$
+
+    \end{enumerate}
+    \item Metagenomic samples (unchanged)
+    \item Error : removed
+    \item Counts
+    \begin{enumerate}
+
+\item[(a-c)] unchanged
+    \item [(d-f)] (ignored)
+     \item[(g)] The value $\mu_{v,s,a,g}$ satisfies: $\forall v,s,$  $\sum_{g\in\llbracket 1,G\rrbracket}\mu_{v,s,a,g}=n_{v,s,a}$ and
+    $$\forall v,s,a : \mu_{v,s,a,\indexvec{g}} \mid n_{v,s,a},\pi, \rho \sim \mathrm{Multinomial}\left(\left(\rho_{v,g,a}*\pi_{g,s}\right)_{g\in\llbracket 1,G\rrbracket},n_{v,s,a}\right).$$
+%\item[(h)]     $\epsilon_{v,b,c}=\rho_{v,g,a}$ if $\tau_{v,g,b}=1$, and $a=c$, 
+    
+
+\end{enumerate}
+\end{enumerate}
+
+\subsection{Model change 4: relaxation 2 use of $\alpha_\tau$ as a tempering coefficient}
+Here we keep both epsilon and $\tau$ in the model, but allow $\tau$ to take values between $0$ and $1$. $\tau_{v,g,\indexvec{b}}\sim \mathrm{Dirichlet}(\alpha_\tau\mathds{1}_4)$, with $\alpha_\tau$ chosen very small. This parameter is used as a tempering parameter in the SMC section.
+
+\begin{enumerate}[1.]
+    \item Haplotypes
+    \begin{enumerate}
+    \item[(a-c)] unchanged
+    \item[(d)] $\alpha_\epsilon=(1,100)$
+    \item[(e)] $\alpha_{\tau}$ is a hyper parameter.
+    \item[(f)] $$\left(\tau_{v,g,\indexvec{b}}\right)_{v\in\{1,\cdots,V\},g\in\{1,\cdots,G\}}|\alpha_{\tau}\overset{i.i.d }{\sim}\mathrm{Dirichlet}(\alpha_{\tau}\mathds{1}_4)$$
+    
+    \end{enumerate}
+    \item Metagenomic samples (unchanged)
+    \item Error : unchanged
+    \item Counts
+    \begin{enumerate}
+
+\item[(a-c)] unchanged
+    \item [(d-f)] (ignored)
+     \item[(g)] The value $\mu_{v,s,a,g}$ satisfies: $\forall v,s,$  $\sum_{g\in\llbracket 1,G\rrbracket}\mu_{v,s,a,g}=n_{v,s,a}$ and
+    $$\forall v,s,a : \mu_{v,s,a,\indexvec{g}} \mid n_{v,s,a},\pi, \rho \sim \mathrm{Multinomial}\left(\left(\rho_{v,g,a}*\pi_{g,s}\right)_{g\in\llbracket 1,G\rrbracket},n_{v,s,a}\right).$$
+%\item[(h)]     $\epsilon_{v,b,c}=\rho_{v,g,a}$ if $\tau_{v,g,b}=1$, and $a=c$, 
+    
+
+\end{enumerate}
+
+
+
+
+\end{enumerate}
+
+
+\subsection{Summary of all models}
+
+%\begin{sidewaystable}[htpb!]
+\begin{table}[H]
+\caption{Model specifications }
+\tiny
+\begin{NiceTabular}{X[1]X[5]X[5]X[5]X[14]X[5]X[14]}[hvlines]
+&Variable&\Block{1-5}{Models}\\
+   && \cellcolor{blue!10}Model 1 Desman &\cellcolor{green!10} Model 2 Block Sampling &\cellcolor{orange!10} Model 5 Tempering& \cellcolor{yellow!20}Model 3 Fixed variants & \cellcolor{red!10}Model 4 Relaxation  \\
+$\star$&$G$&\Block[fill=blue!10]{1-5}{$\mathrm{Dirac}(G^\star)$}\\
+\faEye&$V,~S,~n_{\indexvec{v},\indexvec{s},\indexsum{a}} $&\Block[fill=blue!10]{1-5}{observed, exogenous}\\
+$\star$&$\alpha_\tau$&\Block{1-2}-&&\cellcolor{orange!10}{fixed}&\Block{1-2}-&\\
+$\star$/&$\tau\mid\alpha_\tau$&\Block[fill=blue!10]{1-2}{$\tau_{v,g,\indexvec{b}}\sim \mathrm{Uniform}(\{A,C,G,T\})$} && \cellcolor{orange!10}{$\forall v,g,~\tau_{v,g,\indexvec{b}}\overset{\text{iid}}\sim$ $\mathrm{Dirichlet}(\alpha_\tau\mathds{1}_4)$}& \cellcolor{yellow!20}{$\mathrm{Dirac}_{\tau^\star}$} & -\\
+$\star$&$\alpha_\epsilon$&\cellcolor{blue!10}{$\mathrm{Dirac}(0.1 \mathds{1}_4)$}&\Block[fill=green!10]{1-3}{$\mathrm{Dirac}(\alpha_\epsilon^\star)$}&&&-\\\hline
+&$\tilde\epsilon\mid\alpha_\epsilon$&-&\Block[fill=green!10]{1-3}{$\mathrm{Beta}(\alpha_\epsilon)$}&&&-\\\hline
+&$\epsilon\mid\alpha_\epsilon,{\alpha}_\epsilon$&\cellcolor{blue!10}{$\forall b, \epsilon_{b,\indexvec{a}}\sim$ $\mathrm{Dirichlet}(\alpha_\epsilon)$}&\Block[fill=green!10]{1-3}{$\mathrm{Dirac}\left(\tilde\epsilon/3 (J_4-I_4)+(1-\tilde\epsilon) I_4\right)$}&&&-\\\hline
+$\star$&${\shape}_\rho$&\Block{1-4}-&&&&$\cellcolor{red!10}{\mathrm{Dirac}({\shape}_\rho^\star)}$\\\hline
+&$\alpha_\rho$&\Block{1-4}-&&&&$\cellcolor{red!10}{\mathrm{Gamma}({\shape}_\rho)}$\\\hline
+&$\rho\mid \alpha_\rho$&\Block[fill=blue!10]{1-4}{$\mathrm{Dirac}\left(\left(\sum_{b\in\llbracket 1,4\rrbracket}\epsilon_{b,a}\tau_{v,g,b}\right)_{a\in\llbracket 1,4\rrbracket}\right)$}&&&&\cellcolor{red!10}{$\forall v,g,~\rho_{v,g,\indexvec{a}}\sim$ $\mathrm{Dirichlet}(\alpha_\rho\mathds{1}_4)$}\\\hline
+$\star$&${\shape}_\pi$&-&\Block[fill=green!10]{1-4}{$\mathrm{Dirac}(\shape_\pi^\star)$}&&&\\\hline
+&$\alpha_\pi$&\cellcolor{blue!10}{$\mathrm{Dirac}(\alpha_\pi^\star)$}&\Block[fill=green!10]{1-4}{$\mathrm{Beta}({\shape}_\pi)$}&&&\\\hline
+&$\pi$&\Block[fill=blue!10]{1-5}{$\forall g,~ \pi_{\indexvec{g},s}\sim $ $\mathrm{Dirichlet}(\alpha_\pi \mathds{1}_G)$}&&&&\\\hline
+&$\chi\mid\pi,\epsilon,\tau$&\Block[fill=blue!10]{1-4}{$\forall v,s,a,b,g~ \chi_{v,s,a,b,g}\sim $ $\mathrm{Dirac}(\rho_{v,g,a}\pi_{g,s}\epsilon_{b,a})$}&&&&-\\\hline
+&$\chi_{\indexvec{v},\indexvec{s},\indexvec{a},\indexsum{b},\indexvec{g}}\mid\rho,\pi$&\Block{1-4}{}&&&&\cellcolor{red!10}{$\forall v,s,a,g$ $ \chi_{v,s,a,\indexsum{b},g}\sim $ $\mathrm{Dirac}(\rho_{v,g,a}\pi_{g,s})$}\\\hline
+&$\countdetail\mid n,\chi$&\Block[fill=blue!10]{1-4}{$\forall v,s, a,~\countdetail_{v,s,a,\indexvec{b},\indexvec{g}}\sim \mathrm{Multinomial}\left(n_{v,s,a},\chi_{v,s,a,\indexvec{b},\indexvec{g}}\right)$ }&&&&-\\\hline
+&$\countdetail_{\indexvec{v},\indexvec{s},\indexvec{a},\indexsum{b},\indexvec{g}}\mid n,\chi$&\Block{1-4}{}&&&&\cellcolor{red!10}{$\forall v,s, \countdetail_{v,s,a,\indexsum{b},\indexvec{g}}\sim $ $\mathrm{Multinomial}$ $\left(n_{v,s,a},\chi_{v,s,a,\indexsum{b},\indexvec{g}}\right)$ }\\\hline
+\faEye&$n\mid \countdetail$&\Block[fill=blue!10]{1-5}{$ \mathrm{Dirac}\left(\countdetail_{v,s,a,\indexsum{b},\indexsum{g}}\right)$ }
+
+\end{NiceTabular}
+\end{table}
+
+
+\subsection{Summary of custom kernels}
+
+
+\begin{table}[H]
+\tiny
+\caption{Samplers}
+\begin{NiceTabular}{X[1]X[5]X[5]X[5]X[14]X[5]X[14]}[hvlines]
+&Variable&\Block{1-5}{Models}\\
+   && \cellcolor{blue!10}Model 1 Desman &\cellcolor{green!10} Model 2 Block Sampling &\cellcolor{orange!10} Model 5 Tempering& \cellcolor{yellow!20}Model 3 Fixed variants & \cellcolor{red!10}Model 4 Relaxation  \\
+   &$\countdetail\mid n,\chi$&\Block[fill=blue!10]{1-4}{$\mathrm{Sampler}_m:$ $\forall v,s, a,~\countdetail_{v,s,a,\indexvec{b},\indexvec{g}}\sim \mathrm{Multinomial}\left(n_{v,s,a},\chi_{v,s,a,\indexvec{b},\indexvec{g}}\right)$ }&&&&-\\\hline
+
+&$\countdetail_{\indexvec{v},\indexvec{s},\indexvec{a},\indexsum{b},\indexvec{g}}\mid n,\chi$&\Block{1-4}{}&&&&
+  \cellcolor{red!10}{$\mathrm{Sampler}_{m_{\indexsum{b}}}:$ $\forall v,s, \countdetail_{v,s,a,\indexsum{b},\indexvec{g}}\sim \mathrm{Multinomial}\left(n_{v,s,a},\chi_{v,s,a,\indexsum{b},\indexvec{g}}\right)$ }\\\hline
+&$\tau\mid\countdetail,\alpha_\tau$&
+   \cellcolor{blue!20}{$\tau_{v,g,\indexvec{b}}$ $\sim \mathrm{Multinomial}$} &
+   \cellcolor{green!10}{$\tau_{v,,\indexvec{g},\indexvec{b}}$ $\sim \mathrm{Multinomial}$}& 
+   \cellcolor{orange!10}{$\forall v,g,~\tau_{v,g,\indexvec{b}}\sim$ $\mathrm{Dirichlet}(\alpha_\tau\mathds{1}_4+\countdetail_{v,\bar{s},\indexvec{b},\bar{a},g})$}& 
+   \cellcolor{yellow!20}{$\mathrm{Dirac}_\mathcal{T}$} & -\\
+$\star$&$G$&\Block[fill=blue!10]{1-5}{$\mathrm{Dirac}(G^\star)$}\\
+\faEye&$V,~S,~n_{\indexvec{v},\indexvec{s},\indexsum{a}} $&\Block[fill=blue!10]{1-5}{observed, exogenous}\\
+$\star$&$\alpha_\tau$&\Block{1-2}-&&\cellcolor{orange!10}{fixed}&\Block{1-2}-&\\
+$\star$/&$\tau\mid\alpha_\tau$&\Block[fill=blue!10]{1-2}{$\tau_{v,g,\indexvec{b}}\sim \mathrm{Uniform}(\{A,C,G,T\})$} && \cellcolor{orange!10}{$\forall v,g,~\tau_{v,g,\indexvec{b}}\overset{\text{iid}}\sim$ $\mathrm{Dirichlet}(\alpha_\tau\mathds{1}_4)$}& \cellcolor{yellow!20}{$\mathrm{Dirac}_{\tau^\star}$} & -\\
+$\star$&$\alpha_\epsilon$&\cellcolor{blue!10}{$\mathrm{Dirac}(0.1 \mathds{1}_4)$}&\Block[fill=green!10]{1-3}{$\mathrm{Dirac}(\alpha_\epsilon^\star)$}&&&-\\\hline
+&$\tilde\epsilon\mid\alpha_\epsilon$&-&\Block[fill=green!10]{1-3}{$\mathrm{Beta}(\alpha_\epsilon)$}&&&-\\\hline
+&$\epsilon\mid\alpha_\epsilon,{\alpha}_\epsilon$&\cellcolor{blue!10}{$\forall b, \epsilon_{b,\indexvec{a}}\sim$ $\mathrm{Dirichlet}(\alpha_\epsilon)$}&\Block[fill=green!10]{1-3}{$\mathrm{Dirac}\left(\tilde\epsilon/3 (J_4-I_4)+(1-\tilde\epsilon) I_4\right)$}&&&-\\\hline
+$\star$&${\shape}_\rho$&\Block{1-4}-&&&&$\cellcolor{red!10}{\mathrm{Dirac}({\shape}_\rho^\star)}$\\\hline
+&$\alpha_\rho$&\Block{1-4}-&&&&$\cellcolor{red!10}{\mathrm{Gamma}({\shape}_\rho)}$\\\hline
+&$\rho\mid \alpha_\rho$&\Block[fill=blue!10]{1-4}{$\mathrm{Dirac}\left(\left(\sum_{b\in\llbracket 1,4\rrbracket}\epsilon_{b,a}\tau_{v,g,b}\right)_{a\in\llbracket 1,4\rrbracket}\right)$}&&&&\cellcolor{red!10}{$\forall v,g,~\rho_{v,g,\indexvec{a}}\sim$ $\mathrm{Dirichlet}(\alpha_\rho\mathds{1}_4)$}\\\hline
+$\star$&${\shape}_\pi$&-&\Block[fill=green!10]{1-4}{$\mathrm{Dirac}(\shape_\pi^\star)$}&&&\\\hline
+&$\alpha_\pi$&\cellcolor{blue!10}{$\mathrm{Dirac}(\alpha_\pi^\star)$}&\Block[fill=green!10]{1-4}{$\mathrm{Beta}({\shape}_\pi)$}&&&\\\hline
+&$\pi$&\Block[fill=blue!10]{1-5}{$\forall g,~ \pi_{\indexvec{g},s}\sim $ $\mathrm{Dirichlet}(\alpha_\pi \mathds{1}_G)$}&&&&\\\hline
+&$\chi\mid\pi,\epsilon,\tau$&\Block[fill=blue!10]{1-4}{$\forall v,s,a,b,g~ \chi_{v,s,a,b,g}\sim $ $\mathrm{Dirac}(\rho_{v,g,a}\pi_{g,s}\epsilon_{b,a})$}&&&&-\\\hline
+&$\chi_{\indexvec{v},\indexvec{s},\indexvec{a},\indexsum{b},\indexvec{g}}\mid\rho,\pi$&\Block{1-4}{}&&&&\cellcolor{red!10}{$\forall v,s,a,g$ $ \chi_{v,s,a,\indexsum{b},g}\sim $ $\mathrm{Dirac}(\rho_{v,g,a}\pi_{g,s})$}\\\hline
+&$\countdetail\mid n,\chi$&\Block[fill=blue!10]{1-4}{$\forall v,s, a,~\countdetail_{v,s,a,\indexvec{b},\indexvec{g}}\sim \mathrm{Multinomial}\left(n_{v,s,a},\chi_{v,s,a,\indexvec{b},\indexvec{g}}\right)$ }&&&&-\\\hline
+&$\countdetail_{\indexvec{v},\indexvec{s},\indexvec{a},\indexsum{b},\indexvec{g}}\mid n,\chi$&\Block{1-4}{}&&&&\cellcolor{red!10}{$\forall v,s, \countdetail_{v,s,a,\indexsum{b},\indexvec{g}}\sim $ $\mathrm{Multinomial}$ $\left(n_{v,s,a},\chi_{v,s,a,\indexsum{b},\indexvec{g}}\right)$ }\\\hline
+\faEye&$n\mid \countdetail$&\Block[fill=blue!10]{1-5}{$ \mathrm{Dirac}\left(\countdetail_{v,s,a,\indexsum{b},\indexsum{g}}\right)$ }
+
+\end{NiceTabular}
+\end{table}
+
+\subsection{Summary of kernels without resorting to latent counts}
+
+
+
+
+\subsection{Tempering strategies}
+
+
+
+\subsubsection{Tempering strategy 1 take the power of the likelihood}
+A generic way to perform tempering is to replace the likelihood (Equation \eqref{eq:likelihood}) by its power in $\lambda$. However, doing so makes it hard to sample from (see appendix for details).
+
+
+\subsubsection{Tempering strategy 2 : data tempering by discarding reads}
+
+Let $B(.\mid.)$ be the function 
+\begin{eqnarray}
+    B\left(n|\Theta=(\pi, \tau,\epsilon) \right) &=& \prod_{v=1}^{V} \prod_{s = 1}^{S} n_{v,s,\indexsum{a}}!\times\frac{\prod_{a = 1}^{4} \left(\sum_{b=1}^{4} \sum_{g = 1}^{G} \tau_{v,g,b} \pi_{g,s} \epsilon_{b,a} \right)^{n_{v,s,a}^{(\lambda)}}}{\prod_{a = 1}^{4}n_{v,s,a}!}. \label{eq:tempered1}
+\end{eqnarray}
+
+We notice that $B(n\mid \Theta)=\mathcal{L}\left(n| \Theta=(\pi, \tau,\epsilon) \right)$
+
+For $\lambda\in n_{+,\indexsum{s},\indexsum{a}}^{-1}\times \{1,\ldots,n_{+,\indexsum{s},\indexsum{a}}\}$, one can sample without replacement a number of $\lambda \times n_{+,\indexsum{s},\indexsum{a}}$ reads from the original $n_{+,\indexsum{s},\indexsum{a}}$'s and run a tempered (MCMC or SMC) algorithm associated with a sequence of sub samples of reads.
+
+We denote by $n_{v,s,a}^{(\lambda)}$ the counts obtained for position $v$, sample $s$, nucleotide $a$ after sampling at a rate $\lambda$.
+If the reads are sub sampled at random, then the likelihood of these restricted counts is:
+  $\mathcal{L}\left(n^{(SRS,\lambda)}=m | \Theta=(\pi, \tau,\epsilon) \right)=B(m\mid \Theta)$
+
+
+We chose not  to sample reads at random with simple random sampling, but according to stratified sampling, where stratification is the outcome of crossing by position, sample and nucleotide.
+We considered two allocations. The first corresponds to an allocation per cell equal to $n_{v,s,a}^{(\mathrm{Strat}_1,\lambda)}=\left\lceil \lambda. n_{v,s,a}\right\rceil$, 
+with $\lceil x\rceil=\min\{M\in\mathbb{N} : M\geq x\}$. 
+The second corresponds to the procedure described in Algorithm \ref{alg:strat2}.
+We denote by $n_{v,s,a}^{(\mathrm{Strat}_2,\lambda,\phi)}$ the outcome of this procedure.
+
+Although the likelihood in Equation $\ref{eq:tempered1}$ does not match the likelihood of the restricted data anymore, due to the use of stratified sampling, this does not contravene with the principle of tempering, that is just to create a bridge of distributions from the prior to the posterior. 
+
+
+We use the following notation:convention, $f(a, b)\propto_b g(a,b)$ means that there exists a function $C$ of $b$ (e.g. a function free of $a$) such that $\forall a,b: f(a,b)=C(b)\times g(a,b)$.
+
+We notice that $$(n,\lambda,\Theta=(\pi, \tau,\epsilon))\mapsto B\left(n^{(Strat_2,\lambda,\phi)}\mid\Theta\right) \propto_{n,\lambda} b_\lambda(n,\Theta):= \prod_{v=1}^{V} \prod_{s = 1}^{S} \prod_{a = 1}^{4} \left(\sum_{b=1}^{4} \sum_{g = 1}^{G} \tau_{v,g,b} \pi_{g,s} \epsilon_{b,a} \right)^{n_{v,s,a}^{(Strat_2,\lambda,\phi)}}.$$
+
+
+\begin{algorithm}[H]
+\caption{Data filtering for data tempering: }
+\label{alg:strat2}
+\begin{algorithmic}
+%\Struct{}
+\Procedure{Data filtering}{$n\in \mathbb{N}^{\{1,\cdots,V\}\times\{1,\cdots,S\}\times\{1,\cdots,4\}},\lambda\in[0,1],\phi\in\mathrm{bijections}(\{1,\cdots,V\times S\times 4\},\{1,\cdots,V\}\times\{1,\cdots,S\}\times\{1,\cdots,4\})$}
+
+
+\For{$v=1$ to $V$, $s=1$ to $S$, a= $1$ to $4$}   
+\State $m_{v,s,a}\gets\left\lfloor \lambda. n_{v,s,a}\right\rfloor$
+\State $\mathrm{loss}_{v,s,a}^{(1)}=-2\lambda+(2\times m_{v,s,a}+1)/n_{v,s,a}$ if $n_{v,s,a}>O$, $+\infty$ otherwise.
+\State $\mathrm{loss}_{v,s,a}^{(2)}=1/n_{v,s,a}$ if $n_{v,s,a}>O$, $+\infty$ otherwise.
+
+\EndFor
+\State $\phi_2\gets$  the unique bijection 
+$:\{1,\cdots,V\times S\times 4\}\to\{1,\cdots,V\times S\times 4\}$ such that 
+$\forall i<j$ $\mathrm{loss}^{(1)}_{\phi\circ\phi_2(i)} <\mathrm{loss}^{(1)}_{\phi\circ\phi_2(j)}$ or 
+$\mathrm{loss}^{(1)}_{\phi\circ\phi_2(i)}=\mathrm{loss}^{(1)}_{\phi\circ\phi_2(j)}$ and $\phi_2(i)<\phi_2(j)$
+\State $R\gets\left(\phi_2(1),\cdots, \phi_2(V\times S\times 4)\right)$
+\State $r\gets  \lceil \lambda.\sum_{v,s,a}n_{v,s,a}\rceil- \sum_{v,s,a}m_{v,s,a} $
+\While{$r>0$}
+    \State $m_{\phi(R_1)}\gets     m_{\phi(R_1)}+1$
+    \If{ $m_{\phi(R_1)}\leq n_{\phi(R_1)}$}
+    \State $\mathrm{loss}\gets \mathrm{loss}^{(1)}_{\phi(R_1)}\gets \mathrm{loss}^{(2)}_{\phi(R_1)}$ 
+    \Else
+    \State $\mathrm{loss}\gets \mathrm{loss}^{(1)}_{\phi(R_1)}\gets +\infty$.
+    \EndIf
+    \State $i\gets 1$
+    
+    \While{$\mathrm{loss}^{(1)}_{\phi(R_{i+1})}<\mathrm{loss}$ and $i<V\times S\times 4$}
+    \State    $i\gets{i+1}$
+    \EndWhile
+    \If{$i>1$} 
+        \State $(R_1,\cdots R_i)\gets (R_2,\cdots, R_i,R_1)$
+    \EndIf 
+    \State $r\gets r-1$
+    \EndWhile
+    \State \Return $m$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+
+
+
+
+
+\begin{algorithm}[H]
+\caption{Tempering SMC}
+\begin{algorithmic}
+%\Struct{}
+\Procedure{Tempering SMC}{$n,\alpha_0,S,G,V,T,I,\delta,\mathrm{ESS}_{\mathrm{min}}$}
+
+\Step{Initialisation}{}
+\State Hyper parameters
+\Indent
+\State $\delta\gets \delta_0 \mathds{1}_G$
+\State $\alpha\gets \alpha_0\mathds{1}_G$ 
+\EndIndent
+\State Random sorting of the cells
+\Indent 
+\State $\phi\sim \mathrm{Uniform}\left(\mathrm{Bijections}(\{1,\cdots,V\times S\times 4\},\{1,\cdots,V\}\times\{1,\cdots,S\}\times\{1,\cdots,4\})\right)$
+\EndIndent
+\State Initial values
+\Indent
+\State $\lambda_{0}\gets 0$
+\State $t\gets -1$
+\EndIndent
+\EndStep
+\Step{SMC}{}
+\While {$\lambda_{t}<1$ and $t<T$}
+\State $t\gets t+1$
+\If{t=0}
+\For{$i\in\{1,\ldots,I\}$}
+\State Draw $\pi_0\sim P^{\pi|\alpha=\alpha,S=S}$ 
+\State Draw $\tau_0\sim P^{\tau\mid V=V,G=G}$
+\State Draw $\epsilon_0\sim P^{\epsilon\mid \delta}$ 
+\State $\Theta_0^{(i)}\gets(\tau_0,\pi_0,\epsilon_0)$
+\State $\left(w_{0}^{(i)}\right)_{i=1}^I\gets\left(b_{\lambda_0}\left(n,\Theta_{\lambda_t}^{(i)}\right)\right)_{i=1}^I$
+\State $\left(W_0^{(i)}\right)_{i=1}^I\gets\left(\left(\sum_{j=1}^I w_0^{(j)}\right)^{-1}{w_0^{(i)}}\right)_{i=1}^I$
+\EndFor
+\Else
+        \State $\left(A_{t}^{(i)}\right)_{i=1}^I\gets \mathrm{resample}\left(\left(W_{t-1}^{(i)}\right)_{i=1}^I\right)$
+         \State
+         $\left(\Theta_{t}^{(i)}\right)_{i=1}^I\gets \left(M\left(\Theta_{t-1}^{(A_{t}^{(i)})},n^{(\lambda_t)},\alpha,\delta,S,G,V\right)\right)_{i=1}^I$
+        
+\EndIf
+
+\State 
+ 
+\State $\left(w_t^{(i)}\right)_{i=1}^I\gets\left(b_{\lambda_t}\left(n,\Theta_{\lambda_t}^{(i)}\right)\right)_{i=1}^I$
+\State $\left(W_t^{(i)}\right)_{i=1}^I\gets\left(\left(\sum_{j=1}^I w_t^{(j)}\right)^{-1}{w_t^{(i)}}\right)_{i=1}^I$
+
+
+\State 
+$$\lambda_{t+1}\gets\min\left(\{1\}\cup \left\{\lambda\in [\lambda_t,1]:\frac{\left(\sum_{i=1}^N b_{\lambda}\left(n,\Theta_t^{(i)}\right)\right)^2}{\sum_{i=1}^N b_{\lambda}\left(n,\Theta_t^{(i)}\right)^2}
+ \geq\mathrm{ESS}_{\mathrm{min}}\right\}\right).$$
+
+
+
+\EndWhile
+\EndStep
+\State Return $\left(\Theta_{t+1}^{(i)}\right)_{i\in\llbracket 1,I\rrbracket}$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+
+
+
+\subsection{Proposed algorithm 2}
+Sequential approach (variational)
+\subsection{Proposed algorithm 3}
+Use $\delta$ as tempering parameter
+
+
+\begin{algorithm}[H]
+\caption{ Tempering on $\delta$}
+\begin{algorithmic}
+%\Struct{}
+\Procedure{Tempering 2}{$n,\alpha_0,S,G,V,T,I,(\delta_\infty),\mathrm{ESS}_{\mathrm{min}}$}
+
+\Step{Initialisation}{}
+\State Hyper parameters
+\Indent
+\State $\delta_0\gets \delta_0 \mathds{1}_G$
+\State $\alpha\gets \alpha_0\mathds{1}_G$ 
+\EndIndent
+\State Initial values for unobserved variables
+\Indent
+\State Generate $\pi|\alpha=\alpha,S=S$ 
+\State Generate $\tau\mid V=V,G=G$
+\State Generate $\epsilon\mid\delta$
+\State $\Theta_0=(\tau,\pi,\epsilon)$
+\State $(w_0^{(i)})_{i=1}^N\gets \left(\gamma_0(\Theta_0^{(i)})\right)_{i=1}^N$
+\State $(W_0^{(i)})_{i=1}^N\gets \left(\sum_{i=1}^N w_0^{(i)}\right)^{-1}\times \left(w_0^{(i)}\right)_{i=1}^N$
+\EndIndent
+\EndStep
+\Step{SMC}{}
+\While {$\delta_t<\delta_{\infty}$}
+        \State $\left(A_{t}^{(i)}\right)_{i=1}^I\gets \mathrm{resample}\left(\left(W_{t-1}^{(i)}\right)_{i=1}^I\right)$
+         \State $\left(\Theta_{t}^{(i)}\right)_{i=1}^I\gets \left(M\left(\Theta_{t}^{(A_{t-1}^{(i)})},n,\alpha,\mathbf{\delta_t},S,G,V\right)\right)_{i=1}^I$
+\State Solve in $\lambda\in[0,\delta_\infty-\delta_{t-1}]$ the equation: 
+ $$\frac{\left(\sum_{i=1}^I\exp\left(-\lambda V(\Theta_t^{(i)})\right)\right)^2}{\sum_{i=1}^I\exp\left(-2\lambda V(\Theta_t^{(i)})\right)}=\mathrm{ESS}_{\mathrm{min}}$$
+
+\If {there is no solution}
+\State $\lambda\gets\delta_\infty-\delta_{t-1}$
+\EndIf
+\State $\delta_t\gets \delta_{t-1}+\lambda$
+\State $w_t\gets \exp\left(-\lambda V(\Theta_t^{(i)})\right)$
+
+\EndWhile
+    \State $\left(\Theta_{t}^{(i)}\right)_{i=1}^I\gets \left(M\left(\Theta_{t}^{(A_{t-1}^{(i)})},n,\alpha,\mathbf{\delta_t},S,G,V\right)\right)_{i=1}^I$
+\EndFor    
+\EndStep
+Return $\left(\Theta_{t}^{(i)}\right)_{i\in\llbracket 1,I\rrbracket}$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\section{Interpreting the SMC or MCMC outputs}
+
+The sampling algorithms return a sequence of arrays $\tau_{v,g,b}^{(i)}$ and 4$\pi_gs$.
+For each $i$, We could reorder the second dimension and chose a $g$ index so that the dictionnary is lexicographically ordered. In the case when two or more  dictionnary are plausible, then averaging the $\pi_gs^{(i)}$ over $i$ does not make sense. One has to consider all the possible dicionaries first and second average all the $\pi_gs$
+
+
+
+\section*{Conclusion}
+%\input{section_4_conclusion}
+
+\newpage
+{\Huge Appendix}
+\appendix
+
+
+
+\section{meeting/mail notes}
+
+\subsection{2024 02 06}
+
+
+
+\subsection{2024 02 03}
+{\bf A discuter avec NC}
+
+Tempering : when taking the power of the likelihood, sampling $\nu$, $\mu$, $\countdetail$ from the new distribution is not easy.
+
+We loose the property that the conditionals of the latent count variables conditionally on their aggregates are all multinomial.
+
+
+We thought about two options: 
+1. using a transition kernel where all the steps would come from the tempered likelihood, but the step about sampling nu, mu and xi.
+Following:
+We wonder: are we insured of the existence of an invariant distribution for that kernel ? Do we still get a bridge ? how do we compute the iss in that case:
+Giacomo Zanella, Gareth Roberts, Scalable Importance Tempering and Bayesian Variable Selection, Journal of the Royal Statistical Society Series B: Statistical Methodology, Volume 81, Issue 3, July 2019, Pages 489–517, https://doi.org/10.1111/rssb.12316
+
+2. skipping the computation of xi, which may be unefficient when sampling $\pi$ and $\epsilon$. we would just use a transition kernel with a dirichlet distribution, and use a metropolois hasting step based on the tempered likelihood. 
+\subsection {?} 
+
+option 1 
+1. epsilon suit la meme dirichlet 
+2. Parametre de tempering entre 0 et 1
+$\epsilon' =\lambda \epsilon + (1-\lambda) \epsilon$.
+
+option 2 privilegier la diagonale.
+on fixe varepsilon.
+
+
+
+
+%\input{glossary.tex}
+\nocite{*}
+
+\bibliographystyle{apalike}
+\bibliography{biblio}
+\appendix
+
+\section{Vocabulary}
+
+\subsection{Important}
+
+\begin{itemize}
+   
+    \item {\bf Position}: In the field of genetic variation, the term variant is used to refer to a specific region of the genome which differs between two genomes.(\href{https://www.ebi.ac.uk/training/online/courses/human-genetic-variation-introduction/what-is-genetic-variation/what-are-variants-alleles-and-haplotypes}{source}). In the paper and in the code it seems that the terms  variant, variant position and position all refer to variant.
+    To avoid confusion with variant of a gene, we will privelege the terms region and position, and variant will denote the gene variant (haplotype). 
+    \item Different versions of the same [region] are called alleles. For example, a [single nucleotide polymorphism] may have two alternative bases, or alleles, C and T. (\href{https://www.ebi.ac.uk/training/online/courses/human-genetic-variation-introduction/what-is-genetic-variation/what-are-variants-alleles-and-haplotypes}{source}).
+     \item haplotype: A haplotype (haploid genotype) is a group of alleles in an organism that are inherited together from a single parent. (\href{source}{wikipedia}).
+    In the genome, alleles at [regions] close together on the same chromosome tend to occur together more often than is expected by chance. These blocks of alleles are called haplotypes. Linkage disequilibrium (LD) is a measure of how often two alleles or specific sequences are inherited together, with alleles that are always co-inherited said to be in linkage disequilibrium.(\href{https://www.ebi.ac.uk/training/online/courses/human-genetic-variation-introduction/what-is-genetic-variation/what-are-variants-alleles-and-haplotypes}{source})
+\end{itemize}
+\section{Starting point}
+\subsection{The Desman package related code}
+Original:
+\url{https://github.com/chrisquince/DESMAN}
+
+Version sent via mail by G:
+\code{Desman\_fugace}
+\url{https://e.pcloud.link/publink/show?code=XZeTsDZWp4JXoYfp4h3moaL4Tqfqhkl55cV#returl=https%3A//e.pcloud.link/publink/show%3Fcode%3DXZeTsDZWp4JXoYfp4h3moaL4Tqfqhkl55cV&page=login}
+\afaire{explain where this version comes from}
+
+Study by G.:
+\url{https://forgemia.inra.fr/konkam/improved_desman}
+
+\subsection{Connection to cluster:}
+
+ssh dbonnery@front.migale.inrae.fr
+
+
+
+\subsection{Programmes existants}
+fichiers scripts
+
+
+
+\url{/home/alabraham/metachick-fugace\_save/flugenavi/snakefile/}
+
+
+\subsection{Existing datasets and pipelines}
+
+\subsection{List of experiments}
+\url{/work_projet/ala/metachick-fugace/Analyses_ALA}
+
+
+\subsubsection{Original datasets: reads}
+
+\subsubsection{Pipeline 1}
+
+\subsubsection{Intermediary dataset}
+
+\subsubsection{Desman ready datasets}
+
+\subsection{Desman outputs.}
+
+ \todo{Explain reads format and existing operations}
+
+
+\subsubsection{Existing pipelines}
+We describe one of the existing pipelines.
+
+The main script for this pipeline is  \url{/work_projet/ala/metachick-fugace/Analyses_ALA/tests_ajout_sequences_sept2023/script_freq2DESMAN_tetA.sh}
+The scripts takes ``reads files'' as inputs.
+
+First a subscript \url{/work_projet/ala/metachick-fugace/.sh}
+is called.
+
+output premier pipeline (nettoyage des reads, alignement sur des gènes, et comptage par position).
+1 fichier = 1 échantillon * 1 gène 
+\url{CTU\_ACI} nom echantillon
+\url{ant\_6\_\_Ia\_3\_KF864551} nom du gène.
+
+\url{/work\_projet/ala/metachick-fugace/Analyses\_ALA/more analyse\_55echantillons\_aout2022/calculs\_22sept2022/freq\_alleliques/CTU\_ACI/ant\_6\_\_Ia\_3\_KF864551.freq}
+
+comptage  creation fichier gene 
+
+
+\url{/work_projet/ala/metachick-fugace/Analyses_ALA/analyse_55echantillons_aout2022/calculs_22sept2022/freq_alleliques/CTU_ACJ/cfxA_1_U38243.freq}
+
+
+
+\subsection{}
+
+
+\section{Tasks}
+
+
+\section{Old}
+
+
+$$\mathcal{L}\left(n| \pi, \tau,\epsilon;\lambda \right) =\left( \prod_{v=1}^{V} \prod_{s = 1}^{S} (n_{v,s,\indexsum{a}})!\times\frac{\prod_{a = 1}^{4} \left(\sum_{b=1}^{4} \sum_{g = 1}^{G} \tau_{v,g,b} \pi_{g,s} \epsilon_{b,a} \right)^{\lambda~n_{v,s,a}}}{\prod_{a = 1}^{4}\Gamma(1+\lambda n_{v,s,a})}\right). $$
+
+Which (implies ?)
+$$\mathcal{L}\left(\nu| \pi, \tau,\epsilon;\lambda \right) =\left( \prod_{v=1}^{V} \prod_{s = 1}^{S} (\nu_{v,s,\indexsum{a},\indexsum{b}})!\frac{\prod_{a=1}^4 \prod_{b=1}^4 \left(\sum_{g=1}^G \tau_{v,g,b} \pi_{g,s} \epsilon_{b,a} \right)^{\nu_{v,s,a,b}}}{\nu_{v,s,a,b}!}\right)^\lambda. $$
+
+
+
+The corresponding marginal distributions are the following:
+
+\paragraph*{Sample $\tau_{v,g,\indexvec{b}}|\tau,\pi,\epsilon,n$}
+\begin{eqnarray*}
+    \tau_{v,g,\indexvec{b}}|\pi,n ,\epsilon \tau_{v,g'\neq g,\indexvec{b}};\lambda&\sim&\mathrm{Multinomial}\left(1,\left(\prod_{s,c}      \left(\pi_{g,s}\epsilon_{a,c}+\sum_{g'\neq g,b}\tau^\star_{v,g',b}\pi_{g',s}\epsilon_{b,c}\right)^{ \lambda\times n_{v,s,c}}\right)_{a\in\llbracket 1,4\rrbracket}\right). 
+\end{eqnarray*}
+
+
+\paragraph*{Sample $(\nu,\mu)$} 
+Do we need to replace 
+      Draw $\nu_{v,s,a,.}$ from $\mathrm{Multinomial}(n_{v,s,a},\chi_{v,s,a,\indexvec{b},\indexsum{g}}/M_{v,s,a,\indexsum{b},\indexsum{g}})$
+     
+     ?
+
+
+\paragraph*{Sample $\epsilon\mid \nu,\delta$} 
+
+
+\paragraph*{Sample $\pi \mid \alpha,\mu,e$} 
+
+
+New likelihood.
+
+
+Note de réunion 2024 04 29
+
+Abraham Bonnéry Leclercq Kon Kam King
+
+1. Sébastien est satisfait de l'approche avec variants fixés.
+2. Problème de l'approche: grand dictionnaire: pas de convergence.
+3. Que veut dire convergence ? 
+Sortir toujours les mêmes.
+4. Peut être que l'espace n'a pas été vérifié.
+5. Approche en deux étapes.
+6. Problème avec 150 180 c'est beaucoup, c'est une bonne limite. En général on tourne autour de 50, mais celà peut être atteignable plusieurs fois.
+Par exemple, pour  BLatem, on a répertorié beaucoup de variants. Depuis 40 ans. Peut être plus que dans les génomes sequences.
+Pour ce gène Séb est parti de la base de données resfinder, qui ne fait pas ça pour tous les types de gènes, et ne répertorie que les variants qui approtent des différences en terme d'acides aminés.
+
+Sur refsec, une quarantaine de vairantes pour blatem.
+
+Stratégie avec Ouleye;; faire tourner avec resfinder. PUis aller chercher les vairnats dans genebank
+
+Stratégie aller chercher dans genebank. 
+
+
+réfléchir à un système de préselection de variants. 
+De système de match un à un.
+
+
+
+
+
+A faire rajouter dans le code si ça a bien convergé ou pas.
+
+Dans Peter Muller, les variants ont tendance a devier d'une ou deux bases.
+Ca va avoir un impact sur la diversité des variants qu'on trouve.
+
+question de la parallelisation
+
+GKKK: Une méthode qui ne va pas chercher de nouveaux variants peut elle suffire ?
+
+SL: s'il y a un nouveau variant il y a de l'incertitude. Les abondances relatives ne sont pas fiables
+
+Deux types de nucléotides à cette position: dans mes variants il n'y en a qu'un.
+
+Chercher des positions et des échantillonsur lesquelles on a des anomalies et réintroduire 
+
+Stratégies mixtes.
+
+Réfléchir aux mouvements sur les variants.
+
+Elimination échantillon par échantillon
+vs on fait un échantillon pour tous les dicos mis ensemble. 
+
+On prend le dictionnaire pour chaque échantillon.
+ou groupe d'échantillons.
+
+GKKK à SL: comment réaliser des données difficiles à analyser Pour comprendre les limites de desman et les cas de simulation qui reproduisent des cas problématiques rélistes. 
+Le cas problèméatique est le cas de variants très proches avec peu d'abondance.
+
+GKKK à SL:Simuler un cas ou il manque un variant et ou on n'a pas de bonne estimation de l'erreur
+SL: voir sur discord gène dsfa
+
+Idée de Guillaume dans le cas de nouveau variant à une position:
+multiplier  le dictionnaire 
+
+Pour la détection:
+complémentation échantillon par échantillon.
+
+Au final on recombine des échantillons peu importants.
+
+ALB: Il faut réintroduire l'étape de filtrage des positions.
+
+SL: il faut garder toutes les positions qui varient dans le dictionnaire.
+
+Pour la création de nouveaux variants, il faut partir de toutes les positions.
+
+Etape 1: rajouter les nouveaux variants manquand échantillon par échantillon. en dupliquand et mutant les dictionnaires réduits.
+A partir d'un certain seuil. 
+1 pour cent et trois read
+ou un test statistique.
+cree une alerte et donne les positions.
+
+Etape 3: Crée les variants manquants en multipli.
+
+Etape 2: suppression des variants du dictionnaire échantillon par échantillon
+ - echqntillon par echqntillon
+- comparer l'ensemble des positions du dico et voir quels variants ne peuvent pas être trouvés.
+
+Etape 4 Desman variants fixés avec Desman. pour élimination
+
+Etape 5 Desman variants fixés 
+GKKK: argument pour prendre tous les échantillons d'un coup
+On augment l'estimation de la matrice d'erreur.
+
+
+
+
+
+
+
+
+
+\end{document}

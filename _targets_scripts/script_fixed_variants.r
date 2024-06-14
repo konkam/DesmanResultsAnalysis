@@ -48,7 +48,7 @@ list(
       alpha_pi = .1
     )
   ),
-  tar_target(fixed_tildeepsilon, .0001),
+  tar_target(fixed_bar_epsilon, .0001),
   tar_target(
     name = ln_vsa,
     command = desman_input_file |> 
@@ -56,7 +56,7 @@ list(
       read_desman_input_files()
   ),
   tar_target(
-    name = tau_vga,
+    name = tau_vgb,
     command = variants |>
       translate_dna_string_vector_to_string_matrix() |>
       translate_dna_matrix_to_binary_array()
@@ -68,9 +68,9 @@ list(
       args = c(
         list(
           n_vsa = ln_vsa[[1]],
-          tau_vga = tau_vga,
-          G = dim(tau_vga)[2] - 1,
-          tildeepsilon = NA
+          tau_vgb = tau_vgb,
+          G = dim(tau_vgb)[2] - 1,
+          bar_epsilon = NA
         ),
         desman_tuning_parameters
       )
@@ -83,9 +83,9 @@ list(
       args = c(
         list(
           n_vsa = ln_vsa[[1]],
-          tau_vga = tau_vga,
-          G = dim(tau_vga)[2] - 1,
-          tildeepsilon = fixed_tildeepsilon
+          tau_vgb = tau_vgb,
+          G = dim(tau_vgb)[2] - 1,
+          bar_epsilon = fixed_bar_epsilon
         ),
         desman_tuning_parameters
       )

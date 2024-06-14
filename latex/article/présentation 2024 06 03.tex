@@ -19,16 +19,13 @@
 \usepackage{Ensae_beamer} % customized style
 
 
-\usepackage{graphicx}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
-\usepackage{caption}
-\usepackage{subcaption}
+
 \usepackage{pifont}
     \usetikzlibrary{positioning}
     \usetikzlibrary{backgrounds}
     \usetikzlibrary{arrows.meta}
-\usetikzlibrary{3d, calc}
 
 
 \usepackage{graphicx}
@@ -55,7 +52,7 @@
 \usepackage{collcell}
 \usepackage{colortbl,dcolumn}
 
-\usepackage{dsfont}
+
 
 \newcommand{\code}[1]{\colorbox{light-gray}{\texttt{#1}}}
 
@@ -130,7 +127,7 @@
 \end{frame}
 }
 \begin{frame}
-        Daniel Bonnéry$^*$ (Ensae)\\
+        Daniel Bonnéry$^*$ (Ensae)
         Guillaume Kon Kam King (Inrae)\\
         Anne-Laure Abraham (Inrae)\\
 	Ouleye Sidibe (Inrae)\\
@@ -152,13 +149,12 @@ s\in\{1,\ldots,S\}\\
 a\in \{1,\ldots,4\}\end{array}}$$
 
 \begin{itemize}
-\item $(n_{v,s,a})$ : \fr{comptages des nucléotides}\en{counts of nucleotides}
+\item $(n_{v,s,a})$ : counts of nucleotides
     \begin{itemize}
-\item \fr{à la position}\en{at position} $v$
-\item \fr{dans l'échantillon}\en{in sample} $s$
-\item \fr{de type}\en{of type} $a$ :
-    \begin{itemize}
-    \item $a=1=A=(1,0,0,0)$
+\item at position $v$
+\item in sample $s$
+\item of type $a$ :
+    \begin{itemize}\item $a=1=A=(1,0,0,0)$
     \item $a=2=C=(0,1,0,0)$
     \item $a=3=G=(0,0,1,0)$
     \item $a=4=T=(0,0,0,1)$
@@ -209,11 +205,11 @@ $$\tau=\begin{blockarray}{ccc}
 \end{blockarray} $$
 
 \begin{itemize}
-    \item $\tau_{v,g,b}$ \fr{indique si}\en{indicates if}
+    \item $\tau_{v,g,a}$ \fr{indique si}\en{indicates if}
         \begin{itemize}
             \item \en{at  position}\fr{à la position} $v$
             \item \en{the nucleotide of variant}\fr{le nucléotide du variant} $g$
-            \item \fr{est}\en{is} $b$.
+            \item \fr{est}\en{is} $a$.
         \end{itemize}
 \end{itemize}
 
@@ -260,7 +256,8 @@ $\pi_{g,s}$ est la proportion de
 \subsection{\fr{Distribution du tableau de comptages}\en{Distribution of the counts}}
 \begin{frame}{\fr{Distribution du tableau de comptages}\en{Distribution of the counts}}
     
-\begin{eqnarray*}\lefteqn{\mathcal{L}\left(n | \pi, \tau,\epsilon \right)}\nonumber\\& =& \prod_{v=1}^{V} \prod_{s = 1}^{S} (n_{v,s,+})!\times\frac{\prod_{a = 1}^{4} \left( \sum_{g = 1}^{G}\sum_{b=1}^{4} \tau_{v,g,b}\epsilon_{b,a} \pi_{g,s}  \right)^{n_{v,s,a}}}{\prod_{a = 1}^{4}n_{v,s,a}!}\end{eqnarray*}
+\begin{eqnarray*}\lefteqn{\mathcal{L}\left(n | \pi, \tau,\epsilon \right)}\nonumber\\& =& \prod_{v=1}^{V} \prod_{s = 1}^{S} (n_{v,s,+})!\times\frac{\prod_{a = 1}^{4} \left( \sum_{g = 1}^{G}\sum_{b=1}^{4} \tau_{v,g,b}\epsilon_{b,a} \pi_{g,s}  \right)^{n_{v,s,a}}}{\prod_{a = 1}^{4}n_{v,s,a}!}\nonumber\\
+& =&\prod_{v=1}^{V} \prod_{s = 1}^{S} (n_{v,s,+})!\times\frac{\prod_{a = 1}^{4} \left( \sum_{g = 1}^{G} \rho_{v,g,a} \pi_{g,s}  \right)^{n_{v,s,a}}}{\prod_{a = 1}^{4}n_{v,s,a}!}.\label{eq:likelihood}\end{eqnarray*}
 \end{frame}
 
 \subsection{\fr{Approche bayesienne}}
@@ -291,18 +288,6 @@ $$\eta(\pi,\tau,\epsilon\mid n)=\frac{\eta(n,\pi,\tau,\epsilon)}{\int \eta(n,\pi
 \section{Desman}
 \subsection{Présentation}
 \begin{frame}
-
-
-Quince, C., Delmont, T.~O., Raguideau, S., Alneberg, J., Darling, A.~E.,
-  Collins, G., and Eren, A.~M. (2017).
-
-Desman: a new tool for de novo extraction of strains from
-  metagenomes.
-
-{\em Genome biology}, 18:1--22.
-
-\end{frame}
-\begin{frame}
 \begin{itemize}
 \item Desman est un algorithme d'échantillonage qui permet d'obtenir un échantillon dont les propriétés sont proches d'un échantillon iid de la loi a posteriori de ($\tau$,$\pi$,$\epsilon$).
 \item Il est basé sur des méthodes de Monte Carlo par chaînes de Markov
@@ -310,7 +295,6 @@ Desman: a new tool for de novo extraction of strains from
 \item après introduction de variables latentes pour obtenir un maximum de lois conjuguées et éviter de devoir tirer avec Metropolis Hastings
 \end{itemize}
 \end{frame}
-\subsection{Algorithme de Gibbs}
 \begin{frame}{Algorithme de Gibbs}
 
     \begin{algorithm}[H]
@@ -325,9 +309,6 @@ Desman: a new tool for de novo extraction of strains from
             \EndFor
         \end{algorithmic}
     \end{algorithm}
-    
-    
-\en{The transition kernel is the distribution}\fr{On appelle noyau de transition la distribution } $P^{\Theta^{(t+1)}\mid\Theta^{(t)}}$ 
 \end{frame}
 
 \begin{frame}{Explications}
@@ -337,18 +318,6 @@ Desman: a new tool for de novo extraction of strains from
         \item Le processus est répété pour un nombre d'itérations $T$.
         \item En fin de compte, les échantillons $\mathbf{\Theta}^{(T)}$ sont utilisés pour estimer la distribution cible.
     \end{itemize}
-\end{frame}
-
-
-
-\begin{frame}
-$$\Theta_i^{(t)} \sim \eta\left(\Theta_i \mid \Theta_1^{(t)}, \ldots, \Theta_{i-1}^{(t)}, \Theta_{i+1}^{(t-1)}, \ldots, \Theta_n^{(t-1)}\right)$$
-Comment faire ?
-
-\begin{enumerate}
-\item Lois conjuguées
-\item Metropolis Hasting
-\end{enumerate}
 \end{frame}
 
 \subsection{Les étapes de Gibbs dans Desman}
@@ -398,182 +367,41 @@ $$n_{.,s=2,.}=\begin{blockarray}{ccccc}
     \end{block}
 \end{blockarray} $$
 
-$$\overset{t=1}{\begin{blockarray}{ccc}
+$$\tau=\begin{blockarray}{ccc}
     &&\\&\scriptscriptstyle g=1&\scriptscriptstyle g=2\\
     \begin{block}{c(cc)}
  {\scriptscriptstyle v=1}&A&C\\   
   {\scriptscriptstyle v=2}&A&C\\   
     \end{block}
-\end{blockarray}} \to \overset{t=2}{\begin{blockarray}{ccc}
+\end{blockarray} \to \begin{blockarray}{ccc}
     &&\\&\scriptscriptstyle g=1&\scriptscriptstyle g=2\\
     \begin{block}{c(cc)}
  {\scriptscriptstyle v=1}&A&C\\   
   {\scriptscriptstyle v=2}&C&C\\   
     \end{block}
-\end{blockarray}} \to \overset{t=3}{\begin{blockarray}{ccc}
+\end{blockarray} \to \begin{blockarray}{ccc}
     &&\\&\scriptscriptstyle g=1&\scriptscriptstyle g=2\\
     \begin{block}{c(cc)}
  {\scriptscriptstyle v=1}&A&C\\   
   {\scriptscriptstyle v=2}&C&A\\   
     \end{block}
-\end{blockarray}}$$
+\end{blockarray}$$
 \end{frame}
 
-\section{\en{Improvements}\fr{Stratégies}}
-
-
-
-
-
-
-\subsection{Block sampling}
-
-\begin{frame}
-Il s'agit d'échantillonner en block $\tau_{v,.,.}$:
-
-
-$$\overset{t=1}{\begin{blockarray}{ccc}
-    &&\\&\scriptscriptstyle g=1&\scriptscriptstyle g=2\\
-    \begin{block}{c(cc)}
- {\scriptscriptstyle v=1}&A&C\\   
-  {\scriptscriptstyle v=2}&A&C\\   
-    \end{block}
-\end{blockarray}}  \to \overset{t=2}{\begin{blockarray}{ccc}
-    &&\\&\scriptscriptstyle g=1&\scriptscriptstyle g=2\\
-    \begin{block}{c(cc)}
- {\scriptscriptstyle v=1}&A&C\\   
-  {\scriptscriptstyle v=2}&C&A\\   
-    \end{block}
-\end{blockarray}}$$
-
-Problème:
-
-\begin{table}[H]
-\centering
-\begin{tabular}{lr}
-  \hline
-$4^{1}$&$4$\\$4^{2}$&$16$\\$4^{3}$&$64$\\$4^{4}$&$256$\\$4^{5}$&$1~024$\\$4^{10}$&$1~048~576$\\$4^{15}$&$1~073~741~824$\\$4^{20}$&$1~099~511~627~776$\\   \hline
-\end{tabular}
-\end{table}
-
-\end{frame}
-
-\subsection{Fixed variants}
-
-\begin{frame}
-Il s'agit de remplacer la distribution a priori de $\tau$ par 
-$\mathrm{Uniform}(\mathcal{T})$
-\begin{itemize}
-\item Metropolis Hasting est évité.
-\item Satisfaisant lorsque les variants sont connus
-\item Ne répond pas à l'objectif initial de détection.
-\end{itemize}
-\end{frame}
-\subsection{Cibler $\rho$}
-
-\begin{frame}
-
-
-\begin{eqnarray*}\lefteqn{\mathcal{L}\left(n | \pi, \tau,\epsilon \right)}\nonumber\\& =& \prod_{v=1}^{V} \prod_{s = 1}^{S} (n_{v,s,+})!\times\frac{\prod_{a = 1}^{4} \left( \sum_{g = 1}^{G}\sum_{b=1}^{4} \tau_{v,g,b}\epsilon_{b,a} \pi_{g,s}  \right)^{n_{v,s,a}}}{\prod_{a = 1}^{4}n_{v,s,a}!}\nonumber\\
-& =&\prod_{v=1}^{V} \prod_{s = 1}^{S} (n_{v,s,+})!\times\frac{\prod_{a = 1}^{4} \left( \sum_{g = 1}^{G} \rho_{v,g,a} \pi_{g,s}  \right)^{n_{v,s,a}}}{\prod_{a = 1}^{4}n_{v,s,a}!}\end{eqnarray*}
-
-avec
-
-$$\rho_{v,g,a}=\sum_{b=1}^4\tau_{v,g,b}\epsilon_{ba}$$
-\end{frame}
-\begin{frame}
- $$\rho_{.,g,.}=\begin{blockarray}{ccccc}
-    &\scriptscriptstyle A&\scriptscriptstyle C&\scriptscriptstyle G&\scriptscriptstyle T\\
-    \begin{block}{c(cccc)}
- {\scriptscriptstyle v=1}&0.03&\mathbf{0.91}&0.03&0.03\\   
- {\scriptscriptstyle 
- \vdots}&\vdots&\vdots&\vdots&\vdots\\   
-  {\scriptscriptstyle 
- v=V}&0.05&0.04&\mathbf{0.90}&0.01\\   
-    \end{block}
-\end{blockarray} $$
-\begin{itemize}
-\item On utilise un hyperparamêtre de forme très petit pour la loi de Dirichlet, ce qui assure la concentration des $\rho_{v,g,.}$ autour des sommets A,C,G, ou T.
-\item On garde des lois conjuguées pour $\rho$.
-\item La mise à jour se fait naturellement par block.
-\item Rajout d'un a priori non conjugué sur l'hyperparamêtre de forme.
-\end{itemize}
-\end{frame}
-
-
-\begin{frame}[fragile]
-\input{"4-simplex.tikz"}
-\end{frame}
-
-
-
-
-\begin{frame}
-\begin{figure}[H]
-
-     \begin{subfigure}[b]{0.49\textwidth}
-\includegraphics[width=\textwidth,trim={3.7cm 0 7 0},clip]{simplex1.png}
-\caption{$\alpha=0.1~\mathds{1}_3$}
-\end{subfigure}%
-     \begin{subfigure}[b]{0.49\textwidth}
-\includegraphics[width=\textwidth,,trim={3.7cm 0 7 0},clip]{simplex2.png}
-\caption{$\alpha=0.01~\mathds{1}_3$}
-     \end{subfigure}
-\caption{ \fr{Échantillon de distribution de Dirichlet sur un 3-simplexe} \en{Dirichlet sample on the 3-simplex}}
-\end{figure}
-\end{frame}
-
-\subsection{SMC and Tempering}
-
-\begin{frame}[fragile]
-\includegraphics[scale=.55]{smc.png}
-%\input{SMC.tikz}
-\end{frame}
-
-
-\begin{frame}[fragile]
-\includegraphics[scale=.55]{tempering.png}
-%\input{SMC.tikz}
-\end{frame}
-
-\begin{frame}
-Stratégies de tempering:
-\begin{itemize}
-\item Puissance de la vraisemblance
-\item Data tempering
-\item Paramêtre de tempering naturel.
-\end{itemize}
-\end{frame}
-
-\begin{frame}
-Stratégie retenue
-\begin{itemize}
-\item Cibler $\tau$, $\epsilon$ et $\pi$
-\item Relaxer $\tau$
-\item Le paramêtre de forme sur $\tau$ devient le paramêtre de tempering naturel.
-\end{itemize}
-\end{frame}
-
-
-
-
-\begin{frame}[plain]
-
-
-\includegraphics[scale=.4]{models.png}
-\end{frame}
+\section{\en{Improvements}\fr{Améliorations}}
 
 \section{\en{Work in progress}\fr{Travaux en cours}}
 \begin{frame}
 \begin{itemize}
-\item Développement d'algorithmes en R basés sur jags.
 \item SMC
 \item tempering.
 \item \fr{Choix de modèle}\en{Model choice} ($G$)
 \item ESS
-\item Exploitation des trajectoires de particules obtenues.
+\item Summarise results.
 \end{itemize}
 \end{frame}
+
+\section{Summary}
 
 
 
@@ -587,6 +415,10 @@ Stratégie retenue
 
 \end{frame} 
 
+\begin{frame}{.}
+{\Huge\bf Appendix}
+\appendix
+\end{frame}
 
 
 \end{document}

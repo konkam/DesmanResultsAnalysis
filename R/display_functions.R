@@ -21,7 +21,7 @@ color_palette <- c(RColorBrewer::brewer.pal(n = 12, name = "Paired"),"purple","o
 #' Afficher l'abondance relative des variants
 #' Ce serait bien de pouvoir extraire les noms d'échantillon directement dans la fonction plutôt que de devoir 
 #' le passer en argument mais je ne suis pas du tout a l'aise avec ces objets.
-#' Idem ce serait top d'avoir les noms de variant directement dans le tau_vga, et qu'ils puissent être extraits 
+#' Idem ce serait top d'avoir les noms de variant directement dans le tau_vgb, et qu'ils puissent être extraits 
 #' du pi_summary au lieu de les donner en argument.
 #' @examples
 #' results <- head(jags_sample_to_summary_tibble(mcmc_output),-2)

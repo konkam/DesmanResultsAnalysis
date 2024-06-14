@@ -9,7 +9,7 @@ MCMC report
 
 ## Project ID
 
-smc_1
+fixed_variants
 
 ## Input data
 
@@ -32,7 +32,7 @@ An ad hoc dictionnary of size 4 was used
 ## Free epsilon
 
 ``` r
-plot_tilde_epsilon(mcmc_output = mcmc_output,error_rate = desman_tuning_parameters$error_rate)
+plot_bar_epsilon(mcmc_output = mcmc_output,error_rate = desman_tuning_parameters$error_rate)
 ```
 
     ## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
@@ -63,6 +63,6 @@ then run:
 
 ``` r
 library(targets)
-Sys.setenv(TAR_PROJECT = 'smc_1')
+Sys.setenv(TAR_PROJECT = 'fixed_variants')
 tar_make()
 ```

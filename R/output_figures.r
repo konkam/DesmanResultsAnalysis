@@ -53,14 +53,14 @@ if(FALSE){
   
   real_values_epsilon <- data.frame(a = 1:2) |>
     mutate(real_value = mapply(FUN = function(a) {
-      tildeepsilon[a]
+      bar_epsilon[a]
     }, a, SIMPLIFY = F) |> unlist()) |>
     mutate(parname = mapply(FUN = function(a) {
-      paste("tildeepsilon[", a, "]", sep = "")
+      paste("bar_epsilon[", a, "]", sep = "")
     }, a, SIMPLIFY = F) |> unlist())
   
   jags_samples$mcmc |>
-    plyr::llply(`[`,,"tildeepsilon[2]")|>
+    plyr::llply(`[`,,"bar_epsilon[2]")|>
     do.call(what=cbind)|>
     reshape2::melt()|>
     ggplot(aes(x = Var1,group=as.factor(Var2),col=as.factor(Var2),y=value)) +
@@ -72,7 +72,7 @@ if(FALSE){
     ggtitle("Real value in red, estimation in black")
   
   jags_samples$mcmc |>
-    plyr::llply(`[`,,"tildeepsilon[2]")|>
+    plyr::llply(`[`,,"bar_epsilon[2]")|>
     do.call(what=cbind)|>
     reshape2::melt()|>
     ggplot(aes(x=as.factor(Var2),y=value)) +

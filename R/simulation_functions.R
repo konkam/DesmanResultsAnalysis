@@ -14,8 +14,8 @@ sim_variants_string_matrix <- function(v, g) {
     (`dimnames<-`)(list(v = 1:v, g = 1:g))
 }
 #' @examples
-#' sim_tau_vga(g = 3, v = 12)
-sim_tau_vga <- function(v, g) {
+#' sim_tau_vgb(g = 3, v = 12)
+sim_tau_vgb <- function(v, g) {
   sim_variants_string_matrix(v, g) |>
     translate_dna_matrix_to_binary_array() |>
     (`*`)(1)
@@ -24,7 +24,8 @@ sim_tau_vga <- function(v, g) {
 #' @examples
 #' sim_pi_gs(g = 3, s=5,alpha_pi=.1)
 sim_pi_gs <- function(g, s, alpha_pi = 1) {
-  rdirichlet(alpha = rep(alpha_pi, g), n_samples = s) |> t()
+  rdirichlet(alpha = rep(alpha_pi, g), n_samples = s) |> 
+    t()|>(`dimnames<-`)(list(g=1:g,s=1:s))
 }
 
 epsilon_ba_f <- function(error_rate){diag(x = 1 - error_rate, nrow = 4) + 
@@ -36,29 +37,31 @@ epsilon_ba_f <- function(error_rate){diag(x = 1 - error_rate, nrow = 4) +
 #' @examples
 #' sim_n_vsa(s = 3, n = 1000, v = 50, g = 5)
 sim_n_vsa <- function(n=1000,# expeted sample size
-                      tau_vga = NULL,
+                      tau_vgb = NULL,
                       pi_gs = NULL,
                       v = NULL,
                       g = NULL,
                       s = NULL,
                       error_rate = .001,
                       alpha_pi = 1) {
-  if (is.null(tau_vga)) {
-    tau_vga <- sim_variants(v = v, g = g)
+  if (is.null(tau_vgb)) {
+    tau_vgb <- sim_variants(v = v, g = g)
   } else {
-    v <- dim(tau_vga)[1]
-    g <- dim(tau_vga)[2]
+    v <- dim(tau_vgb)[1]
+    g <- dim(tau_vgb)[2]
   }
   if (is.null(pi_gs)) {
     pi_gs <- sim_pi_gs(g = g, s = s, alpha_pi = alpha_pi)
+
   } else {
     s <- dim(pi_gs)[2]
   }
+  
   # Mean coverage is 20, which is pretty favourable
   n_vs <- if(is.null(n)){rpois(n = v * s, lambda = n) |> array(c(v, s))}else{array(n,c(v,s))}
   epsilon_ba <- epsilon_ba_f(error_rate)
   p_vsabg <- einsum::einsum(equation_string = "vgb,gs,ba->vsabg",
-    tau_vga,
+    tau_vgb,
     pi_gs,
     epsilon_ba
   )
@@ -82,9 +85,13 @@ sim_n_vsa <- function(n=1000,# expeted sample size
 #' g = 5;v = 50; s = 3; n = 100; alpha_pi = .1
 #' sim_tau_pi_epsilon_n(g = 5, v = 50, s = 3, n = 100, alpha_pi = 1)
 sim_tau_pi_epsilon_n <- function(v, g, s, n, error_rate = .001, alpha_pi = 1) {
-  tau_vga <- sim_tau_vga(v = v, g = g)
+  tau_vgb <- sim_tau_vgb(v = v, g = g)
   pi_gs <- sim_pi_gs(g = g, s = s, alpha_pi = alpha_pi)
+  reorder_g=order(pi_gs|>plyr::aaply(1,sum),decreasing = TRUE)|>
+    (function(x){x|>setNames(x)})()
+  pi_gs=pi_gs[reorder_g,]|>(`dimnames<-`)(list(g=1:g,s=1:s))
+  tau_vgb=tau_vgb[,reorder_g,]|>(`dimnames<-`)(list(v=1:v,g=1:g,b=nucleotides))
   epsilon_ba=epsilon_ba_f(error_rate)
-  n_vsa <- sim_n_vsa(n = n, tau_vga = tau_vga, pi_gs = pi_gs, error_rate = error_rate)
-  list(tau_vga = tau_vga, pi_gs = pi_gs, epsilon_ba=epsilon_ba,n_vsa = n_vsa)
+  n_vsa <- sim_n_vsa(n = n, tau_vgb = tau_vgb, pi_gs = pi_gs, error_rate = error_rate)
+  list(tau_vgb = tau_vgb, pi_gs = pi_gs, epsilon_ba=epsilon_ba,n_vsa = n_vsa)
 }

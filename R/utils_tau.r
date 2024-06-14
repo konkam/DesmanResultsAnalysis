@@ -28,7 +28,8 @@ translate_dna_matrix_to_binary_array <- function(variants_string_matrix) {
   variants_string_matrix |>
     tolower() |>
     plyr::aaply(1:2, `==`, nucleotides) |>
-    (`*`)(1)
+    (`*`)(1)|>
+    (function(x){names(dimnames(x))[3]="b";x})()
 }
 
 #' @examples
@@ -46,7 +47,8 @@ translate_dna_string_vector_to_string_matrix <- function(variants_string_vector)
     }) |>
     t() |>
     (function(x) {
-      x |> (`dimnames<-`)(list(v = 1:dim(x)[1], g = 1:dim(x)[2]))
+      x |> (`dimnames<-`)(list(v = 1:dim(x)[1], 
+                               g = 1:dim(x)[2]))
     })()
 }
 

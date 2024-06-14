@@ -36,7 +36,7 @@ The fasta file used for the dictionnary was: [",fasta_file,"]")
 # Results
 
 ```{r}
-plot_tilde_epsilon(mcmc_output)
+plot_bar_epsilon(mcmc_output)
 ```
 
 # Reproduction

@@ -1,8 +1,9 @@
 
-model.string.intractable.f <- function(bar_epsilon = NA, G, tau_vgb) {
-  Gd <- dim(tau_vgb)[2]
-  paste0(
-    "
+
+jags_model_string_fixed_variants_f_old <- 
+  function(bar_epsilon = NA) {
+    paste0(
+      "
 model {
   # Likelihood
   for (v in 1:V){
@@ -12,17 +13,16 @@ model {
   }
   # Mangled variants
   for (v in 1:V){
-    for (g in 1:Gd){
+    for (g in 1:G){
       for (a in 1:4){
         mixed_variants[v, g, a] = inprod(tau_vgb[v,g,], epsilon[,a])
       }
     }
   }
-
   # Latent multinomial observation probability
   for (v in 1:V){
     for (s in 1:S){
-      for (g in 1:Gd){
+      for (g in 1:G){
         for (a in 1:4){
           p_g[v, s, g, a] = pi_gs[g, s] * mixed_variants[v, g, a]
         }
@@ -34,33 +34,19 @@ model {
   }
 
   # Prior
-  for (s in 1:S){",
-    if (G < Gd) {
-      "
-          pi_sel_gs[1:G, s] ~ ddirch(alpha[1:G])
-          selected_[1:Gd, s] ~ dsample(rep(1,Gd),G)
-          selected_pos=order(selected_[1:Gd, s]*(1:N))[1:G]
-          non_selected_pos=order((rep(1,Gd)-selected_[1:Gd, s])*(1:N))[1:Gd-G]
-          pi_gs[selected_pos, s]  =pi_sel_gs[1:G, s]
-          pi_gs[non_selected_pos, s]  =rep(0,(Gd-G))
+  for (s in 1:S){
+    pi_gs[1:G, s] ~ ddirch(alpha[1:G])
+    }",
+      if (is.na(bar_epsilon_1)) {
+        "bar_epsilon~ddirch(shape_epsilon)
 "
-    } else {
+      },
       "
-    pi_gs[1:Gd, s] ~ ddirch(alpha[1:Gd])
-"
-    },
-    "}",
-    if (is.na(bar_epsilon_1)) {
-      "bar_epsilon~ddirch(c(aa, bb))"
-    },
-    "
      for (a in 1:4){
       for (b in 1:4){
         epsilon[a,b] = (a!=b)*bar_epsilon[2]/3 +(a==b)*bar_epsilon[1]
         }
     }
-
 }
 "
-  )
-}
+    )}
