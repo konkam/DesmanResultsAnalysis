@@ -1,5 +1,4 @@
 #### Prior specification for the error matrix
-
 #' @description
 #' Let's call \eqn{\tilde\epsilon} the error rate, which is of order 10e-3.
 #' \deqn{\epsilon=(1-\tilde\epsilon)\times I_4+ \frac{\tilde\epsilon}3\times(J_4-I_4),  } where \eqn{(\tilde\epsilon\sim\mathrm{Beta}(a,b)} means that the prior expected value for the diagonal element \eqn{\tilde\epsilon=\epsilon_{1,1}} is \eqn{\frac{a}{a+b}} and its variance is \eqn{\frac{ab}{(a+b)^2(a+b+1)}}
@@ -32,7 +31,8 @@ smc_observation_f <-
            bar_epsilon_1=NULL,
            tau_vgb=NULL,
            alpha_tau=NULL,
-           kappa_rho=NULL) {
+           kappa_rho=NULL,
+           alpha_rho=NULL) {
     
     
     dimnames(n_vsa) <- lapply(dim(n_vsa), seq_len)
@@ -48,6 +48,10 @@ smc_observation_f <-
           bar_epsilon_1_mean=bar_epsilon_1_mean)
         observations=c(observations,list(alpha_bar_epsilon=alpha_bar_epsilon))}}
     if(!is.null(kappa_rho)){observations=c(observations,list(kappa_rho=kappa_rho))}
+    if(!is.null(alpha_rho)){observations=c(observations,list(alpha_rho=alpha_rho))}
+    if(!is.null(rep_alpha_rho)){
+      observations=c(observations,
+                     list(rep_alpha_rho=rep(alpha_rho,4)))}
     if(!is.null(alpha_pi)){observations=c(observations,
                                    list(alpha_pi=alpha_pi,
                                         rep_alpha_pi=rep(alpha_pi,G)))}
@@ -66,18 +70,3 @@ smc_observation_f <-
     
     if(gs!="nimble"){c(constants,observations)}else{list(constants=constants,observations=observations)}
     }
-
-
-
-
-smc_monitor_f <- 
-  function( gs="jags",
-            fixed_tau=FALSE,
-           fixed_bar_epsilon=FALSE,
-           constrained_epsilon_matrix=TRUE,
-           relax_rho=FALSE){
-    c("pi_gs",
-      if(!fixed_tau&!relax_rho){"tau_vgb"},
-      if(!fixed_bar_epsilon&constrained_epsilon_matrix){"bar_epsilon[1]"},
-      if(!fixed_bar_epsilon&!constrained_epsilon_matrix){"epsilon_ba"},
-      if(relax_rho){c("rho_vga","alpha_rho")})}

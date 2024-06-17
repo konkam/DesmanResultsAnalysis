@@ -55,14 +55,17 @@ gs_run<-
            alpha_bar_epsilon=c(1,10),
            bar_epsilon_1=NULL,
            kappa_rho=NULL,
+           alpha_rho=NULL,
            alpha_pi=.1,
            n_chains = 2,
+           init=NULL,
            ...) {
     
     fixed_bar_epsilon=!is.null(bar_epsilon_1)
     fixed_tau=!is.null(tau_vgb)
     relax_tau=!is.null(alpha_tau)
     relax_rho=!is.null(kappa_rho)
+    fixed_alpha_rho=!is.null(alpha_rho)
     constrained_epsilon_matrix=is.null(alpha_epsilon)
     
     model_string <-
@@ -87,26 +90,45 @@ gs_run<-
                bar_epsilon_1_std=bar_epsilon_1_std,
                bar_epsilon_1_mean=bar_epsilon_1_mean,
                alpha_pi=alpha_pi)
+    
     monitor=smc_monitor_f( gs="jags",
                 fixed_tau=fixed_tau,
                 fixed_bar_epsilon=fixed_bar_epsilon,
                 constrained_epsilon_matrix=constrained_epsilon_matrix,
                 relax_rho=relax_rho)
-        
+    
+    if(is.null(init)){
+      init=smc_inits(V=dim(n_vsa)[1],
+               S=dim(n_vsa)[1],
+               G=G,
+               tau_vgb_0=NULL,
+               pi_gs_0=NULL,
+               gs=gs,
+               fixed_tau=fixed_tau,
+               alpha_tau=alpha_tau,
+               alpha_epsilon=alpha_epsilon,
+               alpha_bar_epsilon=alpha_bar_epsilon,
+               kappa_rho=kappa_rho,
+               alpha_rho=alpha_rho,
+               bar_epsilon_1_std=bar_epsilon_1_std,
+               bar_epsilon_1_mean=bar_epsilon_1_mean,
+               alpha_pi=alpha_pi) }  
   # Compiling and producing posterior samples from the model.
+    
    if(gs=="jags"){
      smc_samples <-runjags::run.jags(
       model = model_string,
       data = observations_and_constants,
       monitor = monitor,n.chains = n_chains,
+      inits=inits,
       ...
      )}
     if(gs=="nimble"){
       nimble_code=eval(parse(text=paste0("nimble::nimbleCode(",model_string,")")))
       model <- nimble::nimbleModel(
         code = nimble_code, 
-        data = data_list, 
-        constants = constants, 
+        data = observations_and_constants$data_list, 
+        constants = observations_and_constants$constants, 
         inits = inits)
       compiled_model <- compileNimble(model)   
       mcmcConf <- configureMCMC(model)
@@ -122,10 +144,11 @@ gs_run<-
     
     
     if(gs=="stan"){
-      smc_samples=rstan::stan(model_code = model_string, data = c(data_list,constants), ...)}
+      smc_samples=rstan::stan(model_code = model_string, 
+                              data = observations_and_constants, ...)}
     
     if(gs=="custom"){
-      smc_samples= smc_sampler(n_vsa,
+      smc_samples= smc_custom(n_vsa,
                                seed=1,
                                n_plus=sum(n_vsa),
                                n_vsa_df=reorder_counts(n_vsa = n_vsa,seed=seed),

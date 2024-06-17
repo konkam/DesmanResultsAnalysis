@@ -32,7 +32,7 @@ The fasta file used for the dictionnary was:
 ## Free epsilon
 
 ``` r
-plot_bar_epsilon(mcmc_output = mcmc_output,error_rate = desman_tuning_parameters$error_rate)
+plot_bar_epsilon(mcmc_output = mcmc_output,epsilon_bar_1 = desman_tuning_parameters$epsilon_bar_1)
 ```
 
     ## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.

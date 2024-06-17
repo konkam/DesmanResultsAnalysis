@@ -39,7 +39,7 @@ smc_observation_desman_f<-function(n_vsa,
 #' @param tau_vgb a collection of variants
 #' @param G an integer. If G is smaller than the number of variants in the variant bin, then the algorithm is ran on the minimum of G and the number of variants in the bin.
 #' @param bar_epsilon a numerical value. if NA, then the model uses a dirichlet prior.
-#' @param error_rate = 0.001 controls the dirichlet prior on bar_epsilon
+#' @param epsilon_bar_1 = 0.001 controls the dirichlet prior on bar_epsilon
 #' @param prior_std = 0.01 controls the dirichlet prior on bar_epsilon
 #' @examples
 #' tau_pi_n <- sim_tau_pi_epsilon_n(v = 50, g = 5, s = 3, n = 1000, alpha_pi = 1)

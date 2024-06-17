@@ -1,7 +1,7 @@
 #'@examples
 #'gs="jags"
 #'tau_pi_n <- sim_tau_pi_epsilon_n(v = 50, g = 5, s = 3, 
-#'n = 1000, alpha_pi = .1, error_rate = .000001)
+#'n = 1000, alpha_pi = .1, epsilon_bar_1 = .000001)
 #'n_vsa = tau_pi_n$n_vsa
 #'tau_vgb = tau_pi_n$tau_vgb
 #'G=if(!is.null(tau_vgb)){dim(tau_vgb)[2]}else{5}

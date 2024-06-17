@@ -11,7 +11,8 @@ model_string_f <-
            block_tau=TRUE,
            fixed_tau=FALSE,
            relax_tau=FALSE,
-           relax_rho=FALSE) {
+           relax_rho=FALSE,
+           fixed_alpha_rho=FALSE) {
   paste0(
     if(gs=="jags"){
 "model "},
@@ -96,10 +97,11 @@ if(!relax_rho){
             }
           }
   }"},
-if(relax_rho){
+if(relax_rho&!fixed_alpha_rho){
   "
     alpha_rho~dbeta(kappa_rho[1],kappa_rho[2])
-    for(a in 1:4){rep_alpha_rho[a]=alpha_rho}
+    for(a in 1:4){rep_alpha_rho[a]=alpha_rho}"},
+if(relax_rho){"
     for(v in 1:V){
       for (g in 1:G){
               rho_vga[v, g, 1:4]~ddirch(rep_alpha_rho) 
