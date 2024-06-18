@@ -463,7 +463,7 @@ smc_sampler<-function(n_vsa,
 #'sim=sim_tau_pi_epsilon_n(v=v, g=g, s=s, n=n, epsilon_bar_1 = .001, alpha_pi=alpha_pi)
 #'n_vsa=sim$n_vsa
 #'i=3
-inits=smc_inits(V=20,
+if(FALSE){inits=smc_inits(V=20,
            S=s,
            G=g,
            tau_vgb_0=NULL,
@@ -477,7 +477,7 @@ inits=smc_inits(V=20,
            alpha_rho=NULL,
            bar_epsilon_1_std=NULL,
            bar_epsilon_1_mean=NULL,
-           alpha_pi=NULL) 
+           alpha_pi=NULL) }
 #'n_vsa_df=reorder_counts(n_vsa = n_vsa,seed=seed)
 #'n_vsa_lambda=sub_sample_counts(n_vsa_df,lambda=.5)
 #'delta=1e-3

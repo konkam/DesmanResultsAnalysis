@@ -76,8 +76,8 @@ sampler_tau_i<-function(tau_ivgb,
 #'n=1000;v=20;g=5;s=3;alpha_pi=.1
 #'sim_tau_pi_epsilon_n(v=v, g=g, s=s, n=n, epsilon_bar_1 = .001, alpha_pi=alpha_pi)|>attach()
 #'epsilon_ba=.999*diag(4)+.001/3*(1-diag(4))
-#'sampler_xi(tau_vgb,pi_gs,epsilon_ba)
-sampler_xi<-function(tau_vgb,pi_gs,epsilon_ba,
+#'sampler_m(tau_vgb,pi_gs,epsilon_ba)
+sampler_m<-function(tau_vgb,pi_gs,epsilon_ba,
                      v=dim(tau_vgb)[1],
                      s=dim(pi_gs)[2],
                      g=dim(pi_gs)[1]){
@@ -92,8 +92,10 @@ sampler_xi<-function(tau_vgb,pi_gs,epsilon_ba,
 }
 
 
-sampler_xi_i<-function(i,tau_ivgb,pi_igs,
+sampler_m_i<-function(tau_ivgb,pi_igs,
                        epsilon_iba,
+                       n_vsa,
+                       i=dim(chi_ivsag)[1],
                        v=dim(tau_vgb)[1],
                        s=dim(pi_gs)[2],
                        g=dim(pi_gs)[1]){
@@ -108,18 +110,35 @@ sampler_xi_i<-function(i,tau_ivgb,pi_igs,
 }
 
 
-nu_from_xi<-function(xi){einsum::einsum("vsabg->vsab",xi)}
-mu_from_xi<-function(xi){einsum::einsum("vsabg->vsag",xi)}
 
-nu_i_from_xi_i<-function(xi){einsum::einsum("ivsabg->ivsab",xi)}
-mu_i_from_xi_i<-function(xi){einsum::einsum("ivsabg->ivsag",xi)}
+#'@examples
+#'sim=sim_tau_pi_epsilon_n_i(i=4,v=6, g=5, s=3, n=50, epsilon_bar_1 = .001, alpha_pi = 1)
+#'chi_ivsag=sim$c
+#'
+sampler_m_ivsag<-function(chi_ivsag,
+                      n_vsa,
+                      i=dim(chi_ivsag)[1],
+                      v=dim(chi_ivsag)[2],
+                      s=dim(pi_igs)[3],
+                      g=dim(pi_igs)[2],
+                      grid_ivsa=expand.grid(i=1:i,v=1:v,s=1:s,a=1:4)){
+  plyr::maply(grid_ivsa,function(i,v,s,a){
+    rmultinom(1,size=n_vsa[v,s,a],
+              prob = chi_ivsag[i,v,s,a])})
+  
+}
+m_vsab_from_m<-function(xi){einsum::einsum("vsabg->vsab",xi)}
+m_vsag_from_m<-function(xi){einsum::einsum("vsabg->vsag",xi)}
+
+m_ivsab_from_m_i<-function(xi){einsum::einsum("ivsabg->ivsab",xi)}
+m_ivsag_from_m<-function(xi){einsum::einsum("ivsabg->ivsag",xi)}
 
 #'@description sampler_pi
 #'@examples
 #'n=1000;v=20;g=5;s=3;alpha_pi=.1
 #'sim_tau_pi_epsilon_n(v=v, g=g, s=s, n=n, epsilon_bar_1 = .001, alpha_pi=alpha_pi)|>attach()
-#'xi=sampler_xi(tau_vgb,pi_gs,epsilon_ba)
-#'mu_vsag=mu_from_xi(xi)
+#'xi=sampler_m(tau_vgb,pi_gs,epsilon_ba)
+#'mu_vsag=m_vsag_from_m(xi)
 #'rep_alpha_pi=rep(alpha_pi,g)
 #'sampler_pi(mu_vsag,rep_alpha_pi)
 
@@ -153,7 +172,7 @@ a_neq_b=g_neq_g_f(4)
 #'n=1000;v=20;g=5;s=3;alpha_pi=.1
 #'sim_tau_pi_epsilon_n(v=v, g=g, s=s, n=n, epsilon_bar_1 = .001, alpha_pi=alpha_pi)|>attach()
 #'
-#'nu_vsab=nu_from_xi(xi)
+#'nu_vsab=m_vsab_from_m(xi)
 #'alpha_epsilon=c(1,10)
 #'
 #'sampler_bar_epsilon_1_0(nu_vsab,alpha_epsilon)

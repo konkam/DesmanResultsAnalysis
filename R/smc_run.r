@@ -120,7 +120,7 @@ gs_run<-
       model = model_string,
       data = observations_and_constants,
       monitor = monitor,n.chains = n_chains,
-      inits=inits,
+      #inits=inits,
       ...
      )}
     if(gs=="nimble"){

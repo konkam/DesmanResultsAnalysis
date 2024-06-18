@@ -25,6 +25,17 @@ plot_pi_tau_from_sample<-
         plyr::aaply(1,sum,.drop=FALSE)|>
         plyr::adply(1,.drop=FALSE)|>
         dplyr::rename(pi_g="V1")
+      pi_gs_true=true_parameter$pi_gs|>
+        plyr::adply(1:2,.drop=FALSE)|>
+        dplyr::rename(value="V1")|>
+        dplyr::group_by(g)|>
+        dplyr::mutate(reorder_g=g,variable="pi",chain="true")|>
+        dplyr::ungroup()|>
+        (function(x){
+          rbind(x|>
+                  dplyr::mutate(iteration=0),
+                x|>
+                  dplyr::mutate(iteration=t_step))})()
      tau_true=true_parameter$tau_vgb|>plyr::adply(1:3)|>
        dplyr::left_join(pi_g_true)|>
         dplyr::mutate(part_of_g=V1*pi_g,
@@ -51,19 +62,23 @@ plot_pi_tau_from_sample<-
         ggplot(aes(x=iteration,y=value*part_of_g,group=interaction(chain,reorder_g,b,v),fill=b))+
         geom_area()+
         facet_grid(strtoi(reorder_g)+strtoi(v)~chain,scales="free_x")
-      plot_epsilon=smc_samples|>
+      
+      plot_epsilon=if(any(grepl(pattern = "epsilon",smc_samples$mcmc[[1]]|>colnames()))){smc_samples|>
         mcmc_output_df(variable_name = "bar_epsilon[1]")|>
         ggplot(aes(x=iteration,y=value))+
         geom_line()+
         scale_y_continuous(trans="log10")+
-        facet_wrap(~chain)
+        facet_wrap(~chain)}else{NULL}
         
       
      plot_pi= smc_samples|>
         mcmc_output_df(variable_name = "pi",index="gs")|>
        dplyr::left_join(reorder_g)|>
-        ggplot(aes(x=iteration,y=value,group=chain,colour=chain))+
-        facet_grid(reorder_g~s)
+       (`[`)(names(pi_gs_true))|>
+       rbind(pi_gs_true)|>
+        ggplot(aes(x=iteration,y=value,group=reorder_g,fill=as.factor(reorder_g)))+
+       geom_area()+
+        facet_grid(s~chain,scales="free_x")
       
       
       list(plot_tau=plot_tau,plot_epsilon=plot_epsilon,

@@ -45,8 +45,8 @@ sampler_tau_i<-function(tau_ivgb,pi_igs,epsilon_iba,n_vsa,
 #'n=1000;v=20;g=5;s=3;alpha_pi=.1
 #'sim_tau_pi_epsilon_n(v=v, g=g, s=s, n=n, epsilon_bar_1 = .001, alpha_pi=alpha_pi)|>attach()
 #'epsilon_ba=.999*diag(4)+.001/3*(1-diag(4))
-#'sampler_xi(tau_vgb,pi_gs,epsilon_ba)
-sampler_xi<-function(tau_vgb,pi_gs,epsilon_ba,
+#'sampler_m(tau_vgb,pi_gs,epsilon_ba)
+sampler_m<-function(tau_vgb,pi_gs,epsilon_ba,
                      v=dim(tau_vgb)[1],
                      s=dim(pi_gs)[2],
                      g=dim(pi_gs)[1]){
@@ -61,7 +61,7 @@ sampler_xi<-function(tau_vgb,pi_gs,epsilon_ba,
 }
 
 
-sampler_xi_i<-function(i,tau_ivgb,pi_igs,epsilon_iba,
+sampler_m_i<-function(i,tau_ivgb,pi_igs,epsilon_iba,
                        v=dim(tau_vgb)[1],
                        s=dim(pi_gs)[2],
                        g=dim(pi_gs)[1]){
@@ -76,18 +76,18 @@ sampler_xi_i<-function(i,tau_ivgb,pi_igs,epsilon_iba,
 }
 
 
-nu_from_xi<-function(xi){einsum::einsum("vsabg->vsab",xi)}
-mu_from_xi<-function(xi){einsum::einsum("vsabg->vsag",xi)}
+m_vsab_from_m<-function(xi){einsum::einsum("vsabg->vsab",xi)}
+m_vsag_from_m<-function(xi){einsum::einsum("vsabg->vsag",xi)}
 
-nu_i_from_xi_i<-function(xi){einsum::einsum("ivsabg->ivsab",xi)}
-mu_i_from_xi_i<-function(xi){einsum::einsum("ivsabg->ivsag",xi)}
+m_ivsab_from_m_i<-function(xi){einsum::einsum("ivsabg->ivsab",xi)}
+m_ivsag_from_m<-function(xi){einsum::einsum("ivsabg->ivsag",xi)}
 
 #'@description sampler_pi
 #'@examples
 #'n=1000;v=20;g=5;s=3;alpha_pi=.1
 #'sim_tau_pi_epsilon_n(v=v, g=g, s=s, n=n, epsilon_bar_1 = .001, alpha_pi=alpha_pi)|>attach()
-#'xi=sampler_xi(tau_vgb,pi_gs,epsilon_ba)
-#'mu_vsag=mu_from_xi(xi)
+#'xi=sampler_m(tau_vgb,pi_gs,epsilon_ba)
+#'mu_vsag=m_vsag_from_m(xi)
 #'alpha_g=rep(.1,g)
 #'sampler_pi(mu_vsag,alpha_g)
 
@@ -121,7 +121,7 @@ a_neq_b=g_neq_g_f(4)
 #'n=1000;v=20;g=5;s=3;alpha_pi=.1
 #'sim_tau_pi_epsilon_n(v=v, g=g, s=s, n=n, epsilon_bar_1 = .001, alpha_pi=alpha_pi)|>attach()
 #'
-#'nu_vsab=nu_from_xi(xi)
+#'nu_vsab=m_vsab_from_m(xi)
 #'delta=.1
 #'
 #'sampler_epsilon_star(nu_vsab,alpha_g)
@@ -146,11 +146,11 @@ sampler_epsilon_star<-function(nu_vsab,delta){
 
 
 smc_kernel<-function(n_vsa,tau_vgb,pi_gs,epsilon_ba,alpha_g,delta){
-  xi_vsabg=sampler_xi(tau_vgb=tau_vgb,
+  xi_vsabg=sampler_m(tau_vgb=tau_vgb,
                       pi_gs=pi_gs,
                       epsilon_ba = epsilon_ba)
-  nu_vsab<-nu_from_xi(xi=xi_vsabg)
-  mu_vsab<-mu_from_xi(xi=xi_vsabg)
+  nu_vsab<-m_vsab_from_m(xi=xi_vsabg)
+  mu_vsab<-m_vsag_from_m(xi=xi_vsabg)
   pi_gs<-sampler_pi(mu_vsag = mu_vsab,alpha_g = alpha_g)
   tau_vgb<-sampler_tau(n_vsa = n_vsa,tau_vgb = tau_vgb,pi_gs = pi_gs,epsilon_ba = epsilon_ba)
   epsilon_ba<-sampler_epsilon_star(nu_vsab,delta)
@@ -158,12 +158,12 @@ smc_kernel<-function(n_vsa,tau_vgb,pi_gs,epsilon_ba,alpha_g,delta){
 }
 
 smc_kernel_i<-function(i,g,n_vsa,tau_ivgb,pi_igs,epsilon_iba,alpha_g,delta,g_neq_g =g_neq_g_f(g)){
-  xi_ivsabg=sampler_xi_i(i =i, tau_ivgb=tau_ivgb,
+  xi_ivsabg=sampler_m_i(i =i, tau_ivgb=tau_ivgb,
                          pi_igs=pi_igs,
                          epsilon_iba = epsilon_iba)
   #plyr::aaply(nu_ivsab,1,sampler_epsilon_star,delta=delta)
-  nu_ivsab=nu_i_from_xi_i(xi=xi_ivsabg)
-  mu_ivsab=mu_i_from_xi_i(xi=xi_ivsabg)
+  nu_ivsab=m_ivsab_from_m_i(xi=xi_ivsabg)
+  mu_ivsab=m_ivsag_from_m(xi=xi_ivsabg)
   pi_igs=sampler_pi_i(mu_ivsag = mu_ivsab,alpha_g = alpha_g)
   tau_ivgb=sampler_tau_i(n_vsa = n_vsa,tau_ivgb = tau_ivgb,pi_igs = pi_igs,epsilon_iba = epsilon_iba,g_neq_g=g_neq_g )
   list(tau_ivgb=tau_ivgb,pi_igs=pi_igs,epsilon_iba=epsilon_iba)

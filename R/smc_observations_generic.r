@@ -65,7 +65,8 @@ smc_observation_f <-
       G4=4^G)
     if(!is.null(alpha_tau)){observations=c(observations,list(alpha_tau=alpha_tau))}
     
-    if(!is.null(bar_epsilon_1)){constants=c(constants,list(bar_epsilon_1=bar_epsilon_1))}
+    if(!is.null(bar_epsilon_1)){constants=c(constants,
+                                            list(bar_epsilon_1=bar_epsilon_1,bar_epsilon=c(bar_epsilon_1,1-bar_epsilon_1)))}
     
     
     if(gs!="nimble"){c(constants,observations)}else{list(constants=constants,observations=observations)}

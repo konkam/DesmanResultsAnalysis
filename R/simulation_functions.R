@@ -151,14 +151,22 @@ sim_tau_pi_epsilon_n_i <- function(i,v, g, s, n, epsilon_bar_1 = .001, alpha_pi 
                        function(ii){
                          tau_ivgb[ii,,reorder_ig[ii,],,drop=FALSE]})|>(`dimnames<-`)(list(i=1:i,v=1:v,g=1:g,b=nucleotides))
   epsilon_iba=epsilon_iba_f(i,epsilon_bar_1)
+  
+  rho_ivga=einsum::einsum('ivgb,iba->ivga',tau_ivgb,epsilon_iba)
+  chi_ivsag=einsum::einsum('ivga,igs,iba->ivsag',rho_ivga,pi_gs)
+  chi_ivsabg=einsum::einsum('ivgb,igs,iba->ivsabg',tau_ivgb,pi_igs,epsilon_iba)
+  
   n_ivsa <- sim_n_ivsa(i,
-                                  n=n,# expeted sample size
-                                  tau_ivgb = tau_ivgb,
-                                  pi_igs = pi_igs,
-                                  v = v,
-                                  g = g,
-                                  s = s,
-                                  epsilon_bar_1 = .001,
-                                  alpha_pi = 1)
-  list(tau_ivgb = tau_vgb, pi_igs = pi_igs, epsilon_iba=epsilon_iba,n_vsa = n_ivsa)
+                       n=n,# expeted sample size
+                       tau_ivgb = tau_ivgb,
+                       rho_ivga=rho_ivga,
+                       chi_ivsag=chi_ivsag,
+                       chi_ivsabg=chi_ivsabg,
+                       pi_igs = pi_igs,
+                       v = v,
+                       g = g,
+                       s = s,
+                       epsilon_bar_1 = .001,
+                       alpha_pi = 1)
+  list(tau_ivgb = tau_vgb, pi_igs = pi_igs, epsilon_iba=epsilon_iba,n_vsa = n_ivsa,rho_ivga=rho_ivga,chi_ivsag=chi_ivsag,chi_ivsabg=chi_ivsabg)
 }
