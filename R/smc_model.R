@@ -77,7 +77,7 @@ model_string_f <-
     "
   for (a in 1:4){
       for (b in 1:4){
-        epsilon[a,b] = (a!=b)*bar_epsilon[2]/3 +(a==b)*bar_epsilon[1]
+        epsilon[a,b] = (a!=b)*bar_epsilon[1]/3 +(a==b)*bar_epsilon[2]
         }
     }
       "

@@ -158,11 +158,11 @@ pi_gs0<-matrix(c(.1,.1,.4,.4),4,1)
 alpha_g=.0001
 n_vsa=sim_n_vsa(tau_vgb=tau_vgb,n = 10000,pi_gs = pi_gs,epsilon_bar_1 = .0001)
 
-  xi_vsabg=sampler_xi(tau_vgb=tau_vgb,
+  xi_vsabg=sampler_m(tau_vgb=tau_vgb,
                       pi_gs=pi_gs,
                       epsilon_ba = epsilon_ba)
-  nu_vsab<-nu_from_xi(xi=xi_vsabg)
-  mu_vsab<-mu_from_xi(xi=xi_vsabg)
+  nu_vsab<-m_vsab_from_m(xi=xi_vsabg)
+  mu_vsab<-m_vsag_from_m(xi=xi_vsabg)
   pi_gs1<-sampler_pi(mu_vsag = mu_vsab,alpha_g = alpha_g)
 ```
 
