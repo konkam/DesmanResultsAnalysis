@@ -42,8 +42,7 @@ kernel_f<-function(
     "theta}")))
     
     
-  }}
-
+  }
 #'@description SMC kernel
 #'@examples
 #'n=1000;v=20;g=5;s=3;alpha_pi=.1
