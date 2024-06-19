@@ -463,21 +463,23 @@ smc_sampler<-function(n_vsa,
 #'sim=sim_tau_pi_epsilon_n(v=v, g=g, s=s, n=n, epsilon_bar_1 = .001, alpha_pi=alpha_pi)
 #'n_vsa=sim$n_vsa
 #'i=3
-if(FALSE){inits=smc_inits(V=20,
-           S=s,
-           G=g,
+if(FALSE){
+  inits=smc_inits(v=20,
+           s=s,
+           g=g,
            tau_vgb_0=NULL,
            pi_gs_0=NULL,
            gs="jags",
            fixed_tau=FALSE,
            alpha_tau=NULL,
            alpha_epsilon=NULL,
-           alpha_bar_epsilon=NULL,
+           alpha_bar_epsilon=c(1,100),
            kappa_rho=NULL,
            alpha_rho=NULL,
            bar_epsilon_1_std=NULL,
            bar_epsilon_1_mean=NULL,
-           alpha_pi=NULL) }
+           alpha_pi=.1) 
+}
 #'n_vsa_df=reorder_counts(n_vsa = n_vsa,seed=seed)
 #'n_vsa_lambda=sub_sample_counts(n_vsa_df,lambda=.5)
 #'delta=1e-3
@@ -521,6 +523,7 @@ smc_custom<-function(n_vsa,
                       trace_all=TRUE,
                       .update_lambda=update_lambda,
                       mcmc=FALSE,
+                     inits=smc_inits(),
                      ...){
   
   lambda=0.1

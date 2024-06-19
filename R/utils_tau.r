@@ -22,7 +22,7 @@ translate_dna_to_binary <- function(dna_string) {
 
 
 #' @examples
-#' variants_string_matrix <- sim_variants_string_matrix(3, 12)
+#' variants_string_matrix <- sim_tau_vgb_string_matrix(3, 12)
 #' translate_dna_matrix_to_binary_array(variants_string_matrix)
 translate_dna_matrix_to_binary_array <- function(variants_string_matrix) {
   variants_string_matrix |>
@@ -34,7 +34,7 @@ translate_dna_matrix_to_binary_array <- function(variants_string_matrix) {
 
 #' @examples
 #' variants_string_vector <- 
-#' sim_variants_string_matrix(g = 3, v = 12) |> 
+#' sim_tau_vgb_string_matrix(g = 3, v = 12) |> 
 #' plyr::aaply(2, paste0, collapse = "")
 #' translate_dna_string_vector_to_string_matrix(variants_string_vector)
 translate_dna_string_vector_to_string_matrix <- function(variants_string_vector) {
@@ -55,7 +55,7 @@ translate_dna_string_vector_to_string_matrix <- function(variants_string_vector)
 
 #' @examples
 #' variants_string_vector <- 
-#' sim_variants_string_matrix(g = 3, v = 12) |> 
+#' sim_tau_vgb_string_matrix(g = 3, v = 12) |> 
 #' plyr::aaply(2, paste0, collapse = "")
 #' translate_dna_string_vector_to_string_matrix(variants_string_vector)|>
 #' translate_dna_matrix_to_binary_array()|>
