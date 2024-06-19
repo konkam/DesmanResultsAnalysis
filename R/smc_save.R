@@ -24,7 +24,7 @@ sampler_tau<-function(tau_vgb,pi_gs,epsilon_ba,n_vsa,
 }
 
 
-sampler_tau_i<-function(tau_ivgb,pi_igs,epsilon_iba,n_vsa,
+sampler_tau_ivgb<-function(tau_ivgb,pi_igs,epsilon_iba,n_vsa,
                         v=dim(tau_ivgb)[2],
                         #s=dim(pi_gs)[2],
                         g=dim(pi_igs)[2],
@@ -165,7 +165,7 @@ smc_kernel_i<-function(i,g,n_vsa,tau_ivgb,pi_igs,epsilon_iba,alpha_g,delta,g_neq
   nu_ivsab=m_ivsab_from_m_i(xi=xi_ivsabg)
   mu_ivsab=m_ivsag_from_m(xi=xi_ivsabg)
   pi_igs=sampler_pi_i(mu_ivsag = mu_ivsab,alpha_g = alpha_g)
-  tau_ivgb=sampler_tau_i(n_vsa = n_vsa,tau_ivgb = tau_ivgb,pi_igs = pi_igs,epsilon_iba = epsilon_iba,g_neq_g=g_neq_g )
+  tau_ivgb=sampler_tau_ivgb(n_vsa = n_vsa,tau_ivgb = tau_ivgb,pi_igs = pi_igs,epsilon_iba = epsilon_iba,g_neq_g=g_neq_g )
   list(tau_ivgb=tau_ivgb,pi_igs=pi_igs,epsilon_iba=epsilon_iba)
 }
 #'@examples
