@@ -85,7 +85,7 @@ model_string_f <-
   if (!fixed_bar_epsilon&!constrained_epsilon_matrix){
     "
   for (a in 1:4){
-        epsilon[a,1:4] = ddirch(alpha_epsilon)
+        epsilon[a,1:4] ~ ddirch(rep_alpha_epsilon)
     }
     "})},
 #---------------------------------------rho
@@ -168,7 +168,7 @@ transformed parameters {
   // Construct epsilon based on bar_epsilon
   for (a in 1:4) {
     for (b in 1:4) {
-      epsilon[a, b] = (a != b) * bar_epsilon[2] / 3 + (a == b) * bar_epsilon[1];
+      epsilon[a, b] = (a != b) * bar_epsilon[1] / 3 + (a == b) * bar_epsilon[2];
     }
   }
   

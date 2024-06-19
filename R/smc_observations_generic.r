@@ -40,7 +40,7 @@ smc_observation_f <-
     observations=list(n_vsa=n_vsa,
            n_vs=n_vsa |> apply(MARGIN = c(1, 2), FUN = sum))
     if(!is.null(tau_vgb)){observations=c(observations,list(tau_vgb=tau_vgb))}
-    if(!is.null(alpha_epsilon)){observations=c(observations,list(alpha_epsilon=alpha_epsilon))}
+    if(!is.null(alpha_epsilon)){observations=c(observations,list(alpha_epsilon=alpha_epsilon,rep_alpha_epsilon=rep(alpha_epsilon,4)))}
     if(!is.null(alpha_bar_epsilon)){observations=c(observations,list(alpha_bar_epsilon=alpha_bar_epsilon))}else{
       if(!is.null(bar_epsilon_1_std)&!is.null(bar_epsilon_1_mean)){
         alpha_bar_epsilon=alpha_bar_epsilon_specification(
@@ -48,10 +48,8 @@ smc_observation_f <-
           bar_epsilon_1_mean=bar_epsilon_1_mean)
         observations=c(observations,list(alpha_bar_epsilon=alpha_bar_epsilon))}}
     if(!is.null(kappa_rho)){observations=c(observations,list(kappa_rho=kappa_rho))}
-    if(!is.null(alpha_rho)){observations=c(observations,list(alpha_rho=alpha_rho))}
-    if(!is.null(rep_alpha_rho)){
-      observations=c(observations,
-                     list(rep_alpha_rho=rep(alpha_rho,4)))}
+    if(!is.null(alpha_rho)){observations=c(observations,list(alpha_rho=alpha_rho,rep_alpha_rho=rep(alpha_rho,4)))}
+
     if(!is.null(alpha_pi)){observations=c(observations,
                                    list(alpha_pi=alpha_pi,
                                         rep_alpha_pi=rep(alpha_pi,G)))}
