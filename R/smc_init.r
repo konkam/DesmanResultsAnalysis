@@ -57,7 +57,7 @@ smc_inits <-
     if(!(fixed_bar_epsilon_1)&!is.null(alpha_bar_epsilon)){
       inits=c(inits,list(bar_epsilon_1=sampler_bar_epsilon_1_0(alpha_bar_epsilon)))
     }
-    inits=c(inits,list(tau_vgb=if(!is.null(tau_vgb)){tau_vgb}else{sim_tau_vgb(v,g)}))}
+    inits=c(inits,list(tau_vgb=if(!is.null(tau_vgb_0)){tau_vgb_0}else{sim_tau_vgb(v,g)}))}
     if(!is.null(kappa_rho)){inits=c(inits,list(alpha_rho=sample_alpha_rho(kappa_rho),
                                                rho=sample_rho(v,g,alpha_rho)))}
     

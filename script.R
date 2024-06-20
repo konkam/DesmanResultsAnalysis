@@ -13,6 +13,7 @@ g=4
 
 
 gs="jags"
+set.seed(1)
 tau_pi_n <- sim_tau_pi_epsilon_n(v = 4, g = gm, s = 3, 
 n = 1000, alpha_pi = .1, epsilon_bar_1 = .001)
 n_vsa =tau_pi_n$n_vsa
@@ -35,6 +36,7 @@ gs_run(n_vsa,
        adapt=0,
        sample=40,
        thin=500)->smc_sample
+
        smc_sample$smc_samples->smc_samples
 reorder_g=smc_reorder(smc_samples,n_vsa)
 importance_g_it=
@@ -54,8 +56,19 @@ tau_pi_n$pi_gs
 n_vsa
 
 
+###################
+g=2;v=2;s=3;alpha_pi=2
+tau_vgb=c("aa","cc")|>translate_dna_string_vector_to_string_matrix()|>translate_dna_matrix_to_binary_array()
+tau_vgb0=c("ac","ca")|>translate_dna_string_vector_to_string_matrix()|>translate_dna_matrix_to_binary_array()
 
-
+pi_gs <- sim_pi_gs(g = g, s = s, alpha_pi = alpha_pi)
+reorder_g=order(pi_gs|>plyr::aaply(1,sum),decreasing = TRUE)|>
+  (function(x){x|>setNames(x)})()
+pi_gs=pi_gs[reorder_g,]|>(`dimnames<-`)(list(g=1:g,s=1:s))
+tau_vgb=tau_vgb[,reorder_g,]|>(`dimnames<-`)(list(v=1:v,g=1:g,b=nucleotides))
+epsilon_ba=epsilon_ba_f(.01)
+n_vsa <- sim_n_vsa(n = 1000, tau_vgb = tau_vgb, pi_gs = pi_gs, epsilon_ba = epsilon_ba)
+inits=plyr::rlply(20,list(tau_vgb=tau_vgb0,pi_gs =sim_pi_gs(g = g, s = s, alpha_pi = alpha_pi)))
 gs_run(n_vsa,
        gs="jags",
        tau_vgb=NULL,
@@ -66,11 +79,11 @@ gs_run(n_vsa,
        bar_epsilon_1_std=NULL,
        bar_epsilon_1_mean=NULL,
        alpha_bar_epsilon=NULL,
-       bar_epsilon_1=.001,
+       bar_epsilon_1=0.001,
        kappa_rho=NULL,
        alpha_rho=NULL,
        alpha_pi=.1,
-       n_chains = 4,
+       n_chains = 20,
        burnin=0,
        adapt=0,
        sample=40,
@@ -81,24 +94,29 @@ importance_g_it2=
   importance_g_it_f(smc_samples=smc_samples2,
                     n_vsa=n_vsa,
                     reorder_g=reorder_g2)
-true_parameter=tau_pi_n
+true_parameter2=list(tau_vgb=tau_vgb,pi_gs=pi_gs)
 smc_samples2|>
   plot_pi_tau_from_sample(n_vsa,v=1:3,
                           importance_g_it=importance_g_it2,
                           reorder_g=reorder_g2,
-                          true_parameter=tau_pi_n,t_step=1)
+                          true_parameter=true_parameter2,t_step=1)
 
 ###################
 
 
 
+set.seed(1)
+tau_pi_n <- sim_tau_pi_epsilon_n(v = 4, g = gm, s = 3, 
+                                 n = 10, alpha_pi = .1, epsilon_bar_1 = .001)
+n_vsa =tau_pi_n$n_vsa
+
 
 gs_run(n_vsa,
        gs="jags",
        tau_vgb=NULL,
-       G=12,
+       G=5,
        block_tau=FALSE,
-       alpha_tau=NULL,
+       alpha_tau=.001,
        alpha_epsilon=NULL,
        bar_epsilon_1_std=NULL,
        bar_epsilon_1_mean=NULL,
@@ -106,7 +124,7 @@ gs_run(n_vsa,
        bar_epsilon_1=.2,
        kappa_rho=NULL,
        alpha_rho=NULL,
-       alpha_pi=.1,
+       alpha_pi=1,
        n_chains = 4,
        burnin=0,
        adapt=0,

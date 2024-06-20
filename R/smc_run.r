@@ -98,21 +98,28 @@ gs_run<-
                 relax_rho=relax_rho)
     
     if(is.null(init)){
-      init=smc_inits(V=dim(n_vsa)[1],
-               S=dim(n_vsa)[1],
-               G=G,
+      init=smc_inits(v=dim(n_vsa)[1],
+               s=dim(n_vsa)[1],
+               g=G,
                tau_vgb_0=NULL,
                pi_gs_0=NULL,
                gs=gs,
+               fixed_pi=FALSE,
                fixed_tau=fixed_tau,
                alpha_tau=alpha_tau,
                alpha_epsilon=alpha_epsilon,
                alpha_bar_epsilon=alpha_bar_epsilon,
+               fixed_bar_epsilon_1=FALSE,
                kappa_rho=kappa_rho,
                alpha_rho=alpha_rho,
+               bar_epsilon_1_0=NULL,
+               epsilon_ba_0=NULL,
                bar_epsilon_1_std=bar_epsilon_1_std,
                bar_epsilon_1_mean=bar_epsilon_1_mean,
                alpha_pi=alpha_pi) }  
+
+    
+    
   # Compiling and producing posterior samples from the model.
     
    if(gs=="jags"){

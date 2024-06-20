@@ -1,0 +1,249 @@
+
+ 
+ \begin{tikzpicture}[y=-2cm,x=2cm
+            > = stealth, % arrow head style
+            shorten > = 1pt, % don't touch arrow head to node
+            auto,
+%            node distance =1cm and 3cm, % distance between nodes
+            semithick, % line style
+            box/.style = {draw,red,inner sep=10pt,rounded corners=5pt}
+        ]
+
+        \tikzstyle{every state}=[
+        rectangle,
+        rounded corners=5pt,
+            draw = black,
+            thick,
+            fill = white,
+            minimum size = 4mm
+        ]
+
+ 		\node at (1.5,0) (tt) {Desman};
+        \node at (1.5,1) (blank) {};
+        \node[state,fill=black!10] at (2.5,3) (G) {$G$};
+        \node[state,fill=black!10] at (3,2) (alphapi) {$\alpha_\pi$};
+        \node[state,fill=black!10] at (1,2) (alphaepsilon) {$\alpha_{\epsilon}$};
+        \node[state] (tau) at (2,4) {$\tau$};
+        \node[state] (epsilon) at (1,4) {$\epsilon$};
+        \node[state] (pi) at (3,4) {$\pi$};
+        \node[state] (chi) at (2,5) {$\chi$};
+        %%\node (theta) at (0.5,4) {$\Theta$};
+        \node[state,text=white,fill=black] (n) at (2,7) {$n$};
+        \node[state,text=white,fill=black] (nvs) at (3,5)  {$n_{\indexvec{v},\indexvec{s},\indexsum{a}}$};
+        \node[state] (m) at (2,6) {$\countdetail$};
+
+         \node[box,fit=(tau) (pi) (epsilon)] {};
+         
+        \path[->,dashed] (alphapi) edge node {} (pi);
+        \path[->,dashed] (alphaepsilon) edge node {} (epsilon);
+        \path[->] (epsilon) edge node {} (chi);
+        \path[->] (tau) edge node {} (chi);
+        \path[->] (pi) edge node {} (chi);
+        \path[->,dashed] (chi) edge node {} (m);
+        \path[->,dashed] (epsilon) edge node {} (chi);
+        \path[->,dashed] (nvs) edge node {} (m);
+        \path[->,dashed] (G) edge node {} (tau);
+        \path[->,dashed] (G) edge node {} (pi);
+        \node[state,fill=black!10] at (2.5,3) (G) {$G$};
+        \path[->] (m) edge node {} (n);
+       
+        
+    \end{tikzpicture}%
+ \begin{tikzpicture}[y=-2cm,x=2cm,
+            > = stealth, % arrow head style
+            shorten > = 1pt, % don't touch arrow head to node
+            auto,
+%            node distance =1cm and 3cm, % distance between nodes
+            semithick, % line style
+            box/.style = {draw,red,inner sep=10pt,rounded corners=5pt}
+        ]
+
+        \tikzstyle{every state}=[
+        rectangle,
+        rounded corners=5pt,
+            draw = black,
+            thick,
+            fill = white,
+            minimum size = 4mm
+        ]
+
+        \node at (1.5,0) (tt) {Model 2};
+        \node at (1.5,1) (blank) {};
+
+        \node[state,fill=black!10] at (2.5,3) (G) {$G$};
+        \node[state,fill=black!10] at (3,2) (alphapi) {$\alpha_\pi$};
+        \node[state,fill=black!10] at (1,2) (alphaepsilon) {$\alpha_{\bar\epsilon}$};
+        \node[state] at (1,4) (barepsilon) {${\bar\epsilon}$};
+        \node[state] (tau) at (2,4) {$\tau$};
+        \node[state] (epsilon) at (1,5) {$\epsilon$};
+        \node[state] (pi) at (3,4) {$\pi$};
+        \node[state] (chi) at (2,5) {$\chi$};
+        %%\node (theta) at (0.5,4) {$\Theta$};
+        \node[state,text=white,fill=black] (n) at (2,7) {$n$};
+        \node[state,text=white,fill=black] (nvs) at (3,5)  {$n_{\indexvec{v},\indexvec{s},\indexsum{a}}$};
+        \node[state] (m) at (2,6) {$\countdetail$};
+
+         \node[box,fit= (tau) (pi) (barepsilon)] {};
+         
+        \path[->,dashed] (alphapi) edge node {} (pi);
+        \path[->,dashed] (alphaepsilon) edge node {} (barepsilon);
+        \path[->] (barepsilon) edge node {} (epsilon);
+        \path[->] (epsilon) edge node {} (chi);
+        \path[->] (tau) edge node {} (chi);
+        \path[->] (pi) edge node {} (chi);
+        \path[->,dashed] (chi) edge node {} (m);
+        \path[->] (epsilon) edge node {} (chi);
+        \path[->,dashed] (nvs) edge node {} (m);
+        \path[->] (m) edge node {} (n);
+        \path[->,dashed] (G) edge node {} (tau);
+        \path[->,dashed] (G) edge node {} (pi);
+       
+        
+    \end{tikzpicture}%
+ \begin{tikzpicture}[y=-2cm,x=2cm,
+            > = stealth, % arrow head style
+            shorten > = 1pt, % don't touch arrow head to node
+            auto,
+%            node distance =1cm and 3cm, % distance between nodes
+            semithick, % line style
+            box/.style = {draw,red,inner sep=10pt,rounded corners=5pt}
+        ]
+
+        \tikzstyle{every state}=[
+        rectangle,
+        rounded corners=5pt,
+            draw = black,
+            thick,
+            fill = white,
+            minimum size = 4mm
+        ]
+
+        \node at (1.5,0) (tt) {Model 3: ffixed $\tau$ };
+        \node at (1.5,1) (blank) {};
+
+        \node[state,fill=black!10] at (2.5,3) (G) {$G$};
+        \node[state,fill=black!10] at (3,2) (alphapi) {$\alpha_\pi$};
+        \node[state,fill=black!10] at (1,2) (alphaepsilon) {$\alpha_{\bar\epsilon}$};
+        \node[state] at (1,4) (barepsilon) {${\bar\epsilon}$};
+        \node[state,fill=black!10] (tau) at (1.5,3) {$\tau$};
+        \node[state] (epsilon) at (1,5) {$\epsilon$};
+        \node[state] (pi) at (3,4) {$\pi$};
+        \node[state] (chi) at (2,5) {$\chi$};
+        %\node (theta) at (0.5,4) {$\Theta$};
+        \node[state,text=white,fill=black] (n) at (2,7) {$n$};
+        \node[state,text=white,fill=black] (nvs) at (3,5)  {$n_{\indexvec{v},\indexvec{s},\indexsum{a}}$};
+        \node[state] (m) at (2,6) {$\countdetail$};
+
+         \node[box,fit=  (pi) (barepsilon)] {};
+        \path[->,dashed] (alphapi) edge node {} (pi);
+        \path[->,dashed] (alphaepsilon) edge node {} (barepsilon);
+        \path[->] (barepsilon) edge node {} (epsilon);
+        \path[->] (epsilon) edge node {} (chi);
+        \path[->] (tau) edge node {} (chi);
+        \path[->] (pi) edge node {} (chi);
+        \path[->,dashed] (chi) edge node {} (m);
+        \path[->] (epsilon) edge node {} (chi);
+        \path[->,dashed] (nvs) edge node {} (m);
+        \path[->] (m) edge node {} (n);
+        \path[->] (tau) edge node {} (G);
+        \path[->,dashed] (G) edge node {} (pi);
+       
+        
+    \end{tikzpicture}%
+  \begin{tikzpicture}[y=-2cm,x=2cm,
+            > = stealth, % arrow head style
+            shorten > = 1pt, % don't touch arrow head to node
+            auto,
+%            node distance =1cm and 3cm, % distance between nodes
+            semithick, % line style
+            box/.style = {draw,red,inner sep=10pt,rounded corners=5pt}
+        ]
+
+        \tikzstyle{every state}=[
+        rectangle,
+        rounded corners=5pt,
+            draw = black,
+            thick,
+            fill = white,
+            minimum size = 4mm
+        ]
+
+
+        \node at (1.5,0) (tt) {Relax $\rho$ };
+        \node[state,fill=black!10] at (2.5,1.5) (G) {$G$};
+        \node[state,fill=black!10] at (3,1) (alphapi) {$\alpha_\pi$};
+        \node[state] at (1.5,1) (alpharho) {$\alpha_\rho$};
+        \node[state] (pi) at (3,3) {$\pi$};
+        \node[state] (chi) at (1.75,4) {$\chi_{\indexvec{v},\indexvec{s},\indexvec{a},\indexsum{b},\indexvec{g}}$};
+        \node[state] (rho) at (1.5,3) {$\tilde\rho$};
+        \node[state] (tau) at (.5,4) {$\tau$};
+        \node[state,text=white,fill=black] (n) at (2,6) {$n$};
+        \node[state] (m) at (2,5) {$\countdetail_{\indexvec{v},\indexvec{s},\indexvec{a},\indexsum{b},\indexvec{g}}$};
+
+        \node[state,text=white,fill=black] (nvs) at (3,4) {$n_{\indexvec{v},\indexvec{s},\indexsum{a}}$};
+        
+        \node[box,fit=(pi) (rho) ] {};
+        \path[->,dashed] (kapparho) edge node {} (alpharho);
+        \path[->,dashed] (alpharho) edge node {} (rho);
+        \path[->,dashed] (alphapi) edge node {} (pi);
+        \path[->] (pi) edge node {} (chi);
+        \path[->] (rho) edge node {} (chi);
+        \path[->,dashed] (chi) edge node {} (m);
+        \path[->] (rho) edge node {} (tau);
+        \path[->,dashed] (nvs) edge node {} (m);
+        \path[->] (m) edge node {} (n);
+        \path[->,dashed] (G) edge node {} (pi);
+        \path[->,dashed] (G) edge node {} (rho);
+    \end{tikzpicture}%
+ \begin{tikzpicture}[y=-2cm,x=2cm,
+            > = stealth, % arrow head style
+            shorten > = 1pt, % don't touch arrow head to node
+            auto,
+%            node distance =1cm and 3cm, % distance between nodes
+            semithick, % line style
+            box/.style = {draw,red,inner sep=10pt,rounded corners=5pt}
+        ]
+
+        \tikzstyle{every state}=[
+        rectangle,
+        rounded corners=5pt,
+            draw = black,
+            thick,
+            fill = white,
+            minimum size = 4mm
+        ]
+
+        \node at (1.5,0) (tt) {Relax $\tau$ };
+        \node at (1.5,1) (blank) {};
+
+        \node[state,fill=black!10] at (2.5,3) (G) {$G$};
+        \node[state,fill=black!10] at (2,2) (alphatau) {$\alpha_\tau$};
+        \node[state,fill=black!10] at (3,2) (alphapi) {$\alpha_\pi$};
+        \node[state,fill=black!10] at (1,2) (alphaepsilon) {$\alpha_{\bar\epsilon}$};
+        \node[state] at (1,4) (barepsilon) {${\bar\epsilon}$};
+        \node[state] (tau) at (2,4) {$\tilde\tau$};
+        \node[state] (epsilon) at (1,5) {$\epsilon$};
+        \node[state] (pi) at (3,4) {$\pi$};
+        \node[state] (chi) at (2,5) {$\chi$};
+        %\node (theta) at (0.5,4) {$\Theta$};
+        \node[state,text=white,fill=black] (n) at (2,7) {$n$};
+        \node[state,text=white,fill=black] (nvs) at (3,5)  {$n_{\indexvec{v},\indexvec{s},\indexsum{a}}$};
+        \node[state] (m) at (2,6) {$\countdetail$};
+
+         \node[box,fit= (tau) (pi) (barepsilon)] {};
+        \path[->,dashed] (alphatau) edge node {} (tau);
+        \path[->,dashed] (alphapi) edge node {} (pi);
+        \path[->,dashed] (alphaepsilon) edge node {} (barepsilon);
+        \path[->] (barepsilon) edge node {} (epsilon);
+        \path[->] (epsilon) edge node {} (chi);
+        \path[->] (tau) edge node {} (chi);
+        \path[->] (pi) edge node {} (chi);
+        \path[->,dashed] (chi) edge node {} (m);
+        \path[->] (epsilon) edge node {} (chi);
+        \path[->,dashed] (nvs) edge node {} (m);
+        \path[->] (m) edge node {} (n);
+        \path[->,dashed] (G) edge node {} (tau);
+        \path[->,dashed] (G) edge node {} (pi);
+       
+        
+    \end{tikzpicture}

@@ -19,11 +19,11 @@ temper_alpha_tau=FALSE)
 #'theta=sim_tau_pi_epsilon_n_i(i=4,v=v, g=g, s=s, n=n, epsilon_bar_1 = .001, alpha_pi=alpha_pi)
 #'obs=sim_tau_pi_epsilon_n(v=v, g=g, s=s, n=n, epsilon_bar_1 = .001, alpha_pi=alpha_pi)
 #'m_ivsabg=sampler_m_ivsabg(theta$chi_ivsabg,obs$n_vsa)
-(kernel_f(
-    fixed_bar_epsilon=FALSE,constrained_epsilon_matrix=TRUE,block_tau=FALSE,fixed_tau=FALSE,relax_tau=TRUE,relax_rho=FALSE))(
-      theta=theta,
-      obs=list(n_vsa=n_vsa),
-      param=list(rep_alpha_pi=rep(.1,g),rep_alpha_tau=rep(.1,4),alpha_bar_epsilon=c(1,100)))
+#'(kernel_f(
+#'    fixed_bar_epsilon=FALSE,constrained_epsilon_matrix=TRUE,block_tau=FALSE,fixed_tau=FALSE,relax_tau=TRUE,relax_rho=FALSE))(
+#'          theta=theta,
+#'                obs=list(n_vsa=n_vsa),
+#'                      param=list(rep_alpha_pi=rep(.1,g),rep_alpha_tau=rep(.1,4),alpha_bar_epsilon=c(1,100)))
 kernel_f<-function(
         fixed_bar_epsilon=fixed_bar_epsilon,
         constrained_epsilon_matrix=constrained_epsilon_matrix,

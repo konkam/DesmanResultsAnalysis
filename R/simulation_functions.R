@@ -111,7 +111,7 @@ sim_n_ivsa <- function(n=1000,# expeted sample size
 #' @examples
 #' g = 5;v = 50; s = 3; n = 100; alpha_pi = .1
 #' sim_tau_pi_epsilon_n(g = 5, v = 50, s = 3, n = 100, alpha_pi = 1)
-sim_tau_pi_epsilon_n <- function(v, g, s, n, epsilon_bar_1 = .001, alpha_pi = 1) {
+sim_tau_pi_epsilon_n <- function(tau_vgb=NULL,v, g, s, n, epsilon_bar_1 = .001, alpha_pi = 1) {
   tau_vgb <- sim_tau_vgb(v = v, g = g)
   pi_gs <- sim_pi_gs(g = g, s = s, alpha_pi = alpha_pi)
   reorder_g=order(pi_gs|>plyr::aaply(1,sum),decreasing = TRUE)|>
