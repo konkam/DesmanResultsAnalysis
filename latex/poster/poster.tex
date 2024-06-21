@@ -7,6 +7,7 @@
 \institute{Overleaf Institute}
 %\usetheme{Board}
 \usepackage{background}
+\usepackage{dsfont}
 \backgroundsetup{scale = 1, angle = 0, opacity = 1,
    contents = {\includegraphics[width = \paperwidth,
    height = \paperheight, keepaspectratio]
@@ -14,7 +15,7 @@
   
 \newcommand{\fr}[1]{}
 \newcommand{\en}[1]{#1} 
-   
+   \usepackage{oubraces}
    \definebackgroundstyle{samplebackgroundstyle}{
 \draw[inner sep=0pt, line width=0pt, draw opacity =0, fill opacity=0]
 (0,0) rectangle (0,0);
@@ -26,10 +27,10 @@
 \defineblockstyle{titleblock}{
 titlewidthscale=0.9, bodywidthscale=1,titleleft,
 titleoffsetx=0pt, titleoffsety=0pt, bodyoffsetx=0mm, bodyoffsety=5mm,
-bodyverticalshift=10mm, roundedcorners=5, linewidth=2pt,
-titleinnersep=6mm, bodyinnersep=1cm
+bodyverticalshift=10mm, roundedcorners=5, linewidth=0pt,
+titleinnersep=6mm, bodyinnersep=2cm
 }{
-\draw[color=color1, fill=blockbodybgcolor,
+\draw[color=white, fill=white,
 rounded corners=\blockroundedcorners] (blockbody.south west)
 rectangle (blockbody.north east);
 \ifBlockHasTitle
@@ -38,8 +39,17 @@ rounded corners=\blockroundedcorners] (blocktitle.south west)
 rectangle (blocktitle.north east);
 \fi
 }
-
-
+\colorlet{titlebgcolor}{color1}
+\colorlet{framecolor}{color1}% pour certains contours liés au fond
+\colorlet{blocktitlebgcolor}{color1}% pour la couleur du fond du titre des blocks
+\colorlet{blocktitlefgcolor}{white}% pour la couleur du texte du titre des blocks
+\colorlet{blockbodybgcolor}{white}% pour la couleur du fond du block
+\colorlet{blockbodyfgcolor}{black}% pour la couleur du texte du block
+% Innerblock Colors (couleurs des sous-blocks)
+\colorlet{innerblocktitlebgcolor}{color1!10!white}% pour la couleur du fond du titre des sous-blocks
+\colorlet{innerblocktitlefgcolor}{black}% pour la couleur du texte du titre des sous-blocks
+\colorlet{innerblockbodybgcolor}{white}% pour la couleur du fond du sous-block
+\colorlet{innerblockbodyfgcolor}{black}% pour la couleur du texte du sous-block
 \defineblockstyle{normalblock}{
 titlewidthscale=0.9, bodywidthscale=1,titleleft,
 titleoffsetx=0pt, titleoffsety=0pt, bodyoffsetx=0mm, bodyoffsety=15mm,
@@ -98,6 +108,9 @@ variants in metagenomic samples}
 \usetikzlibrary{3d, calc}
 
 
+\usetikzlibrary{shapes.geometric}
+\newcommand{\warningsign}{\tikz[baseline=.75ex] \node[shape=regular polygon, regular polygon sides=3, inner sep=0pt, draw=red, thick] {\textbf{!}};}
+
 
 \newcommand\indexsum[1]{\mathbf{\bar{#1}}}
 \newcommand\indexvec[1]{\mathbf{#1}}
@@ -144,46 +157,10 @@ variants in metagenomic samples}
 \newcommand\G{\thevector{0}{0}{\mathbf{1}}{0}}
 \newcommand\T{\thevector{0}{0}{0}{\mathbf{1}}}
 
-\begin{document}
-
-%\maketitle[titletotopverticalspace=12cm]
-\makeatletter
-    \setlength{\TP@blocktop}{.48\textheight}
-\makeatother
-
-%\begin{columns}
-%    \column{0.2}
-%\useblockstyle{instituteblock} 
-%\block{}{\color{color1}\normalsize\underline{Équipe de recherche}\\
-%¹ Université Paris-Saclay, INRAE, MaIAGE, Jouy-en-Josas, France\\
-%² Ensae, Palaiseau, France\\
-%³ Crest,
-%⁴ Ensae}
-%    \column{0.8}
-\begin{columns}
-\column{0.15}
-\column{0.65}
-\useblockstyle{titleblock} 
-\block{}
-{\color{color1}
-    {\Huge \bf A tempered Sequential Monte Carlo Method for estimating the number of
-variants in metagenomic samples}\\
-
-\Large
-Anne-Laure Abraham$^{1}$, {\bf Daniel Bonnéry$^{1,4}$}, Nicolas Chopin$^{3}$, Guillaume Kon Kam King$^{1,4}$, Sebastien Leclercq$^{2}$, Ouleye Sidibe$^{2}$. \hspace*{1cm}\normalsize $^1$ Inrae, MaIAGE, $^2$ Inrae, $^3$ Ensae-Crest,$^4$ Ensae
-}
-\column{0.2}
-\end{columns}
-%\end{columns}
+\newcommand\countdetail{m}
 
 
-
-
-\useblockstyle{normalblock} 
-\begin{columns}
-    \column{0.33}
-   
-    \block{1. Parameters}{
+\def\blockaa{ \innerblock{Parameters}{
 The variants ($\tau$), the proportions in each sample ($\pi$), the mearsurement error rate ($\epsilon$)
 
 $$\tau=\begin{blockarray}{ccccc}
@@ -219,47 +196,279 @@ $$\pi=\begin{blockarray}{cccc}
 \epsilon_{4,1}&\cdots&\epsilon_{4,4}\\
     \end{pmatrix}$$
 
-}
-    \column{0.33}
- \block{2. Observations}{
-
-\en{A 3-dimensional array of counts of nucleotides.}
+}}
+\def\blockab{
+\innerblock{Observations, latent counts}{
+\begin{minipage}{.12\textwidth}
+\en{Oberved: A 3-dimensional array of counts of nucleotides.}
 \fr{On observe un tableau tridimensionel de comptages}
 $$\left(n_{v,s,a}\right)_{\footnotesize\begin{array}{cl}
 v\in\{1,\ldots,V\}&\text{(position)}\\
 s\in\{1,\ldots,S\}&\text{(sample)}\\
-a\in \{A,C,G,T\}&\text{(nucleotide)}\end{array}}$$
-}
-    \block{3. Likelihood}{
-\begin{eqnarray*}\lefteqn{\mathcal{L}\left(n | \pi, \tau,\epsilon,n_{\indexvec{v},\indexvec{s},\indexsum{a}} \right)}\nonumber\\& =& \prod_{v=1}^{V} \prod_{s = 1}^{S} (n_{v,s,\indexsum{a}})!\times\frac{\prod_{a = 1}^{4} \left( \sum_{g = 1}^{G}\sum_{b=1}^{4} \tau_{v,g,b}\epsilon_{b,a} \pi_{g,s}  \right)^{n_{v,s,a}}}{\prod_{a = 1}^{4}n_{v,s,a}!}\nonumber\\
-& =&\prod_{v=1}^{V} \prod_{s = 1}^{S} (n_{v,s,\indexsum{a}})!\times\frac{\prod_{a = 1}^{4} \left( \sum_{g = 1}^{G} \rho_{v,g,a} \pi_{g,s}  \right)^{n_{v,s,a}}}{\prod_{a = 1}^{4}n_{v,s,a}!},\end{eqnarray*}
-with $\rho_{v,g,a}=\sum_{b\in\llbracket 1,4\rrbracket}\tau_{v,g,b}\epsilon_{b,a}.$
-}
-    \column{0.33}
-\block{4. Priors}{}   
- 
+a\in \{A,C,G,T\}&\text{(nucleotide)}\end{array}}$$\end{minipage}%
+\begin{minipage}{0.01\textwidth}
+\phantom{aa}
+\end{minipage}%
+\begin{minipage}{0.14\textwidth}
+\en{Latent: A 5-dimensional array of counts of nucleotides.}
+$$\left(\countdetail_{v,s,a,b,g}\right)_{\footnotesize\begin{array}{cl}
+v\in\{1,\ldots,V\}&\text{(position)}\\
+s\in\{1,\ldots,S\}&\text{(sample)}\\
+a\in \{A,C,G,T\}&\text{(oberved nucleotide)}\\
+b\in \{A,C,G,T\}&\text{(latent nucleotide)}\\
+g\in \{A,C,G,T\}&\text{(variant)}\end{array}}$$
+\end{minipage}
+}}
 
-\block{5. Desman}{} 
- 
-\end{columns}
-\begin{columns}
-    \column{0.66}
-    \block{Mixture model}{\input{fig_directed_graph_1.tex}}
-    \block{Mixture model}{
-$G$ variants, present in different proportions in each sample
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\blockac{
+\innerblock{Likelihood : multinomial}{
+     $\mathcal{L}\left(n | \pi, \tau,\epsilon,n_{\indexvec{v},\indexvec{s},\indexsum{a}} \right)=$
+     
+    \vspace*{-.7cm}
+$$\prod_{v=1}^{V} \prod_{s = 1}^{S} (n_{v,s,\indexsum{a}})!\times\frac{\prod_{a = 1}^{4} \left( \overunderbraces{\br{2}{\rho_{v,g,a}}}{\sum_{b=1}^{4} &\tau_{v,g,b}\epsilon_{b,a}&\pi_{g,s}}{&\br{2}{\chi_{v,s,a,b,g}}} \right)^{n_{v,s,a}}}{\prod_{a = 1}^{4}n_{v,s,a}!}$$
+}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\blockad{
+\innerblock{Conjugate priors}{
+\begin{itemize}
+	\item Fix $G$.
+	\item $\forall v,g$, $\tau_{v,g,\indexvec{a}}\sim\mathrm{Multinomial}\left(1,\left(p^{(0)}_a\right)_{a\in\{A,C,G,T\}}\right)$, with $p^{(0)}=\mathds{1}_4/4$.
+	\item $\forall b$, $\epsilon_{b,\indexvec{a}}\sim\mathrm{Dirichlet}(\alpha_\epsilon)$, with $\alpha_\epsilon\in\mathbb{R}^4$ fixed.
+	\item $\forall s$,  $\pi_{\indexvec{g},s}\sim\mathrm{Dirichlet}(\alpha_\pi)$, with $\alpha_\pi\in\mathbb{R}^G$ fixed.
+	\item $n_{\indexvec{v},\indexvec{s},\indexsum{a}}$ exogeneous.
+\end{itemize}
+}  }
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\blocka{
 
-$\tau$}
-    
-    \column{0.33}
-    \block{}{}
-    \column{0.33}
+\block{Statistical Framework}{
+\blockaa\blockab\blockac\blockad}
+
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\blockb{
+\block{Desman Gibbs sampler}{
+\begin{itemize}
+	\item  $\forall v,s,a,$ $\countdetail_{v,s,a,\indexvec{b},\indexvec{g}}\mid\tau,\pi,\epsilon,n_{\indexvec{v},\indexvec{s},\indexsum{a}}\sim \mathrm{Binomial}(n_{v,s,a},\chi_{v,s,a,b,g})$
+	\item $\forall s,\ \pi_{\indexvec{g},s}\mid\countdetail\sim\mathrm{Dirichlet}(\alpha_\pi+m_{\indexsum{v},s,\indexsum{a},\indexsum{b},\indexvec{g}})$
+	\item  $\forall b$, $\epsilon_{b,\indexvec{a}}\mid\mid\countdetail\sim\mathrm{Dirichlet}(\alpha_\pi+m_{\indexsum{v},\indexsum{s},\indexvec{a},b,\indexsum{g}})$
+	\item\includegraphics[scale=1.5,align=t]{sign} $\forall v,g$, $\tau_{v,g,\indexvec{b}}\mid \pi,\epsilon,(\tau_{v',g',\indexvec{b}})_{(v',g')\neq(v,g)}\sim\mathrm{Multinomial}\left(1,(p_b)_{b\in\{A,C,G,T\}}\right)$, with 
+	$p_b\propto \left(\prod_{s,a}      \left(\pi_{g,s}\epsilon_{b,a}+\sum_{g'\neq g,b'}\tau^\star_{v,g',b'}\pi_{g',s}\epsilon_{b',a}\right)^{ n_{v,s,a}}\right)_{b\in\llbracket 1,4\rrbracket}$
+\end{itemize}
+
+\vspace{-.5cm}
+
+ \begin{tikzpicture}[y=-3cm,x=2.8cm,
+            > = {Stealth[inset=0pt,length=8pt,angle'=28,round]}, % arrow head style
+            shorten > = 1pt, % don't touch arrow head to node
+            auto,
+%            node distance =1cm and 3cm, % distance between nodes
+            semithick, % line style
+            box/.style = {draw,red,inner sep=10pt,rounded corners=5pt}
+        ]
+
+        \tikzstyle{every state}=[
+        rectangle,
+        rounded corners=5pt,
+            draw = black,
+            thick,
+            fill = white,
+            minimum size = 4mm
+        ]
+
+
+        \node[state] at (0,1) (m) {$\countdetail_t$ };
+        \node[state] at (1.5,0) (pi) {$\pi_t$ };
+        \node[state] at (1.5,2) (epsilon) {$\epsilon_t$ };
+        \node[state] at (2.5,1) (point) {$(\pi_t,\epsilon_t)$};
+        \node[state] at (5.2,1) (tau) {$\tau_t$};
+        \node[state] at (6,1) (chi) {$\chi_{t}$};
+        \node[state] at (8,1) (mm) {$\countdetail_{t+1}$};
+        
+        \path[->,dashed] (m) edge node[above, sloped]  {$\pi\mid \countdetail$} (pi);
+        \path[->,dashed] (m) edge node[below, sloped]  {$\epsilon\mid \countdetail$} (epsilon);
+        \path[->] (pi) edge node {} (point);
+        \path[->] (epsilon) edge node {} (point);
+        \path[->,dashed] (point) edge node[above, sloped]  {\warningsign $\tau\mid \pi, \epsilon,n$} (tau);
+        \path[->] (tau) edge node {} (chi);
+        \path[->] (pi) edge [bend left] node {} (chi);
+        \path[->] (epsilon) edge[bend right] node {} (chi);
+        \path[->,dashed] (chi) edge node {$\countdetail\mid \chi,n$} (mm);
+        \node[box,fit=(pi) (epsilon) (tau)]{};
+    \end{tikzpicture}
+
+\vspace{-1.5cm}}
+
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\blockdiagnostic{
+\block{Diagnostic}{
+\begin{itemize}
+\item When distributed according to the posterior law, the $\tau_{v,g,\indexvec{a}}$ are discrete and highly correlated. 
+\item Sampling them independently does not work.
+\end{itemize}
+\vspace{-1cm}
+
+    $$n_{.,s=1,.}=\begin{blockarray}{ccccc}
+    &a=A&a=C&a=G&a=T&\\
+    \begin{block}{c(cccc)}
+ {\scriptscriptstyle v=1}&600&400&0&0\\   
+ {\scriptscriptstyle v=2}&400&600&1&0\\
+    \end{block}
+\end{blockarray} $$
+
+\vspace{-1.6cm}
+$$\begin{blockarray}{ccc}
+    &&\\&\scriptscriptstyle g=1&\scriptscriptstyle g=2\\
+    \begin{block}{c(cc)}
+ {\scriptscriptstyle v=1}&A&C\\   
+  {\scriptscriptstyle v=2}&A&C\\   
+    \end{block}
+\end{blockarray} \overset{t=t+1}{\rightarrow}\begin{blockarray}{ccc}
+    &&\\&\scriptscriptstyle g=1&\scriptscriptstyle g=2\\
+    \begin{block}{c(cc)}
+ {\scriptscriptstyle v=1}&A&C\\   
+  {\scriptscriptstyle v=2}&C&C\\   
+    \end{block}
+\end{blockarray}\overset{t=t+1}{\rightarrow}\begin{blockarray}{ccc}
+    &&\\&\scriptscriptstyle g=1&\scriptscriptstyle g=2\\
+    \begin{block}{c(cc)}
+ {\scriptscriptstyle v=1}&A&C\\   
+  {\scriptscriptstyle v=2}&C&A\\   
+    \end{block}
+\end{blockarray}$$
+}
+
+	 \note[targetoffsety = -8cm,targetoffsetx = 2cm,rotate = 5]{\warningsign Sampler can't do this and stays stuck}
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\blockrelax{\innerblock{Relaxation}{\input{4-simplex.tikz}}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\blockblock{ \innerblock{Block sampling}{
+$\forall v$, $\tau_{v,\indexvec{g},\indexvec{b}}\mid \pi,\epsilon,(\tau_{v',\indexvec{g},\indexvec{b}})_{(v',g')\neq(v,g)}\sim\mathrm{Multinomial}\left(1,(p_t)_{t\in\{A,C,G,T\}^G}\right)$, with 
+	$p_t\propto $ $$\prod_{s,a}\left(\sum_g\pi_{g,s}\epsilon_{b,a}t_{g,a}\!+\!\sum_{g'\neq g,b'}\tau_{v,g',b'}\pi_{g',s}\epsilon_{b',a}\right)^{ n_{v,s,a}}$$}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\blocktempering{ 
+\innerblock{Tempering}{
+\includegraphics[scale=.8]{tempering.png}}
+Tempering strategies
+\begin{itemize}
+\item Data tempering:
+\item 
+\item 
+\end{itemize}
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\blocksmc{
+ \innerblock{Sequential Monte Carlo}{\includegraphics[scale=1]{smc.png}}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\blockmodels{
+\innerblock{Alternative models}{\input{fig_directed_graph_1.tex}}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\blockd{
+\block{Alternative models and sampling strategies}{
+\blockmodels
+\innerblock{Relaxation}{\input{4-simplex.tikz}}}}
+\def\blocki{
+\block{Sampling strategies}{}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\blockj{
+
+    \block{Comparative results}{}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\blockref{
+
     \block{References}{
 \small{
 Dau, H. D., \& Chopin, N. (2022). Waste-free sequential monte carlo. Journal of the Royal Statistical Society Series B: Statistical Methodology, 84(1), 114-148.
 
 Quince, C., Delmont, T. O., Raguideau, S., Alneberg, J., Darling, A. E., Collins, G., \& Eren, A. M. (2017). DESMAN: a new tool for de novo extraction of strains from metagenomes. Genome biology, 18, 1-22.
-}}
+}}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+\begin{document}
+
+%\maketitle[titletotopverticalspace=12cm]
+\makeatletter
+    \setlength{\TP@blocktop}{.48\textheight}
+\makeatother
+
+%\begin{columns}
+%    \column{0.2}
+%\useblockstyle{instituteblock} 
+%\block{}{\color{color1}\normalsize\underline{Équipe de recherche}\\
+%¹ Université Paris-Saclay, INRAE, MaIAGE, Jouy-en-Josas, France\\
+%² Ensae, Palaiseau, France\\
+%³ Crest,
+%⁴ Ensae}
+%    \column{0.8}
+\begin{columns}
+\column{0.15}
+\column{0.65}
+\useblockstyle{titleblock} 
+\block{}
+{\color{color1}
+    {\Huge \bf A tempered Sequential Monte Carlo Method for estimating the number of
+variants in metagenomic samples}\\
+
+\Large 
+Anne-Laure Abraham$^{1}$, {\bf Daniel Bonnéry$^{1,4}$}, Nicolas Chopin$^{3}$, Guillaume Kon Kam King$^{1,4}$, Sebastien Leclercq$^{2}$, Ouleye Sidibe$^{2}$ \small(alphabetical order). \hspace*{1cm}\normalsize $^1$ Inrae, MaIAGE, $^2$  Inrae,ISP UMR 1282 $^3$ Ensae-Crest,$^4$ Ensae
+}
+\column{0.2}
 \end{columns}
+%\end{columns}
+\vspace*{.5cm}
+
+
+
+\useblockstyle{normalblock} 
+\begin{columns}
+    \column{0.33333}
+   		\blocka
+   		\blockb
+    	\blockdiagnostic
+    \column{0.6666}
+		\block{Alternative models and sampling strategies}{
+			\blockmodels
+\begin{minipage}{.22\textwidth}
+\blockblock
+\end{minipage}%
+\begin{minipage}{.22\textwidth}
+\innerblock{Relaxation}{\input{4-simplex.tikz}}
+\end{minipage}%
+\begin{minipage}{.22\textwidth}
+
+\blocktempering
+\blocksmc
+\end{minipage}
+}
+\end{columns}
+\end{document}
+
+
+
+
+   }
+ %\block{Relaxation}{\input{4-simplex.tikz}}
+ 
+\end{columns}
+
+\end{document}
+\begin{columns}
+    \column{0.33333}
+    \blocki
+    \column{0.66666}
+    \blockj
+    
+\end{columns}
+
+
+
+\blockref
 
 
 \end{document}

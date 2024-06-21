@@ -1,7 +1,7 @@
 
  
- \begin{tikzpicture}[y=-2cm,x=2cm
-            > = stealth, % arrow head style
+ \begin{tikzpicture}[y=-2cm,x=3cm,
+            > = {Stealth[inset=0pt,length=8pt,angle'=28,round]}, % arrow head style
             shorten > = 1pt, % don't touch arrow head to node
             auto,
 %            node distance =1cm and 3cm, % distance between nodes
@@ -18,7 +18,7 @@
             minimum size = 4mm
         ]
 
- 		\node at (1.5,0) (tt) {Desman};
+ 		\node at (1.5,1) (tt) {Desman};
         \node at (1.5,1) (blank) {};
         \node[state,fill=black!10] at (2.5,3) (G) {$G$};
         \node[state,fill=black!10] at (3,2) (alphapi) {$\alpha_\pi$};
@@ -47,10 +47,12 @@
         \node[state,fill=black!10] at (2.5,3) (G) {$G$};
         \path[->] (m) edge node {} (n);
        
+       
+         \node[box,color=black,fit= (tt) (tau) (pi) (epsilon) (alphaepsilon) (m) (nvs) (n) (chi) (alphapi)] {};
         
     \end{tikzpicture}%
- \begin{tikzpicture}[y=-2cm,x=2cm,
-            > = stealth, % arrow head style
+ \begin{tikzpicture}[y=-2cm,x=3cm,
+            > = {Stealth[inset=0pt,length=8pt,angle'=28,round]}, % arrow head style
             shorten > = 1pt, % don't touch arrow head to node
             auto,
 %            node distance =1cm and 3cm, % distance between nodes
@@ -67,7 +69,7 @@
             minimum size = 4mm
         ]
 
-        \node at (1.5,0) (tt) {Model 2};
+        \node at (1.5,1) (tt) {Constrain $\epsilon$};
         \node at (1.5,1) (blank) {};
 
         \node[state,fill=black!10] at (2.5,3) (G) {$G$};
@@ -98,10 +100,12 @@
         \path[->,dashed] (G) edge node {} (tau);
         \path[->,dashed] (G) edge node {} (pi);
        
+       
+         \node[box,color=black,fit= (tt) (tau) (pi) (barepsilon) (alphaepsilon) (m) (nvs) (n) (chi) (alphapi)] {};
         
     \end{tikzpicture}%
- \begin{tikzpicture}[y=-2cm,x=2cm,
-            > = stealth, % arrow head style
+ \begin{tikzpicture}[y=-2cm,x=3cm,
+            > = {Stealth[inset=0pt,length=8pt,angle'=28,round]}, % arrow head style
             shorten > = 1pt, % don't touch arrow head to node
             auto,
 %            node distance =1cm and 3cm, % distance between nodes
@@ -118,8 +122,7 @@
             minimum size = 4mm
         ]
 
-        \node at (1.5,0) (tt) {Model 3: ffixed $\tau$ };
-        \node at (1.5,1) (blank) {};
+        \node at (1.5,1) (tt) {Fixed $\tau$ };
 
         \node[state,fill=black!10] at (2.5,3) (G) {$G$};
         \node[state,fill=black!10] at (3,2) (alphapi) {$\alpha_\pi$};
@@ -149,9 +152,11 @@
         \path[->,dashed] (G) edge node {} (pi);
        
         
+       
+         \node[box,color=black,fit= (tt) (tau) (pi) (alphaepsilon) (alphapi) (m) (nvs) (n) (chi)] {};
     \end{tikzpicture}%
-  \begin{tikzpicture}[y=-2cm,x=2cm,
-            > = stealth, % arrow head style
+  \begin{tikzpicture}[y=-2cm,x=3cm,
+            > = {Stealth[inset=0pt,length=8pt,angle'=28,round]}, % arrow head style
             shorten > = 1pt, % don't touch arrow head to node
             auto,
 %            node distance =1cm and 3cm, % distance between nodes
@@ -172,7 +177,7 @@
         \node at (1.5,0) (tt) {Relax $\rho$ };
         \node[state,fill=black!10] at (2.5,1.5) (G) {$G$};
         \node[state,fill=black!10] at (3,1) (alphapi) {$\alpha_\pi$};
-        \node[state] at (1.5,1) (alpharho) {$\alpha_\rho$};
+        \node[state,fill=black!10] at (1.5,1) (alpharho) {$\alpha_\rho$};
         \node[state] (pi) at (3,3) {$\pi$};
         \node[state] (chi) at (1.75,4) {$\chi_{\indexvec{v},\indexvec{s},\indexvec{a},\indexsum{b},\indexvec{g}}$};
         \node[state] (rho) at (1.5,3) {$\tilde\rho$};
@@ -183,7 +188,6 @@
         \node[state,text=white,fill=black] (nvs) at (3,4) {$n_{\indexvec{v},\indexvec{s},\indexsum{a}}$};
         
         \node[box,fit=(pi) (rho) ] {};
-        \path[->,dashed] (kapparho) edge node {} (alpharho);
         \path[->,dashed] (alpharho) edge node {} (rho);
         \path[->,dashed] (alphapi) edge node {} (pi);
         \path[->] (pi) edge node {} (chi);
@@ -194,9 +198,11 @@
         \path[->] (m) edge node {} (n);
         \path[->,dashed] (G) edge node {} (pi);
         \path[->,dashed] (G) edge node {} (rho);
+        
+        \node[box,color=black,fit= (tt) (tau) (pi) (alpharho) (alphaepsilon) (m) (nvs) (n) (chi)] {};
     \end{tikzpicture}%
- \begin{tikzpicture}[y=-2cm,x=2cm,
-            > = stealth, % arrow head style
+ \begin{tikzpicture}[y=-2cm,x=3cm,
+            > = {Stealth[inset=0pt,length=8pt,angle'=28,round]}, % arrow head style
             shorten > = 1pt, % don't touch arrow head to node
             auto,
 %            node distance =1cm and 3cm, % distance between nodes
@@ -213,7 +219,7 @@
             minimum size = 4mm
         ]
 
-        \node at (1.5,0) (tt) {Relax $\tau$ };
+        \node at (1.5,1) (tt) {Relax $\tau$ };
         \node at (1.5,1) (blank) {};
 
         \node[state,fill=black!10] at (2.5,3) (G) {$G$};
@@ -245,5 +251,34 @@
         \path[->,dashed] (G) edge node {} (tau);
         \path[->,dashed] (G) edge node {} (pi);
        
+         \node[box,color=black,fit= (tt) (tau) (pi) (barepsilon) (alphaepsilon) (m) (nvs) (n) (chi)] {};
         
-    \end{tikzpicture}
+    \end{tikzpicture}%
+ \begin{tikzpicture}[y=2cm,
+            > = {Stealth[inset=0pt,length=8pt,angle'=28,round]}, % arrow head style
+            shorten > = 1pt, % don't touch arrow head to node
+            auto,
+%            node distance =1cm and 3cm, % distance between nodes
+            semithick, % line style
+            box/.style = {draw,red,inner sep=10pt,rounded corners=5pt}
+        ]
+
+        \tikzstyle{every state}=[
+        rectangle,
+        rounded corners=5pt,
+            draw = black,
+            thick,
+            fill = white,
+            minimum size = 4mm
+        ]
+
+        \node[state,fill=black!10] at (1.1,1) (fixed) {fixed};
+        \node[state] at (2.5,0)  (unobserved)  {unobserved};
+        \node[state,text=white,fill=black ] at (2,2) (observed)  {observed};
+        \path[->] (0,3) edge node {deterministic} (5,3);
+        \path[->,dashed] (0,4) edge node {stochastic} (4,4);
+
+        \node at (2.3,5.5) (theta1) {target};
+        \node at (2.5,6) (theta2) {Inference};
+        \node[box,fit=(theta1) (theta2)] {};
+         \end{tikzpicture}
