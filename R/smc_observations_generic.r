@@ -19,7 +19,7 @@ alpha_bar_epsilon_specification <- function(bar_epsilon_1_mean, bar_epsilon_1_st
 
 
 
-smc_observation_f <- 
+smc_fixed_f <- 
   function(n_vsa,
            gs="jags",
            G,
@@ -32,14 +32,15 @@ smc_observation_f <-
            tau_vgb=NULL,
            alpha_tau=NULL,
            kappa_rho=NULL,
-           alpha_rho=NULL) {
+           alpha_rho=NULL,
+           i=1){
     
     
     dimnames(n_vsa) <- lapply(dim(n_vsa), seq_len)
     
     observations=list(n_vsa=n_vsa,
            n_vs=n_vsa |> apply(MARGIN = c(1, 2), FUN = sum))
-    if(!is.null(tau_vgb)){observations=c(observations,list(tau_vgb=tau_vgb))}
+    if(!is.null(tau_vgb)){observations=c(observations,list(tau_vgb=tau_vgb),if(i>1){list(tau_ivgb=plyr::raply(i,tau_vgb))})}
     if(!is.null(alpha_epsilon)){observations=c(observations,list(alpha_epsilon=alpha_epsilon,rep_alpha_epsilon=rep(alpha_epsilon,4)))}
     if(!is.null(alpha_bar_epsilon)){observations=c(observations,list(alpha_bar_epsilon=alpha_bar_epsilon))}else{
       if(!is.null(bar_epsilon_1_std)&!is.null(bar_epsilon_1_mean)){
@@ -53,7 +54,6 @@ smc_observation_f <-
     if(!is.null(alpha_pi)){observations=c(observations,
                                    list(alpha_pi=alpha_pi,
                                         rep_alpha_pi=rep(alpha_pi,G)))}
-    observations
     
     
     constants=list(
@@ -61,10 +61,17 @@ smc_observation_f <-
       S = dim(n_vsa)[2],
       G=G,
       G4=4^G)
-    if(!is.null(alpha_tau)){observations=c(observations,list(alpha_tau=alpha_tau))}
+    if(!is.null(alpha_tau)){
+      observations=c(observations,
+                     list(alpha_tau=alpha_tau,
+                                       rep_alpha_tau=rep(alpha_tau,4)))
+      }
     
     if(!is.null(bar_epsilon_1)){constants=c(constants,
-                                            list(bar_epsilon_1=bar_epsilon_1,bar_epsilon=c(bar_epsilon_1,1-bar_epsilon_1)))}
+                                            list(bar_epsilon_1=bar_epsilon_1,
+                                                 bar_epsilon=c(bar_epsilon_1,1-bar_epsilon_1),
+                                                 epsilon_ba=epsilon_ba_f(bar_epsilon_1),
+                                                 epsilon_iba=epsilon_iba_f(i=i,bar_epsilon_1=bar_epsilon_1)))}
     
     
     if(gs!="nimble"){c(constants,observations)}else{list(constants=constants,observations=observations)}

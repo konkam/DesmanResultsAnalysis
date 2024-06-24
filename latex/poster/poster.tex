@@ -306,7 +306,7 @@ $$\prod_{v=1}^{V} \prod_{s = 1}^{S} (n_{v,s,\indexsum{a}})!\times\frac{\prod_{a 
 \def\blockdiagnostic{
 \block{Diagnostic}{
 \begin{itemize}
-\item When distributed according to the posterior law, the $\tau_{v,g,\indexvec{a}}$ are discrete and highly correlated. 
+\item When distributed according to the posterior law, the $\tau_{v,g,\indexvec{a}}$ are discrete and highly correlated over $g$.
 \item Sampling them independently does not work.
 \end{itemize}
 \vspace{-1cm}
@@ -341,28 +341,40 @@ $$\begin{blockarray}{ccc}
 \end{blockarray}$$
 }
 
-	 \note[targetoffsety = -8cm,targetoffsetx = 2cm,rotate = 5]{\warningsign Sampler can't do this and stays stuck}
+	 \note[targetoffsety = -8cm,targetoffsetx = 2cm,rotate = 5]{\warningsign Sampler can't make these jumps and stays stuck}
 }
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \def\blockrelax{\innerblock{Relaxation}{\input{4-simplex.tikz}}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\def\blockblock{ \innerblock{Block sampling}{
-$\forall v$, $\tau_{v,\indexvec{g},\indexvec{b}}\mid \pi,\epsilon,(\tau_{v',\indexvec{g},\indexvec{b}})_{(v',g')\neq(v,g)}\sim\mathrm{Multinomial}\left(1,(p_t)_{t\in\{A,C,G,T\}^G}\right)$, with 
-	$p_t\propto $ $$\prod_{s,a}\left(\sum_g\pi_{g,s}\epsilon_{b,a}t_{g,a}\!+\!\sum_{g'\neq g,b'}\tau_{v,g',b'}\pi_{g',s}\epsilon_{b',a}\right)^{ n_{v,s,a}}$$}}
+\def\blockconstrainepsilon{\innerblock{Constrain $\epsilon$}{
+Set  $\epsilon=\bar\epsilon_1/3(J_4-I_4)+\bar\epsilon_2I_4$, $\bar\epsilon\sim\mathrm{Dirichlet}(\alpha_{\bar\epsilon})$ (AM1,2,4)}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\blockfixedtau{\innerblock{Fix $\tau$}{
+Fixing $\tau$ (AM2) allow to approximate the posterior of $\pi$ only}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\blockblock{ \innerblock{Block sampling}{
+Components of $\tau$ are sampled jointly position by position (AM1) when $G$ is small.
+$\forall v$, $\tau_{v,\indexvec{g},\indexvec{b}}\mid \pi,\epsilon,(\tau_{v',\indexvec{g},\indexvec{b}})_{(v',g')\neq(v,g)}\sim\mathrm{Multinomial}\left(1,(p_t)_{t\in\{A,C,G,T\}^G}\right)$, with 
+$p_t\propto $ $$\!\!\!\prod_{s,a}\!\!\left(\!\!\sum_g\!\pi_{g,s}\!\epsilon_{b,a}\!t_{g,a}\!+\!\sum_{g'\neq g,b'}\!\tau_{v,g',b'}\!\pi_{g',s}\epsilon_{b',a}\!\right)^{ n_{v,s,a}}$$}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
 \def\blocktempering{ 
 \innerblock{Tempering}{
-\includegraphics[scale=.8]{tempering.png}}
+\includegraphics[scale=.716]{tempering.png}
 Tempering strategies
 \begin{itemize}
-\item Data tempering:
-\item 
-\item 
+\item Data tempering :$n^{(\lambda)}_{v,s,a}\underset{\lambda\to 1}{\rightarrow} n\uparrow$.
+\begin{itemize}
+	\item minimum entropy of $n^{(\lambda)}_{v,s,\indexvec{a}}$
+	\item at random
+	\item by increasing observed positions ($v$ index).
 \end{itemize}
+\item $\bar\epsilon\to 1e^{-3}$
+\item $\alpha_\tau\to 0$
+\end{itemize}}
 }
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \def\blocksmc{
- \innerblock{Sequential Monte Carlo}{\includegraphics[scale=1]{smc.png}}}
+ \innerblock{Sequential Monte Carlo}{\includegraphics[scale=.724]{smc.png}}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \def\blockmodels{
 \innerblock{Alternative models}{\input{fig_directed_graph_1.tex}}}
@@ -434,18 +446,23 @@ Anne-Laure Abraham$^{1}$, {\bf Daniel Bonnéry$^{1,4}$}, Nicolas Chopin$^{3}$, G
     \column{0.6666}
 		\block{Alternative models and sampling strategies}{
 			\blockmodels
-\begin{minipage}{.22\textwidth}
+\begin{minipage}{.20\textwidth}
+\blockconstrainepsilon
+\blockfixedtau
+\innerblock{Relax $\tau$ or $\rho$}{
+Replace the distribution of $\tau$ (AM4) (resp. $\rho$ (AM5)) by $\mathrm{Dirichlet}(\alpha_\tau\mathds{1}_4)$ (resp. $\mathrm{Dirichlet}(\alpha_\rho\mathds{1}_4)$).
+\input{4-simplex.tikz}}
+\end{minipage}\hspace{.74cm}%
+\begin{minipage}{.20\textwidth}
 \blockblock
-\end{minipage}%
-\begin{minipage}{.22\textwidth}
-\innerblock{Relaxation}{\input{4-simplex.tikz}}
-\end{minipage}%
-\begin{minipage}{.22\textwidth}
+\blocksmc
+\end{minipage}\hspace{.74cm}%
+\begin{minipage}{.20\textwidth}
 
 \blocktempering
-\blocksmc
 \end{minipage}
 }
+    \blockj
 \end{columns}
 \end{document}
 
@@ -462,7 +479,6 @@ Anne-Laure Abraham$^{1}$, {\bf Daniel Bonnéry$^{1,4}$}, Nicolas Chopin$^{3}$, G
     \column{0.33333}
     \blocki
     \column{0.66666}
-    \blockj
     
 \end{columns}
 

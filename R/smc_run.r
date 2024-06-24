@@ -64,7 +64,7 @@ gs_run<-
     fixed_bar_epsilon=!is.null(bar_epsilon_1)
     fixed_tau=!is.null(tau_vgb)
     relax_tau=!is.null(alpha_tau)
-    relax_rho=!is.null(kappa_rho)
+    relax_rho=!is.null(kappa_rho)|!is.null(alpha_rho)
     fixed_alpha_rho=!is.null(alpha_rho)
     constrained_epsilon_matrix=is.null(alpha_epsilon)
     
@@ -78,7 +78,7 @@ gs_run<-
         relax_tau=relax_tau,
         relax_rho=relax_rho)
     
-    observations_and_constants <- smc_observation_f(n_vsa=n_vsa,
+    observations_and_constants <- smc_fixed_f(n_vsa=n_vsa,
                                      gs=gs,
                G=G,
                bar_epsilon_1=bar_epsilon_1,
@@ -109,7 +109,7 @@ gs_run<-
                alpha_tau=alpha_tau,
                alpha_epsilon=alpha_epsilon,
                alpha_bar_epsilon=alpha_bar_epsilon,
-               fixed_bar_epsilon_1=FALSE,
+               fixed_bar_epsilon=FALSE,
                kappa_rho=kappa_rho,
                alpha_rho=alpha_rho,
                bar_epsilon_1_0=NULL,

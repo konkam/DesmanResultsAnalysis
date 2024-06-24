@@ -67,7 +67,7 @@ if(FALSE){
     theme_bw() +
     geom_line()+
     scale_y_continuous(trans="log10")+
-    geom_hline(yintercept = epsilon_bar_1, colour = "red", size = 0.75) +
+    geom_hline(yintercept = bar_epsilon_1, colour = "red", size = 0.75) +
     facet_grid(~Var2)+
     ggtitle("Real value in red, estimation in black")
   
@@ -80,7 +80,7 @@ if(FALSE){
     geom_violin()+
     geom_point(size=.01,alpha=.5,position = position_jitter(w = 0.1, h = 0))+
     scale_y_continuous(trans="log10")+
-    geom_hline(yintercept = epsilon_bar_1, colour = "red", size = 0.75) +
+    geom_hline(yintercept = bar_epsilon_1, colour = "red", size = 0.75) +
     ggtitle("Real value in red, estimation in black")
   
   

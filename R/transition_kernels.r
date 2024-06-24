@@ -16,14 +16,13 @@ temper_alpha_tau=FALSE)
 #'s=3
 #'g=6
 #'rho_ivga
-#'theta=sim_tau_pi_epsilon_n_i(i=4,v=v, g=g, s=s, n=n, epsilon_bar_1 = .001, alpha_pi=alpha_pi)
-#'obs=sim_tau_pi_epsilon_n(v=v, g=g, s=s, n=n, epsilon_bar_1 = .001, alpha_pi=alpha_pi)
-#'m_ivsabg=sampler_m_ivsabg(theta$chi_ivsabg,obs$n_vsa)
+#'theta=sim_tau_pi_epsilon_n_i(i=4,v=v, g=g, s=s, n=n, bar_epsilon_1 = .001, alpha_pi=alpha_pi)
+#'obs=sim_tau_pi_epsilon_n(v=v, g=g, s=s, n=n, bar_epsilon_1 = .001, alpha_pi=alpha_pi)
+#'m_ivsabg=sampler_m_ivsabg(theta$chi_ivsabg,n_vsa)
 #'(kernel_f(
 #'    fixed_bar_epsilon=FALSE,constrained_epsilon_matrix=TRUE,block_tau=FALSE,fixed_tau=FALSE,relax_tau=TRUE,relax_rho=FALSE))(
 #'          theta=theta,
-#'                obs=list(n_vsa=n_vsa),
-#'                      param=list(rep_alpha_pi=rep(.1,g),rep_alpha_tau=rep(.1,4),alpha_bar_epsilon=c(1,100)))
+#'          fixed=list(n_vsa=n_vsa,rep_alpha_pi=rep(.1,g),rep_alpha_tau=rep(.1,4),alpha_bar_epsilon=c(1,100)))
 kernel_f<-function(
         fixed_bar_epsilon=fixed_bar_epsilon,
         constrained_epsilon_matrix=constrained_epsilon_matrix,
@@ -34,46 +33,74 @@ kernel_f<-function(
       eval(parse(text=paste0("
   function(
     theta,
-    lambda,
-    obs,
-    param){
-            attach(theta);attach(param);attach(obs);thetanew=list()",
+    fixed){
+            allvar=c(theta,fixed);
+            thetanew=list();
+                             ",
     if(relax_rho){
       "
-      chi_ivsag=einsum::einsum('ivga,igs->ivsag',rho_ivga,pi_igs);
-      m_ivsag=sampler_m_ivsag(n_vsa=n_vsa,chi_ivsag=chi_ivsag);
-      thetanew$rho_ivga<-rho_ivga<-sampler_tilde_rho_ivga(m_ivga=einsum::einsum('ivsag->ivga',m_ivsag),rep_alpha_rho=rep_alpha_rho);
-      thetanew$pi_igs<-pi_igs<-sampler_pi_igs(m_igs=einsum::einsum('ivsag->ivgs',m_ivsag),rep_alpha_pi=rep_alpha_pi);"
+      chi_ivsag=einsum::einsum('ivga,igs->ivsag',allvar$rho_ivga,allvar$pi_igs);
+      m_ivsag=sampler_m_ivsag(n_vsa=allvar$n_vsa,chi_ivsag=chi_ivsag);
+      thetanew$rho_ivga<-
+        rho_ivga<-
+        sampler_tilde_rho_ivga(m_ivga=einsum::einsum('ivsag->ivga',m_ivsag),
+                               rep_alpha_rho=allvar$rep_alpha_rho);
+      thetanew$pi_igs<-
+        pi_igs<-
+        sampler_pi_igs(m_igs=einsum::einsum('ivsag->ivgs',m_ivsag),
+                       rep_alpha_pi=allvar$rep_alpha_pi);"
     },
     if(!relax_rho){
       "
-      chi_ivsabg=einsum::einsum('ivgb,iba,igs->ivsabg',tau_ivgb,epsilon_iba,pi_igs);
-      m_ivsabg=sampler_m_ivsabg(n_vsa=obs$n_vsa,chi_ivsabg=chi_ivsabg);
-       thetanew$pi_igs<-pi_igs<-sampler_pi_igs(m_igs=einsum::einsum('ivsabg->igs',m_ivsabg),rep_alpha_pi=rep_alpha_pi);"},
+      chi_ivsabg=einsum::einsum('ivgb,iba,igs->ivsabg',allvar$tau_ivgb,allvar$epsilon_iba,allvar$pi_igs);
+      m_ivsabg=sampler_m_ivsabg(n_vsa=n_vsa,chi_ivsabg=chi_ivsabg);
+       thetanew$pi_igs<-
+          pi_igs<-
+          sampler_pi_igs(m_igs=einsum::einsum('ivsabg->igs',m_ivsabg),
+                         rep_alpha_pi=allvar$rep_alpha_pi);"},
     if(!relax_rho&relax_tau&!fixed_tau){
-      "thetanew$tau_ivgb<-tau_ivgb<-sampler_tilde_tau_ivgb(m_ivgb=einsum::einsum('ivsabg->ivgb',m_ivsabg),rep_alpha_tau=rep_alpha_tau);"
+      "thetanew$tau_ivgb<-
+        tau_ivgb<-
+        sampler_tilde_tau_ivgb(m_ivgb=einsum::einsum('ivsabg->ivgb',m_ivsabg),
+                               rep_alpha_tau=allvar$rep_alpha_tau);"
       },
     if(!relax_rho&!relax_tau&!fixed_tau&!block_tau){
-      "tau_ivgb<-thetanew$tau_ivgb<-sampler_tau_ivgb(m_ivgb=einsum::einsum('ivsabg->ivgb',m_ivsabg),rep_alpha_tau=rep_alpha_tau);"
+      "tau_ivgb<-
+          thetanew$tau_ivgb<-
+          sampler_tau_ivgb(thetanew$tau_ivgb,
+                        pi_igs,
+                        epsilon_iba,
+                        n_vsa,
+                        v=dim(tau_ivgb)[2],
+                        #s=dim(pi_gs)[2],
+                        g=dim(pi_igs)[2],
+                        g_neq_g=g_neq_g_f(g),
+                        alpha_tau=0,
+                        m_ivgb=einsum::einsum('ivsabg->ivgb',m_ivsabg),
+                           rep_alpha_tau=allvar$rep_alpha_tau);"
     },
     if(!relax_rho&!relax_tau&!fixed_tau&block_tau){
-      "tau_ivgb<-thetanew$tau_ivgb<-blocksampler_tau_ivgb(m_ivgb=einsum::einsum('ivsabg->ivgb',m_ivsabg),rep_alpha_tau=rep_alpha_tau);"
+      "tau_ivgb<-
+          thetanew$tau_ivgb<-
+          blocksampler_tau_ivgb(
+            m_ivgb=einsum::einsum('ivsabg->ivgb',m_ivsabg),
+            rep_alpha_tau=allvar$rep_alpha_tau);"
     },
     if(!relax_rho&!fixed_bar_epsilon&constrained_epsilon_matrix){
       "m_ianeqb=einsum::einsum('ivsabg,ab->i',m_ivsabg,a_neq_b);
-      m_iaa=einsum::einsum('ivsaag->i',m_ivsabg);
-      epsilon_bar_1i=sampler_bar_epsilon_i1(m_ianeqb=m_ianeqb,m_iaa=m_iaa,alpha_bar_epsilon_1=alpha_bar_epsilon_1);
-      thetanew$epsilon_iba<-epsilon_iba<-plyr::aaply(epsilon_bar_1i,1,epsilon_ba_f);
+       m_iaa=einsum::einsum('ivsaag->i',m_ivsabg);
+       bar_epsilon_1i=sampler_bar_epsilon_i1(m_ianeqb=m_ianeqb,m_iaa=m_iaa,alpha_bar_epsilon=allvar$alpha_bar_epsilon);
+      thetanew$epsilon_iba<-epsilon_iba<-plyr::aaply(bar_epsilon_1i,1,epsilon_ba_f);
       "
     },
     if(!relax_rho&!fixed_bar_epsilon&!constrained_epsilon_matrix){
       "m_iba=einsum::einsum('ivsabg->iba',m_ivsabg);
-      thetanew$epsilon_iba<-epsilon_iba<-sampler_epsilon_iba(m_iba=m_iba,rep_alpha_epsilon=rep_alpha_epsilon);
+      thetanew$epsilon_iba<-epsilon_iba<-sampler_epsilon_iba(m_iba=m_iba,rep_alpha_epsilon=allvar$rep_alpha_epsilon);
       "
     },
     if(!relax_rho&!fixed_bar_epsilon&!constrained_epsilon_matrix){
       "m_iba=einsum::einsum('ivsabg->iba',m_ivsabg);
-      epsilon_iba=sampler_epsilon_iba(m_iba=m_iba,rep_alpha_epsilon=rep_alpha_epsilon);
+      epsilon_iba=sampler_epsilon_iba(m_iba=m_iba,rep_alpha_epsilon=allvar$rep_alpha_epsilon);
       "
     },
     "thetanew}")))

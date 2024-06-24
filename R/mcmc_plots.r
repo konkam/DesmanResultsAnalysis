@@ -2,14 +2,14 @@
 #'@examples
 #'tar_load(mcmc_output)
 #'plot_bar_epsilon(mcmc_output)
-plot_bar_epsilon<-function(mcmc_output,epsilon_bar_1){
+plot_bar_epsilon<-function(mcmc_output,bar_epsilon_1){
   mcmc_output|>
     mcmc_output_df(variable_name = "bar_epsilon[2]")|>
   ggplot(aes(x = iteration,group=as.factor(variable),col=as.factor(variable),y=value)) +
   theme_bw() +
   geom_line()+
   scale_y_continuous(trans="log10")+
-  geom_hline(yintercept = epsilon_bar_1, colour = "red", size = 0.75) +
+  geom_hline(yintercept = bar_epsilon_1, colour = "red", size = 0.75) +
   facet_grid(~variable)+
   ggtitle("Real value in red, estimation in black")}
 
