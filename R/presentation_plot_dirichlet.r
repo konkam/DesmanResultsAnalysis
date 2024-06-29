@@ -55,7 +55,7 @@ ggtern(data = samples_df2, aes(x = A, y = C, z = G)) +
 
 
 project_simplex_3d <- function(point=NULL) {
-  if(is.null(point)){point=dirmult::rdirichlet(5000,alpha = rep(.1,4))}
+  if(is.null(point)){point=rdirichlet_smallalpha(5000,alpha = rep(.1,4))}
   A=matrix(
     c(0,0,0,
       1,0,0,

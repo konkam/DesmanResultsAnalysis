@@ -32,7 +32,7 @@ sampler_tau<-function(tau_vgb,
     translate_dna_matrix_to_binary_array()
     }else{
       plyr::aaply(m_vbg,c(1,3),
-                  function(x_b){dirmult::rdirichlet(1,alpha=rep_alpha_tau+x_b)})
+                  function(x_b){rdirichlet_smallalpha(1,alpha=rep_alpha_tau+x_b)})
     }
   
 }
@@ -49,6 +49,7 @@ sampler_tau_ivgb<-function(tau_ivgb,
                         pi_igs,
                         epsilon_iba,
                         n_vsa,
+                        i=if(!is.null(tau_ivgb)){dim(tau_ivgb)[1]},
                         v=dim(tau_ivgb)[2],
                         #s=dim(pi_gs)[2],
                         g=dim(pi_igs)[2],
@@ -57,11 +58,14 @@ sampler_tau_ivgb<-function(tau_ivgb,
                         rep_alpha_tau=rep(alpha_tau,4),
                         m_ivgb=NULL,
                         block_tau=FALSE,
-                        tau_ivk=if(block_tau){
-                          tau_ivgb|>array(dim(tau_ivgb)|>(function(x){c(x[1:2],prod(x[3:4]))}))},
                         grid_iv=if(alpha_tau==0){
-                          expand.grid(i=1:i,v=1:v)}){
-  if(alpha_tau==0&!bloc_tau){
+                          expand.grid(i=1:i,v=1:v)},
+                        tau_kgb=if(block_tau){
+                          plyr::maply(expand.grid(k=1:(4^g)),function(k){
+                              plyr::aaply(1:g,1,function(gg){
+                               1*((1+(((k-1)%/%(4^(gg-1)))%%4))==1:4)})})|>namedims(index="kgb")
+                        }){
+  if(alpha_tau==0&!block_tau){
     tau_ivgb=
       plyr::maply(grid_iv,function(ii,vv){
       taustar=tau_ivgb[ii,vv,,,drop=FALSE]
@@ -70,32 +74,30 @@ sampler_tau_ivgb<-function(tau_ivgb,
             einsum::einsum(
               equation_string="sgab,vsa->b",
               log(
-                einsum::einsum("igs,iba->sgab",pi_igs[ii,,,drop=FALSE],epsilon_iba[ii,,,drop=FALSE])+
-                  einsum::einsum("b,gh,ivhc,ihs,ica->sgab",rep(1,4),g_neq_g[gg,],taustar[1,1,,,drop=FALSE],pi_igs[ii,,,drop=FALSE],epsilon_iba[ii,,,drop=FALSE])),
+                einsum::einsum("igs,iba->sgab",pi_igs[ii,gg,,drop=FALSE],epsilon_iba[ii,,,drop=FALSE])+
+                  einsum::einsum("b,gh,ivhc,ihs,ica->sgab",rep(1,4),g_neq_g[gg,,drop=FALSE],taustar[1,1,,,drop=FALSE],pi_igs[ii,,,drop=FALSE],epsilon_iba[ii,,,drop=FALSE])),
               n_vsa[vv,,,drop=FALSE])|>
         (function(x){exp(x-max(x))})()|>
-          (function(xi){(1:4)==sample(4,1,prob = xi)})()}
+          (function(xi){(1:4)==sample(4,1,prob = xi)})()
+        }
         taustar})|>
-      namedims(index="ivgb")}
-    if(alpha_tau==0&bloc_tau){
+      namedims(index="ivgb")
+    }
+    if(alpha_tau==0&block_tau){
       tau_ivgb=
-        plyr::maply(grid_iv,function(ii,vv){
-          taustar=tau_ivgb[ii,vv,,,drop=FALSE]
-          for(gg in 1:g){
-            taustar[1,1,gg,]<-
-              einsum::einsum(
-                equation_string="sgab,vsa->b",
-                log(
-                  einsum::einsum("igs,iba->sgab",pi_igs[ii,,,drop=FALSE],epsilon_iba[ii,,,drop=FALSE])+
-                    einsum::einsum("b,gh,ivhc,ihs,ica->sgab",rep(1,4),g_neq_g[gg,],taustar[1,1,,,drop=FALSE],pi_igs[ii,,,drop=FALSE],epsilon_iba[ii,,,drop=FALSE])),
-                n_vsa[vv,,,drop=FALSE])|>
-              (function(x){exp(x-max(x))})()|>
-              (function(xi){(1:4)==sample(4,1,prob = xi)})()}
-          taustar})|>
-        namedims(index="ivgb")}
+          einsum::einsum(
+              equation_string="kisa,vsa->kiv",
+              einsum::einsum("b,g,kgb,igs,iba->kisa",rep(1,4),rep(1,g),tau_kgb,pi_igs,epsilon_iba)|>
+                log(),
+              n_vsa)|>
+              plyr::aaply(2:3,function(x){
+                exp(x-max(x))|>
+                  (function(probs){tau_kgb[sample(4^g,size=1,prob=probs),,]})()})|>
+        namedims(index="ivgb")
+      }
   if(alpha_tau>0){
     tau_ivgb=plyr::aaply(m_ivgb,c(1:3),
-                         function(x_b){dirmult::rdirichlet(1,alpha=rep_alpha_tau+x_b)})
+                         function(x_b){rdirichlet_smallalpha(1,alpha=rep_alpha_tau+x_b)})
   }
   tau_ivgb
 }
@@ -113,14 +115,14 @@ sampler_tau_ivgb<-function(tau_ivgb,
 sampler_tilde_tau_ivgb<-function(rep_alpha_tau,
                            m_ivgb){
     plyr::aaply(m_ivgb,c(1:3),
-                function(x_b){dirmult::rdirichlet(1,alpha=rep_alpha_tau+x_b)})|>
+                function(x_b){rdirichlet_smallalpha(1,alpha=rep_alpha_tau+x_b)})|>
     namedims("ivgb")}
 
 
 sampler_tilde_rho_ivga<-function(rep_alpha_rho,
                                 m_ivga){
   plyr::aaply(m_ivga,c(1:3),
-              function(x_a){dirmult::rdirichlet(1,alpha=rep_alpha_rho+x_a)})|>
+              function(x_a){rdirichlet_smallalpha(1,alpha=rep_alpha_rho+x_a)})|>
     namedims("ivga")}
 
 
@@ -174,7 +176,7 @@ sampler_m_ivsabg<-function(chi_ivsabg,
   
   plyr::maply(grid_ivsa,function(i,v,s,a){
     rmultinom(1,size=n_vsa[v,s,a],
-              prob = chi_ivsabg[i,v,s,a,,])})|>
+              prob = chi_ivsabg[i,v,s,a,,]|>c()|>log()|>(function(x){x-max(x)})()|>exp())})|>
     array(dim=dim(chi_ivsabg))|>
     namedims("ivsabg")
   }
@@ -196,7 +198,7 @@ sampler_m_ivsag<-function(chi_ivsag,
                       grid_ivsa=expand.grid(i=1:i,v=1:v,s=1:s,a=1:4)){
   plyr::maply(grid_ivsa,function(i,v,s,a){
     rmultinom(1,size=n_vsa[v,s,a],
-              prob = chi_ivsag[i,v,s,a,])})|>
+              prob = chi_ivsag[i,v,s,a,]|>log()|>(function(x){x-max(x)})()|>exp())})|>
     namedims("ivsag")
   
 }
@@ -220,7 +222,7 @@ sampler_pi<-function(mu_vsag,
   
   einsum::einsum("vsag->sg",mu_vsag)|>
     plyr::aaply(1,function(x_g){
-      x=dirmult::rdirichlet(1,alpha=rep_alpha_pi+x_g)
+      x=rdirichlet_smallalpha(1,alpha=rep_alpha_pi+x_g)
       x[x<.Machine$double.xmin]<-.Machine$double.xmin
       x/sum(x)})|>
     t()
@@ -230,7 +232,7 @@ sampler_pi<-function(mu_vsag,
 sampler_pi_igs<-function(m_igs,
                        rep_alpha_pi){
   plyr::aaply(m_igs,c(1,3),
-              function(x_g){dirmult::rdirichlet(1,alpha=rep_alpha_pi+x_g)})|>
+              function(x_g){rdirichlet_smallalpha(1,alpha=rep_alpha_pi+x_g)})|>
     aperm(c(1,3,2))|>
     namedims("igs")
 }
@@ -250,7 +252,7 @@ a_neq_b=g_neq_g_f(4)
 
 sampler_epsilon_iba<-function(m_iba,rep_alpha_epsilon){
   plyr::aaply(m_iba,1:2,
-              function(x_a){dirmult::rdirichlet(1,alpha=rep_alpha_epsilon+x_a)})|>
+              function(x_a){rdirichlet_smallalpha(1,alpha=rep_alpha_epsilon+x_a)})|>
     namedims("iba")
 }
 

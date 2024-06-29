@@ -15,9 +15,9 @@ g=4
 gs="jags"
 set.seed(1)
 tau_pi_n <- sim_tau_pi_epsilon_n(v = 4, g = gm, s = 3, 
-n = 1000, alpha_pi = .1, epsilon_bar_1 = .001)
+n = 1000, alpha_pi = .1, bar_epsilon_1 = .001)
 n_vsa =tau_pi_n$n_vsa
-gs_run(n_vsa,
+smc_run(n_vsa,
        gs="jags",
        tau_vgb=NULL,
        G=g,
@@ -69,7 +69,7 @@ tau_vgb=tau_vgb[,reorder_g,]|>(`dimnames<-`)(list(v=1:v,g=1:g,b=nucleotides))
 epsilon_ba=epsilon_ba_f(.01)
 n_vsa <- sim_n_vsa(n = 1000, tau_vgb = tau_vgb, pi_gs = pi_gs, epsilon_ba = epsilon_ba)
 inits=plyr::rlply(20,list(tau_vgb=tau_vgb0,pi_gs =sim_pi_gs(g = g, s = s, alpha_pi = alpha_pi)))
-gs_run(n_vsa,
+smc_run(n_vsa,
        gs="jags",
        tau_vgb=NULL,
        G=g,
@@ -107,11 +107,11 @@ smc_samples2|>
 
 set.seed(1)
 tau_pi_n <- sim_tau_pi_epsilon_n(v = 4, g = gm, s = 3, 
-                                 n = 10, alpha_pi = .1, epsilon_bar_1 = .001)
+                                 n = 10, alpha_pi = .1, bar_epsilon_1 = .001)
 n_vsa =tau_pi_n$n_vsa
 
 
-gs_run(n_vsa,
+smc_run(n_vsa,
        gs="jags",
        tau_vgb=NULL,
        G=5,

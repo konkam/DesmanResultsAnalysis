@@ -28,7 +28,7 @@
 titlewidthscale=0.9, bodywidthscale=1,titleleft,
 titleoffsetx=0pt, titleoffsety=0pt, bodyoffsetx=0mm, bodyoffsety=5mm,
 bodyverticalshift=10mm, roundedcorners=5, linewidth=0pt,
-titleinnersep=6mm, bodyinnersep=2cm
+titleinnersep=6mm, bodyinnersep=1.5cm
 }{
 \draw[color=white, fill=white,
 rounded corners=\blockroundedcorners] (blockbody.south west)
@@ -98,6 +98,11 @@ variants in metagenomic samples}
 {\color{color1}\large \@author \par} \vspace*{1em} 
 }
 
+\usepackage{fontspec}
+\usepackage{frcursive}% for 5
+
+\newenvironment{Handwriting}{\cursive
+ }{}
 
 \usepackage{caption}
 \usepackage{subcaption}
@@ -158,10 +163,10 @@ variants in metagenomic samples}
 \newcommand\T{\thevector{0}{0}{0}{\mathbf{1}}}
 
 \newcommand\countdetail{m}
-
+\input{sens-interdit.tikz}
 
 \def\blockaa{ \innerblock{Parameters}{
-The variants ($\tau$), the proportions in each sample ($\pi$), the mearsurement error rate ($\epsilon$)
+The variants ($\tau$), the proportions in each sample ($\pi$), the measurement error rate ($\epsilon$)
 
 $$\tau=\begin{blockarray}{ccccc}
     {\scriptstyle g=1}&{\scriptstyle g=2}&\cdots&{\scriptstyle g=G}&\\
@@ -200,7 +205,7 @@ $$\pi=\begin{blockarray}{cccc}
 \def\blockab{
 \innerblock{Observations, latent counts}{
 \begin{minipage}{.12\textwidth}
-\en{Oberved: A 3-dimensional array of counts of nucleotides.}
+\en{Observed: A 3-\\dimensional array of\\ counts of nucleotides.}
 \fr{On observe un tableau tridimensionel de comptages}
 $$\left(n_{v,s,a}\right)_{\footnotesize\begin{array}{cl}
 v\in\{1,\ldots,V\}&\text{(position)}\\
@@ -242,7 +247,7 @@ $$\prod_{v=1}^{V} \prod_{s = 1}^{S} (n_{v,s,\indexsum{a}})!\times\frac{\prod_{a 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \def\blocka{
 
-\block{Statistical Framework}{
+\block{Statistical Framework\phantom{g}}{
 \blockaa\blockab\blockac\blockad}
 
 }
@@ -326,13 +331,13 @@ $$\begin{blockarray}{ccc}
  {\scriptscriptstyle v=1}&A&C\\   
   {\scriptscriptstyle v=2}&A&C\\   
     \end{block}
-\end{blockarray} \overset{t=t+1}{\rightarrow}\begin{blockarray}{ccc}
+\end{blockarray} {\overset{ t\to t+1}{\rightarrow}}\begin{blockarray}{ccc}
     &&\\&\scriptscriptstyle g=1&\scriptscriptstyle g=2\\
     \begin{block}{c(cc)}
  {\scriptscriptstyle v=1}&A&C\\   
   {\scriptscriptstyle v=2}&C&C\\   
     \end{block}
-\end{blockarray}\overset{t=t+1}{\rightarrow}\begin{blockarray}{ccc}
+\end{blockarray}\overset{t\to t+1}{\rightarrow}\begin{blockarray}{ccc}
     &&\\&\scriptscriptstyle g=1&\scriptscriptstyle g=2\\
     \begin{block}{c(cc)}
  {\scriptscriptstyle v=1}&A&C\\   
@@ -341,7 +346,11 @@ $$\begin{blockarray}{ccc}
 \end{blockarray}$$
 }
 
-	 \note[targetoffsety = -8cm,targetoffsetx = 2cm,rotate = 5]{\warningsign Sampler can't make these jumps and stays stuck}
+	 \note[connection, radius=4cm, angle=-85,targetoffsety = -4cm,targetoffsetx = -3.5cm,rotate = 5, innersep=0.1cm, width=11.2cm]{\begin{minipage}{2cm}\sensinterdit\end{minipage}\begin{minipage}{9cm} \begin{Handwriting}
+
+
+
+Sampler can't make that jump and stays stuck\end{Handwriting} \end{minipage}}
 }
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \def\blockrelax{\innerblock{Relaxation}{\input{4-simplex.tikz}}}
@@ -355,7 +364,7 @@ Fixing $\tau$ (AM2) allow to approximate the posterior of $\pi$ only}}
 \def\blockblock{ \innerblock{Block sampling}{
 Components of $\tau$ are sampled jointly position by position (AM1) when $G$ is small.
 $\forall v$, $\tau_{v,\indexvec{g},\indexvec{b}}\mid \pi,\epsilon,(\tau_{v',\indexvec{g},\indexvec{b}})_{(v',g')\neq(v,g)}\sim\mathrm{Multinomial}\left(1,(p_t)_{t\in\{A,C,G,T\}^G}\right)$, with 
-$p_t\propto $ $$\!\!\!\prod_{s,a}\!\!\left(\!\!\sum_g\!\pi_{g,s}\!\epsilon_{b,a}\!t_{g,a}\!+\!\sum_{g'\neq g,b'}\!\tau_{v,g',b'}\!\pi_{g',s}\epsilon_{b',a}\!\right)^{ n_{v,s,a}}$$}}
+$p_t\propto $ $$\prod_{s,a}\left(\sum_{g,b}\pi_{g,s}\epsilon_{b,a}t_{g,b}\right)^{n_{v,s,a}}$$}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
 \def\blocktempering{ 
 \innerblock{Tempering}{
@@ -388,7 +397,39 @@ Tempering strategies
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \def\blockj{
 
-    \block{Comparative results}{}}
+    \block{Comparative results}{
+\begin{minipage}{.20\textwidth}
+	\innerblock{Case study}{
+	    $$n_{.,s=1,.}=\begin{blockarray}{ccccc}
+    &a=A&a=C&a=G&a=T&\\
+    \begin{block}{c(cccc)}
+ {\scriptscriptstyle v=1}&500&500&0&0\\   
+ {\scriptscriptstyle v=2}&500&500&1&0\\
+    \end{block}
+\end{blockarray}$$
+	
+	}
+	
+	
+    \innerblock{Block sampling}{\includegraphics[scale=1]{plotblock.pdf}}
+\end{minipage}\hspace{.74cm}%
+\begin{minipage}{.20\textwidth}
+    \innerblock{"True" posterior}{\includegraphics[scale=1]{posteriortrue.pdf}}
+    \innerblock{$\bar\epsilon$ tempering}{\includegraphics[scale=1]{plotepsilontemp.pdf}}
+
+\end{minipage}\hspace{.74cm}%
+\begin{minipage}{.20\textwidth}
+    \innerblock{Desman}{\includegraphics[scale=1]{plotdesman.pdf}}
+    \innerblock{$\alpha_\tau$ tempering}{\includegraphics[scale=1]{plotalpha.pdf}}
+
+
+\end{minipage}\hspace{.74cm}%
+    }
+    
+    
+    
+    
+    }
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \def\blockref{
 
@@ -419,18 +460,26 @@ Quince, C., Delmont, T. O., Raguideau, S., Alneberg, J., Darling, A. E., Collins
 %⁴ Ensae}
 %    \column{0.8}
 \begin{columns}
-\column{0.15}
-\column{0.65}
 \useblockstyle{titleblock} 
+\column{0.15}
+\block{}{\vspace*{-4cm}
+\input{rf-logo.tikz}}
+\column{0.65}
 \block{}
 {\color{color1}
-    {\Huge \bf A tempered Sequential Monte Carlo Method for estimating the number of
-variants in metagenomic samples}\\
+\vspace*{-3cm}
+    {\Huge \bf A tempered Sequential Monte Carlo Method for \mbox{estimating} the number of
+variants in metagenomic \mbox{samples}}\\
 
 \Large 
-Anne-Laure Abraham$^{1}$, {\bf Daniel Bonnéry$^{1,4}$}, Nicolas Chopin$^{3}$, Guillaume Kon Kam King$^{1,4}$, Sebastien Leclercq$^{2}$, Ouleye Sidibe$^{2}$ \small(alphabetical order). \hspace*{1cm}\normalsize $^1$ Inrae, MaIAGE, $^2$  Inrae,ISP UMR 1282 $^3$ Ensae-Crest,$^4$ Ensae
+Anne-Laure Abraham$^{1}$, {\bf Daniel Bonnéry$^{1,4}$}, Nicolas Chopin$^{3}$, Guillaume Kon Kam King$^{1}$, Sebastien Leclercq$^{2}$, Ouleye Sidibe$^{2}$ \small(alphabetical order). \hspace*{1cm}\normalsize $^1$ Inrae, MaIAGE, $^2$  Inrae, ISP UMR 1282 $^3$ Ensae-Crest,$^4$ Ensae, Inrae
 }
 \column{0.2}
+\block{}{\vspace*{-3cm}
+\input{inrae-logo.tikz}
+
+\input{ups-logo.tikz}
+}
 \end{columns}
 %\end{columns}
 \vspace*{.5cm}
@@ -463,6 +512,22 @@ Replace the distribution of $\tau$ (AM4) (resp. $\rho$ (AM5)) by $\mathrm{Dirich
 \end{minipage}
 }
     \blockj
+    \begin{subcolumns}
+	\subcolumn{.66}
+\block{Conclusion}{
+\begin{itemize}
+\item All the methods tested for this case study provide a posterior distribution concentrated around a high posterior density point. 
+\item Block sampling performs the best mixing, but is only tractable for small values of $G$. A single chain will contain the 2 high posterior density values of $\tau$
+\item Other methods rely on the use of many particules or chains. Single chains stay concentrated around the same value.
+\item Tempering strategies, in particular data tempering and tempering on $\bar\epsilon_1$ offer an alternative to block sampling.
+\item The resampling phase in SMC algorithms often shrinks the sample to one particle. This impacts the role of ESS and the computation of the step for the tempering.
+\item Tempering on $\alpha_\tau$ doesn't look as promising after trial. Mixing occurs but rather slowly.
+\end{itemize}
+
+}
+\subcolumn{.33}
+\blockref
+\end{subcolumns}
 \end{columns}
 \end{document}
 

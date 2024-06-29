@@ -51,7 +51,8 @@ smc_inits <-
     
     
     theta=list()
-    sim=if(i>1){sim_tau_pi_epsilon_n_i(v=v,g=g,s=s,i=i,n=0)}else{sim_tau_pi_epsilon_n(v=v,g=g,s=s,n=0)}
+    sim=if(i>1){sim_tau_pi_epsilon_n_i(v=v,g=g,s=s,i=i,n=0)
+      }else{sim_tau_pi_epsilon_n(v=v,g=g,s=s,n=0)}
     
     
     if(is.null(kappa_rho)&is.null(alpha_rho)){
@@ -65,22 +66,23 @@ smc_inits <-
       if(!(fixed_bar_epsilon)&!is.null(alpha_bar_epsilon)){
         
         theta=c(theta,        
-                if(i>1){list(epsilon_iba=sim$epsilon_iba)},
-                if(i==1){list(epsilon_ba=sim$epsilon_ba)})
-        theta=c(theta,list(bar_epsilon_1=sampler_bar_epsilon_1_0(alpha_bar_epsilon)))
+                if(i>1){list(epsilon_iba=sim$epsilon_iba,
+                             bar_epsilon_1_i=3*sim$epsilon_iba[,2,1])},
+                if(i==1){list(epsilon_ba=sim$epsilon_ba,
+                              bar_epsilon_1=3*sim$epsilon_ba[2,1])})
       }
       if(!is.null(tau_vgb_0)){theta=c(theta,list(tau_vgb=tau_vgb_0))}
       if(!is.null(tau_ivgb_0)){theta=c(theta,list(tau_ivgb=tau_ivgb_0))}
-      if(i==1&is.null(tau_vgb_0)){theta=c(theta,list(tau_vgb=sim$tau_vgb))}
-      if(i>1&is.null(tau_ivgb_0)){theta=c(theta,list(tau_ivgb=sim$tau_ivgb))}
+      if(i==1&is.null(tau_vgb_0)&!fixed_tau){theta=c(theta,list(tau_vgb=sim$tau_vgb))}
+      if(i>1&is.null(tau_ivgb_0)&!fixed_tau){theta=c(theta,list(tau_ivgb=sim$tau_ivgb))}
       if(!is.null(kappa_rho)){alpha_rho=sample_alpha_rho(kappa_rho);
-      theta=c(theta,list(alpha_rho=sample_alpha_rho(kappa_rho)))}
-      if(!is.null(alpha_rho)){
-        rep_alpha_rho=rep(alpha_rho,4)
-        theta=c(theta,         if(i>1){list(rho_ivgb=sim$rho_ivgb)},
-                if(i==1){list(rho_vgb=sim$rho_vgb)})}}
+      theta=c(theta,list(alpha_rho=sample_alpha_rho(kappa_rho)))}}
+    if(!is.null(alpha_rho)){
+      rep_alpha_rho=rep(alpha_rho,4)
+      theta=c(theta,         if(i>1){list(rho_ivga=sim$rho_ivga)},
+              if(i==1){list(rho_vgb=sim$rho_vgb)})}
     theta=c(theta,
-            if(!is.null(pi_gs_0)){list(pi_igs=pi_gs_0)},
+            if(!is.null(pi_gs_0)){list(pi_gs=pi_gs_0)},
             if(!is.null(pi_igs_0)){list(pi_igs=pi_igs_0)},
             if(i>1&is.null(pi_igs_0)){list(pi_igs=sim$pi_igs)},
             if(i==1&is.null(pi_gs_0)){list(pi_gs=sim$pi_gs)})

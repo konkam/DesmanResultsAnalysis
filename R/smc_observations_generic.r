@@ -38,22 +38,21 @@ smc_fixed_f <-
     
     dimnames(n_vsa) <- lapply(dim(n_vsa), seq_len)
     
-    observations=list(n_vsa=n_vsa,
-           n_vs=n_vsa |> apply(MARGIN = c(1, 2), FUN = sum))
-    if(!is.null(tau_vgb)){observations=c(observations,list(tau_vgb=tau_vgb),if(i>1){list(tau_ivgb=plyr::raply(i,tau_vgb))})}
-    if(!is.null(alpha_epsilon)){observations=c(observations,list(alpha_epsilon=alpha_epsilon,rep_alpha_epsilon=rep(alpha_epsilon,4)))}
-    if(!is.null(alpha_bar_epsilon)){observations=c(observations,list(alpha_bar_epsilon=alpha_bar_epsilon))}else{
+    notrandom=list(n_vsa=n_vsa,
+                      n_vs=n_vsa |> apply(MARGIN = c(1, 2), FUN = sum))
+    if(!is.null(tau_vgb)){notrandom=c(notrandom,list(tau_vgb=tau_vgb),if(i>1){list(tau_ivgb=plyr::raply(i,tau_vgb))})}
+    if(!is.null(alpha_epsilon)){notrandom=c(notrandom,list(alpha_epsilon=alpha_epsilon,rep_alpha_epsilon=rep(alpha_epsilon,4)))}
+    if(!is.null(alpha_bar_epsilon)){notrandom=c(notrandom,list(alpha_bar_epsilon=alpha_bar_epsilon))}else{
       if(!is.null(bar_epsilon_1_std)&!is.null(bar_epsilon_1_mean)){
         alpha_bar_epsilon=alpha_bar_epsilon_specification(
           bar_epsilon_1_std =bar_epsilon_1_std,
           bar_epsilon_1_mean=bar_epsilon_1_mean)
-        observations=c(observations,list(alpha_bar_epsilon=alpha_bar_epsilon))}}
-    if(!is.null(kappa_rho)){observations=c(observations,list(kappa_rho=kappa_rho))}
-    if(!is.null(alpha_rho)){observations=c(observations,list(alpha_rho=alpha_rho,rep_alpha_rho=rep(alpha_rho,4)))}
-
-    if(!is.null(alpha_pi)){observations=c(observations,
-                                   list(alpha_pi=alpha_pi,
-                                        rep_alpha_pi=rep(alpha_pi,G)))}
+        notrandom=c(notrandom,list(alpha_bar_epsilon=alpha_bar_epsilon))}}
+    if(!is.null(kappa_rho)){notrandom=c(notrandom,list(kappa_rho=kappa_rho))}
+    if(!is.null(alpha_rho)){notrandom=c(notrandom,list(alpha_rho=alpha_rho,rep_alpha_rho=rep(alpha_rho,4)))}
+    
+    if(!is.null(alpha_pi)){notrandom=c(notrandom,
+                                          list(rep_alpha_pi=rep(alpha_pi,G)))}
     
     
     constants=list(
@@ -62,10 +61,10 @@ smc_fixed_f <-
       G=G,
       G4=4^G)
     if(!is.null(alpha_tau)){
-      observations=c(observations,
+      notrandom=c(notrandom,
                      list(alpha_tau=alpha_tau,
-                                       rep_alpha_tau=rep(alpha_tau,4)))
-      }
+                          rep_alpha_tau=rep(alpha_tau,4)))
+    }
     
     if(!is.null(bar_epsilon_1)){constants=c(constants,
                                             list(bar_epsilon_1=bar_epsilon_1,
@@ -74,5 +73,5 @@ smc_fixed_f <-
                                                  epsilon_iba=epsilon_iba_f(i=i,bar_epsilon_1=bar_epsilon_1)))}
     
     
-    if(gs!="nimble"){c(constants,observations)}else{list(constants=constants,observations=observations)}
-    }
+    if(gs!="nimble"){c(constants,notrandom)}else{list(constants=constants,notrandom=notrandom)}
+  }

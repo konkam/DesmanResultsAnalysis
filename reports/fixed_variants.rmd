@@ -41,7 +41,7 @@ htmltools::tagList(desman_tuning_parameters)
 # Results
 ## Free epsilon
 ```{r}
-plot_bar_epsilon(mcmc_output = mcmc_output,epsilon_bar_1 = desman_tuning_parameters$epsilon_bar_1)
+plot_bar_epsilon(mcmc_output = mcmc_output,bar_epsilon_1 = desman_tuning_parameters$bar_epsilon_1)
 plot_pi(mcmc_output,n_vsa =n_vsa,variants = variants)
 ```
 

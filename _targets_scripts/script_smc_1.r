@@ -42,7 +42,7 @@ list(
     desman_tuning_parameters,
     list(
       sample = 10000, burnin = 1000, adapt = 1000,
-      epsilon_bar_1 = 0.001,
+      bar_epsilon_1 = 0.001,
       prior_std = 0.01,
       n_chains = 2,
       alpha_pi = .1

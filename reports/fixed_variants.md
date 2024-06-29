@@ -32,7 +32,7 @@ An ad hoc dictionnary of size 4 was used
 ## Free epsilon
 
 ``` r
-plot_bar_epsilon(mcmc_output = mcmc_output,epsilon_bar_1 = desman_tuning_parameters$epsilon_bar_1)
+plot_bar_epsilon(mcmc_output = mcmc_output,bar_epsilon_1 = desman_tuning_parameters$bar_epsilon_1)
 ```
 
     ## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.

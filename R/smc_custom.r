@@ -167,14 +167,14 @@ update_lambda<-function(ess_min,
   
   if(min_samplesize==max_samplesize){
     lambda=min_samplesize/n_plus
-    n_vsa_lambda=data_tempering_stratified(n_vsa=n_vsa,n_plus=n_plus,n_vsa_df=n_vsa_df,lambda=lambda)
+    n_vsa_lambda=tempering_n_stratified(n_vsa=n_vsa,n_plus=n_plus,n_vsa_df=n_vsa_df,lambda=lambda)
     ess=smc_ess(n_vsa_lambda=n_vsa_lambda,tau_ivgb=tau_ivgb,pi_igs=pi_igs,epsilon_iba=epsilon_iba)
     sol=list(n_vsa_lambda=n_vsa_lambda,
              lambda=lambda,ess=ess)
   }else{
     samplesize=floor((min_samplesize+max_samplesize)/2)
     lambda=samplesize/n_plus
-    n_vsa_lambda=data_tempering_stratified(n_vsa=n_vsa,n_plus=n_plus,n_vsa_df=n_vsa_df,lambda=lambda)
+    n_vsa_lambda=tempering_n_stratified(n_vsa=n_vsa,n_plus=n_plus,n_vsa_df=n_vsa_df,lambda=lambda)
     ess=smc_ess(n_vsa_lambda=n_vsa_lambda,tau_ivgb=tau_ivgb,pi_igs=pi_igs,epsilon_iba=epsilon_iba)
     
     #print(paste0(min_samplesize," _ ",samplesize," _ ",max_samplesize," _ ",ess))
@@ -214,7 +214,7 @@ update_lambda<-function(ess_min,
 #'resample_array(the_array,dimension,selection)|>dim()
 #'identical(resample_array(the_array,dimension,selection),the_array[,3:4,])
 resample_array<-function(the_array,dimension=1,selection=1:(dim(the_array)[dimension])){
-  a=plyr::alply(dim(the_array),1,seq_len)
+  a=plyr::alply(dim(as.array(the_array)),1,seq_len)
   a[[dimension]]<-selection#a[dimension]<-if(is.vector(selection)){list(selection)}else{selection}
   do.call(what=`[`,c(list(the_array),a,list(drop=FALSE)))
 }
@@ -293,12 +293,12 @@ smc_sampler<-function(n_vsa,
                 ess=1)
     
   }
-  if(mcmc){n_vsa_lambda=n_vsa;lambda=0;sample_i=1:i}
+  if(mcmc){n_vsa_lambda=n_vsa;lambda=0;sample_i=1:n_chains}
   while(((lambda<1)|(t<=min(t_max,t_min)))&(t<max(t_max,t_min))){
     print(paste0("t : ",t," || lambda :",lambda))
     t=t+1
     if(!mcmc){
-      n_vsa_lambda=data_tempering_stratified(n_vsa=n_vsa,n_plus=n_plus,n_vsa_df=n_vsa_df,lambda=lambda)
+      n_vsa_lambda=tempering_n_stratified(n_vsa=n_vsa,n_plus=n_plus,n_vsa_df=n_vsa_df,lambda=lambda)
       sample_i=sample(x=i,size=i,replace=(i>1),prob=ww)}
     
     new0=new
@@ -403,21 +403,28 @@ smc_sampler<-function(n_vsa,
 #'bar_epsilon_1_mean=NULL
 #'alpha_bar_epsilon=NULL#c(1,10)
 #'bar_epsilon_1=.1
-#'data_tempering=FALSE
+#'tempering_n=FALSE
 #'bar_epsilon_1_tempering=FALSE
 #'alpha_tau_tempering=FALSE
 #'#'tau_vgb=NULL
 #'alpha_tau_seq=NULL
 #'bar_epsilon_1_seq=(function(x){.001+0.249*(1/x)^{1/4}})(1:1000)
-
-
+#'formals(smc_custom)|>
+#' (function(x){
+#'   x[sapply(x,function(xx){!is.element("name",class(xx))})]
+#'   })()|>
+#'plyr::llply(eval)|>
+#' list2env(.GlobalEnv)
 
 smc_custom<-function(n_vsa,
-                     gs="jags",
                      tau_vgb=NULL,
+                     tau_ivgb_0=NULL,
+                     tau_vgb_0=NULL,
                      G=if(!is.null(tau_vgb)){dim(tau_vgb)[2]}else{5},
                      pi_igs_0=NULL,#set initial value
-                     pi_gs_0=NULL,#set initial value
+                     pi_gs_0=NULL,#set initial value,
+                     epsilon_ba_0=NULL,
+                     epsilon_iba_0=NULL,
                      block_tau=TRUE,
                      alpha_tau=NULL,
                      alpha_rho=NULL,
@@ -429,7 +436,7 @@ smc_custom<-function(n_vsa,
                      kappa_rho=NULL,
                      alpha_pi=.1,
                      n_chains = 2,
-                      n_vsa_df=reorder_counts(n_vsa = n_vsa,seed=seed),
+                      n_vsa_df=NULL,
                       g=G,
                       t_min=1,
                       t_max,
@@ -439,13 +446,20 @@ smc_custom<-function(n_vsa,
                       .update_lambda=update_lambda,
                       mcmc=FALSE,
                      inits=NULL,
-                     data_tempering=FALSE,
+                     tempering_n=FALSE,
                      bar_epsilon_1_tempering=FALSE,
                      alpha_tau_tempering=FALSE,
                      alpha_tau_seq=NULL,
-                     bar_epsilon_seq=NULL,
+                     bar_epsilon_1_seq=NULL,
                      ...){
-
+  v<-dim(n_vsa)[1]
+  s<-dim(n_vsa)[2]
+  if(bar_epsilon_1_tempering&!is.null(bar_epsilon_1_seq)){
+    bar_epsilon_1=bar_epsilon_1_seq[1]
+  }
+  if(alpha_tau_tempering&!is.null(alpha_tau_seq)){
+    alpha_tau=alpha_tau_seq[1]
+  }
   fixed_bar_epsilon=!is.null(bar_epsilon_1)
   fixed_tau=!is.null(tau_vgb)
   relax_tau=!is.null(alpha_tau)
@@ -459,23 +473,22 @@ smc_custom<-function(n_vsa,
                     i=n_chains,
                     gs=gs,
                     tau_vgb_0=tau_vgb_0,#set initial value
-                    tau_ivgb_0=tau_vgb_0,#set initial value
+                    tau_ivgb_0=tau_ivgb_0,#set initial value
                     fixed_tau=fixed_tau,
                     alpha_tau=alpha_tau,
                     pi_igs_0=pi_igs_0,#set initial value
                     pi_gs_0=pi_gs_0,#set initial value
-                    fixed_pi=fixed_pi,
                     alpha_pi=alpha_pi,
-                  bar_epsilon_1_0=bar_epsilon_1_0,
-                  alpha_bar_epsilon=alpha_bar_epsilon,
-                  bar_epsilon_1_std=bar_epsilon_1_std,
-                  bar_epsilon_1_mean=bar_epsilon_1_mean,
-                  fixed_bar_epsilon=fixed_bar_epsilon,
-                  epsilon_ba_0=epsilon_ba_0,
-                  alpha_epsilon=alpha_epsilon,
-                  kappa_rho=kappa_rho,
-                  alpha_rho=alpha_rho)
-    }
+                    bar_epsilon_1_0=bar_epsilon_1_0,
+                    alpha_bar_epsilon=alpha_bar_epsilon,
+                    bar_epsilon_1_std=bar_epsilon_1_std,
+                    bar_epsilon_1_mean=bar_epsilon_1_mean,
+                    fixed_bar_epsilon=fixed_bar_epsilon,
+                    epsilon_ba_0=epsilon_ba_0,
+                    alpha_epsilon=alpha_epsilon,
+                    kappa_rho=kappa_rho,
+                    alpha_rho=alpha_rho)
+  }
   
   smc_kernel=kernel_f(fixed_bar_epsilon=fixed_bar_epsilon,
                       constrained_epsilon_matrix=constrained_epsilon_matrix,
@@ -485,37 +498,37 @@ smc_custom<-function(n_vsa,
                       relax_rho=relax_rho)
   
   
-  param=smc_fixed_f(n_vsa=n_vsa,
-             gs="custom",
-             G=g,
-             alpha_pi=alpha_pi,
-             alpha_epsilon=alpha_epsilon,
-             bar_epsilon_1_std=bar_epsilon_1_std,
-             bar_epsilon_1_mean=bar_epsilon_1_mean,
-             alpha_bar_epsilon=alpha_bar_epsilon,
-             bar_epsilon_1=bar_epsilon_1,
-             tau_vgb=tau_vgb,
-             alpha_tau=alpha_tau,
-             kappa_rho=kappa_rho,
-             alpha_rho=alpha_rho,
-             i=n_chains)
+  fixed=smc_fixed_f(n_vsa=n_vsa,
+                    gs="custom",
+                    G=g,
+                    alpha_pi=alpha_pi,
+                    alpha_epsilon=alpha_epsilon,
+                    bar_epsilon_1_std=bar_epsilon_1_std,
+                    bar_epsilon_1_mean=bar_epsilon_1_mean,
+                    alpha_bar_epsilon=alpha_bar_epsilon,
+                    bar_epsilon_1=bar_epsilon_1,
+                    tau_vgb=tau_vgb,
+                    alpha_tau=alpha_tau,
+                    kappa_rho=kappa_rho,
+                    alpha_rho=alpha_rho,
+                    i=n_chains)
   
   theta=inits
-  fixed=param
   
   
-    
+  
   lambda=0.1
   t=0
   n_plus=sum(n_vsa)
-  v=dim(n_vsa)[1]
-  s=dim(n_vsa)[2]
- 
+  
   
   #w<-smc_b_prime(0*n_vsa,tau_ivgb,pi_igs,epsilon_iba)
   if(!mcmc){ww<-rep(1/n_chains,n_chains)}#w/sum(w)}
+  ww<-rep(1/n_chains,n_chains)
   if(trace_all){
     traces=list()
+    if(is.element("rho_ivga",names(theta))){
+      traces=c(traces,list(rho_tivga=array(theta$rho_ivga,c(1,dim(theta$rho_ivga)))))}
     if(is.element("epsilon_iba",names(theta))){
       traces=c(traces,list(epsilon_tiba=array(theta$epsilon_iba,c(1,dim(theta$epsilon_iba)))))}
     if(is.element("pi_igs",names(theta))){
@@ -523,77 +536,92 @@ smc_custom<-function(n_vsa,
     if(is.element("tau_ivgb",names(theta))){
       traces=c(traces,list(tau_tivgb=array(theta$tau_ivgb,c(1,dim(theta$tau_ivgb)))))}
     traces=c(traces,list(
-            ww_ti=array(ww,c(1,dim(as.array(ww)))),
-                sample_ti=array(1:n_chains,c(1,n_chains)),
-                ess_t=1))
+      ww_ti=array(ww,c(1,dim(as.array(ww)))),
+      sample_ti=array(1:n_chains,c(1,n_chains)),
+      ess_t=1))
     
   }
   sample_i=1:n_chains
-  if(!data_tempering){n_vsa_lambda=n_vsa;lambda=0}
+  
+  if(!tempering_n){n_vsa_lambda=n_vsa;lambda=0}
   while(((lambda<1)|(t<=min(t_max,t_min)))&(t<max(t_max,t_min))){
-    print(paste0("t : ",t," || lambda :",lambda))
+    tempering_message="|| tempering "
     t=t+1
-    if(data_tempering){
-      n_vsa_lambda=data_tempering_stratified(n_vsa=n_vsa,n_plus=n_plus,n_vsa_df=n_vsa_df,lambda=lambda)
-      fixed$n_vsa=n_vsa_lambda
-      }
-    
-    if(data_tempering){
-      n_vsa_lambda=data_tempering_stratified(n_vsa=n_vsa,n_plus=n_plus,n_vsa_df=n_vsa_df,lambda=lambda)
+    if(tempering_n){
+      tempering=paste0(tempering_message," - data:",lambda)  
+      n_vsa_lambda=tempering_n_stratified(n_vsa=n_vsa,n_plus=n_plus,n_vsa_df=n_vsa_df,lambda=lambda)
       fixed$n_vsa=n_vsa_lambda
     }
     
     if(bar_epsilon_1_tempering){
-      fixed$bar_epsilon_1=bar_epsilon_1_seq[min(t,length(bar_epsilon_1_seq))]
-      fixed$bar_epsilon=c(fixed$bar_epsilon_1,1-fixed$bar_epsilon_1)
-      fixed$epsilon_ba=epsilon_ba_f(bar_epsilon_1=fixed$bar_epsilon_1)
-      epsilon_iba=epsilon_iba_f(i=n_chains,bar_epsilon_1=fixed$bar_epsilon_1)
-      
-      
-    }
-      if(!mcmc&t>1){
-      sample_i=sample(x=n_chains,size=n_chains,replace=(n_chains>1),prob=ww)
+      if(!is.null(bar_epsilon_1_seq)){
+        fixed$bar_epsilon_1=bar_epsilon_1_seq[min(t,length(bar_epsilon_1_seq))]
+        fixed$bar_epsilon=c(fixed$bar_epsilon_1,1-fixed$bar_epsilon_1)
+        fixed$epsilon_ba=epsilon_ba_f(bar_epsilon_1=fixed$bar_epsilon_1)
+        fixed$epsilon_iba=epsilon_iba_f(i=n_chains,bar_epsilon_1=fixed$bar_epsilon_1)
+        tempering=paste0(tempering_message," - bar_epsilon_1: ",fixed$bar_epsilon_1)  
+        
       }
+    }
     
-    obs=list(n_vsa=n_vsa)
+    
+    if(alpha_tau_tempering){
+      if(!is.null(alpha_tau_seq)){
+        alpha_tau_t=alpha_tau_seq[min(t,length(alpha_tau_seq))]
+        fixed$rep_alpha_tau=rep(alpha_tau_t,4)
+        tempering=paste0(tempering_message," - alpha_tau: ",signif(alpha_tau_t,4))  
+      }
+    }
+    
+    print(paste0("t : ",t,tempering))
+    
+    if(!mcmc&t>1){
+      sample_i=sample(x=n_chains,size=n_chains,replace=(n_chains>1),prob=ww)
+      xx=table(sample_i)
+      uniques=strtoi(names(xx))
+      sample_i[uniques]<-uniques
+      sample_i[-uniques]<-rep(uniques,times=c(xx)-1)
+    }
+    
     if(!mcmc){theta=plyr::llply(theta,resample_array,dimension=1,selection=sample_i)}
-    theta=smc_kernel(theta = theta,
-                     fixed=fixed)
+    theta=smc_kernel(theta = theta, fixed = fixed)
     
     if(!mcmc){
       w<-do.call(what=smc_logb_prime,c(theta,fixed)[c("n_vsa","tau_ivgb","pi_igs","epsilon_iba")])
       w<-exp(w-max(w))
       ww<-w/sum(w)
       ess=1/sum(ww^2)
-      if(data_tempering){
-      sample_size=sum(n_vsa_lambda)
-      lambda_n_vsa=.update_lambda(ess_min,
-                                  n_vsa=n_vsa,
-                                  n_plus=n_plus,seed=seed,
-                                  n_vsa_df=n_vsa_df,
-                                  min_samplesize=sample_size,
-                                  max_samplesize=n_plus,
-                                  tau_ivgb,
-                                  pi_igs,
-                                  epsilon_iba)
-      lambda=max(lambda_n_vsa$lambda,lambda*1.02)
-      n_vsa_lambda=lambda_n_vsa$n_vsa_lambda}
+      if(tempering_n){
+        sample_size=sum(n_vsa_lambda)
+        lambda_n_vsa=.update_lambda(ess_min,
+                                    n_vsa=n_vsa,
+                                    n_plus=n_plus,seed=seed,
+                                    n_vsa_df=n_vsa_df,
+                                    min_samplesize=sample_size,
+                                    max_samplesize=n_plus,
+                                    tau_ivgb,
+                                    pi_igs,
+                                    epsilon_iba)
+        lambda=max(lambda_n_vsa$lambda,lambda*1.02)
+        n_vsa_lambda=lambda_n_vsa$n_vsa_lambda}
       
-      }
+    }
     
     
     
     if(trace_all){
+      if(is.element("rho_ivga",names(theta))){
+        traces$rho_tivga=abind::abind(traces$rho_tivga,theta$rho_ivga,along=1)}
       if(is.element("epsilon_iba",names(theta))){
         traces$epsilon_tiba=abind::abind(traces$epsilon_tiba,theta$epsilon_iba,along=1)}
       if(is.element("pi_igs",names(theta))){
-        traces$pi_tigs=abind::abind(traces$pi_tigs,theta$pi_gs,along=1)}
+        traces$pi_tigs=abind::abind(traces$pi_tigs,theta$pi_igs,along=1)}
       if(is.element("tau_ivgb",names(theta))){
         traces$tau_tivgb=abind::abind(traces$tau_tivgb,theta$tau_ivgb,along=1)}
       traces$ww_ti=abind::abind(traces$ww_ti,array(ww,c(1,n_chains)),along=1)
       traces$sample_ti=abind::abind(traces$sample_ti,array(sample_i,c(1,n_chains)),along=1)
       traces$ess_t=c(traces$ess_t,1/(sum(ww^2)))
-      }
+    }
   }
   list(theta=theta,traces=if(trace_all){traces}else{NULL})
 }

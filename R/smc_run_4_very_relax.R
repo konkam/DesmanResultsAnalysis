@@ -46,7 +46,7 @@ inference_4_run <- function(n_vsa,
                             kappa_rho=c(1,100),
                             n_chains =2,
                             ...) {
-  gs_run(n_vsa,
+  smc_run(n_vsa,
          gs=gs,
          tau_vgb=NULL,
          G=G,

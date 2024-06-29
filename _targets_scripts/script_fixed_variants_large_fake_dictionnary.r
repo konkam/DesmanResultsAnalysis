@@ -49,7 +49,7 @@ list(
                                                        tau_vgb,
                                                        G=dim(tau_vgb)[2]-1,
                                              bar_epsilon=NA,
-                                                       epsilon_bar_1 = 0.001,
+                                                       bar_epsilon_1 = 0.001,
                                                        prior_std = 0.01,
                                                        n_chains=2,
                                                        alpha_pi=.1,
@@ -61,7 +61,7 @@ list(
                                              tau_vgb,
                                              G=dim(tau_vgb)[2]-1,
                                              bar_epsilon=.0001,
-                                             epsilon_bar_1 = 0.001,
+                                             bar_epsilon_1 = 0.001,
                                              prior_std = 0.01,
                                              n_chains=2,
                                              alpha_pi=.1)))

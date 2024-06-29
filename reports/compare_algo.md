@@ -53,11 +53,11 @@ pi_gs
     ## [5,]  0.2
 
 ``` r
-epsilon_bar_1 <- .0001
-epsilon_ba <- epsilon_ba_f(epsilon_bar_1)
+bar_epsilon_1 <- .0001
+epsilon_ba <- epsilon_ba_f(bar_epsilon_1)
 
 
-n_vsa=sim_n_vsa(tau_vgb=tau_vgb,n = 10000,pi_gs = pi_gs,epsilon_bar_1 = epsilon_bar_1)
+n_vsa=sim_n_vsa(tau_vgb=tau_vgb,n = 10000,pi_gs = pi_gs,bar_epsilon_1 = bar_epsilon_1)
 drop(n_vsa)|> (function(x){dimnames(x)[[2]]<-nucleotides;x})()
 ```
 
@@ -156,7 +156,7 @@ pi_gs0<-matrix(c(.1,.1,.4,.4),4,1)
 
 
 alpha_g=.0001
-n_vsa=sim_n_vsa(tau_vgb=tau_vgb,n = 10000,pi_gs = pi_gs,epsilon_bar_1 = .0001)
+n_vsa=sim_n_vsa(tau_vgb=tau_vgb,n = 10000,pi_gs = pi_gs,bar_epsilon_1 = .0001)
 
   xi_vsabg=sampler_m(tau_vgb=tau_vgb,
                       pi_gs=pi_gs,

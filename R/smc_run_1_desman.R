@@ -20,7 +20,7 @@ smc_observation_desman_f<-function(n_vsa,
                           alpha_epsilon=.1,
                           alpha_pi=.1){
   
-  smc_observation_generic_f(n_vsa=n_vsa,
+  smc_fixed_f(n_vsa=n_vsa,
                             gs=gs,
                             G=G,
                             alpha_bar_epsilon=NULL,
@@ -54,8 +54,8 @@ desman_run <- function(n_vsa,
                                 alpha_epsilon=.1,
                                 n_chains =2,
                                 ...) {
-  gs_run(n_vsa,
-             gs="jags",
+  smc_run(n_vsa,
+             gs="custom",
              G=G,
              tau_vgb=NULL,
              block_tau=FALSE,
@@ -83,10 +83,10 @@ desman_run <- function(n_vsa,
 }
 
 
-mcmc_desman_run <- function(n_vsa,
+desman_run <- function(n_vsa,
                             G,
                             gs="jags",
-                            bar_epsilon=.01,
+                            alpha_epsilon=.1,
                             n_chains =2,
                             ...) {
   mcmc_unrelaxed_run(n_vsa,

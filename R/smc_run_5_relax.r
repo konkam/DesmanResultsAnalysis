@@ -44,7 +44,7 @@ inference_5_run <- function(n_vsa,
                             alpha_bar_epsilon=c(1,100),
                             n_chains =2,
                             ...) {
-  gs_run(n_vsa,
+  smc_run(n_vsa,
          gs=gs,
          tau_vgb=NULL,
          G=G,
