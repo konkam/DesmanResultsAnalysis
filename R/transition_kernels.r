@@ -40,7 +40,7 @@ kernel_f<-function(
     if(relax_rho){
       "
       chi_ivsag=einsum::einsum('ivga,igs->ivsag',allvar$rho_ivga,allvar$pi_igs);
-      m_ivsag=sampler_m_ivsag(n_vsa=allvar$n_vsa,chi_ivsag=chi_ivsag);
+      m_ivsag=sampler_m_ivsag(n_vsa=allvar$n_vsa,chi_ivsag=chi_ivsag,lambda_m=allvar$lambda_m);
       thetanew$rho_ivga<-
         rho_ivga<-
         sampler_tilde_rho_ivga(m_ivga=einsum::einsum('ivsag->ivga',m_ivsag),
@@ -53,7 +53,7 @@ kernel_f<-function(
     if(!relax_rho){
       "
       chi_ivsabg=einsum::einsum('ivgb,iba,igs->ivsabg',allvar$tau_ivgb,allvar$epsilon_iba,allvar$pi_igs);
-      m_ivsabg=sampler_m_ivsabg(n_vsa=n_vsa,chi_ivsabg=chi_ivsabg);
+      m_ivsabg=sampler_m_ivsabg(n_vsa=n_vsa,chi_ivsabg=chi_ivsabg,lambda_m=allvar$lambda_m);
        thetanew$pi_igs<-
           pi_igs<-
           sampler_pi_igs(m_igs=einsum::einsum('ivsabg->igs',m_ivsabg),

@@ -10,3 +10,12 @@ fixed_variants_large_dictionnary:
 smc_1:
   store: _targets_store/smc_1
   script: _targets_scripts/script_smc_1.r
+
+
+20240701_poster:
+  store: _targets_store/20240701_poster
+  script: _targets_scripts/script_20240701_poster.r
+
+20240709_test:
+  store: _targets_store/20240709_test
+  script: _targets_scripts/script_20240709_test.r

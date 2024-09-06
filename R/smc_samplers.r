@@ -137,13 +137,14 @@ sampler_tilde_rho_ivga<-function(rep_alpha_rho,
 sampler_m<-function(tau_vgb,pi_gs,epsilon_ba,
                      v=dim(tau_vgb)[1],
                      s=dim(pi_gs)[2],
-                     g=dim(pi_gs)[1]){
+                     g=dim(pi_gs)[1],
+                    lambda_m=1){
   ns<-  einsum::einsum("vsa,b,g->vsabg",n_vsa,rep(1,4),rep(1,g))
   ms<-einsum::einsum("vgb,gs,ba->vsabg",tau_vgb,pi_gs,epsilon_ba)
   nms=abind::abind(ns,ms,along=6)
   nm=nms[1,1,1,,,,drop=FALSE]|>abind::adrop(1:3)
   nms|>plyr::aaply(1:3,function(nm){
-    rmultinom(1,size=nm[1,1,1],prob = nm[,,2])|>
+    lambda_m*rmultinom(1,size=nm[1,1,1],prob = nm[,,2])|>
       matrix(4)},.drop = FALSE)
   
 }
@@ -170,13 +171,15 @@ sampler_m_ivsabg<-function(chi_ivsabg,
                            v=dim(chi_ivsabg)[2],
                            s=dim(chi_ivsabg)[3],
                            g=dim(chi_ivsabg)[6],
-                           grid_ivsa=expand.grid(i=1:i,v=1:v,s=1:s,a=1:4)){
+                           grid_ivsa=expand.grid(i=1:i,v=1:v,s=1:s,a=1:4),
+                           lambda_m=1){
   
   
   
-  plyr::maply(grid_ivsa,function(i,v,s,a){
-    rmultinom(1,size=n_vsa[v,s,a],
-              prob = chi_ivsabg[i,v,s,a,,]|>c()|>log()|>(function(x){x-max(x)})()|>exp())})|>
+  (lambda_m*
+    plyr::maply(grid_ivsa,function(i,v,s,a){
+      rmultinom(1,size=n_vsa[v,s,a],
+              prob = chi_ivsabg[i,v,s,a,,]|>c()|>log()|>(function(x){x-max(x)})()|>exp())}))|>
     array(dim=dim(chi_ivsabg))|>
     namedims("ivsabg")
   }
@@ -195,10 +198,12 @@ sampler_m_ivsag<-function(chi_ivsag,
                       v=dim(chi_ivsag)[2],
                       s=dim(chi_ivsag)[3],
                       g=dim(chi_ivsag)[5],
-                      grid_ivsa=expand.grid(i=1:i,v=1:v,s=1:s,a=1:4)){
+                      grid_ivsa=expand.grid(i=1:i,v=1:v,s=1:s,a=1:4),
+                      lambda_m=1){
+  (lambda_m*
   plyr::maply(grid_ivsa,function(i,v,s,a){
     rmultinom(1,size=n_vsa[v,s,a],
-              prob = chi_ivsag[i,v,s,a,]|>log()|>(function(x){x-max(x)})()|>exp())})|>
+              prob = chi_ivsag[i,v,s,a,]|>log()|>(function(x){x-max(x)})()|>exp())}))|>
     namedims("ivsag")
   
 }

@@ -33,13 +33,15 @@ smc_fixed_f <-
            alpha_tau=NULL,
            kappa_rho=NULL,
            alpha_rho=NULL,
+           lambda_m=1,
            i=1){
     
     
     dimnames(n_vsa) <- lapply(dim(n_vsa), seq_len)
     
     notrandom=list(n_vsa=n_vsa,
-                      n_vs=n_vsa |> apply(MARGIN = c(1, 2), FUN = sum))
+                      n_vs=n_vsa |> apply(MARGIN = c(1, 2), FUN = sum),
+                   lambda_m=lambda_m)
     if(!is.null(tau_vgb)){notrandom=c(notrandom,list(tau_vgb=tau_vgb),if(i>1){list(tau_ivgb=plyr::raply(i,tau_vgb))})}
     if(!is.null(alpha_epsilon)){notrandom=c(notrandom,list(alpha_epsilon=alpha_epsilon,rep_alpha_epsilon=rep(alpha_epsilon,4)))}
     if(!is.null(alpha_bar_epsilon)){notrandom=c(notrandom,list(alpha_bar_epsilon=alpha_bar_epsilon))}else{

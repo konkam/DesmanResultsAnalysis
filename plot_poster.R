@@ -7,7 +7,7 @@ library(dplyr)
 library(runjags)
 library(RColorBrewer)
 
-"R" |>  list.files(full.names = TRUE) |>sapply(FUN = source)
+"R" |>  list.files(full.names = TRUE) |>sapply(FUN = source)|>invisible()
 
 v=2;s=2;G=g=2
 n_chains=i=3

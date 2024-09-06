@@ -27,6 +27,7 @@
 #'G=G,
 #'gs=gs,
 #'adapt=0,
+#'burnin=0,
 #'sample=10)
 #')}
 #'X|>mcmc_output_df("bar_epsilon")|>View()

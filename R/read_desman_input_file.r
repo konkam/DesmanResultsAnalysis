@@ -3,10 +3,13 @@
 #'get_data_from_server()|>
 #'read_desman_input_files()->X
 read_desman_input_files<-
-  function(desman_input_file){
+  function(desman_input_file,
+           sep="\\.",
+           s_pattern="[[:alnum:]]+_+[[:alnum:]]+",
+           a_pattern="[[:alnum:]]+"){
     desman_input_file|>read.csv()|>tidyr::pivot_longer(cols=!c("Position","X"),
                            names_to=c("s","a"),
-                           names_pattern = "([[:alnum:]]+_+[[:alnum:]]+)\\.([[:alnum:]]+)")|>
+                           names_pattern = paste0("(",s_pattern,")",sep,"(",a_pattern,")"))|>
       plyr::dlply(~X,
                   function(d){
                     d|>dplyr::rename(v="Position")|>

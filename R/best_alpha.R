@@ -1,4 +1,18 @@
-#'@examples
+#' Calculate selected g count based on Dirichlet distribution
+#'
+#' This function calculates various statistics based on the Dirichlet distribution
+#' and multinomial sampling, given the parameters alpha, g, and n.
+#'
+#' @param alpha Numeric, the concentration parameter for the Dirichlet distribution.
+#' @param g Integer, the number of groups.
+#' @param n Integer, the number of samples.
+#' @return A vector containing summary statistics related to the Dirichlet distribution
+#' and multinomial sampling, such as the number of small and large probabilities, medians, 
+#' and alpha parameter.
+#' @importFrom LaplacesDemon rdirichlet
+#' @importFrom plyr aaply
+#' @export
+#' @examples
 #'g=200
 #'alpha=.1
 #'n=30000
@@ -6,8 +20,6 @@
 #'x=plyr::aaply(sort(outer(0:4,c(1,2,5),function(x,y){y*10^(-x)})),1,
 #'selected_g_count,g=300,n=30000,.progress="text")
 #'x
-
-
 selected_g_count<-function(alpha,g,n){
   nrep=10000
   pis=LaplacesDemon::rdirichlet(nrep,
@@ -27,6 +39,21 @@ selected_g_count<-function(alpha,g,n){
                    function(p){sum(rmultinom(1,n,p)>0)})|>
     (function(x){c(alpha=alpha,min=min(x),median=median(x),mean=mean(x),max=max(x))})())}
 
+#' Calculate mean selected g count
+#'
+#' This function calculates the mean number of selected groups from multinomial sampling
+#' based on the Dirichlet distribution.
+#'
+#' @param alpha Numeric, the concentration parameter for the Dirichlet distribution.
+#' @param g Integer, the number of groups.
+#' @param n Integer, the number of samples.
+#' @return Numeric, the mean number of selected groups.
+#' @export
+#' @examples
+#' g = 200
+#' alpha = 0.1
+#' n = 30000
+#' selected_g_count_mean(alpha, g, n)
 selected_g_count_mean<-function(alpha,g,n){
   nrep=10000
   pis=LaplacesDemon::rdirichlet(nrep,
@@ -41,21 +68,49 @@ selected_g_count_mean<-function(alpha,g,n){
 
 
 
-#'@examples
-#'g=6
-#'alpha=.1
-#'n=30000
-#'L(.1,g,5,n)
+
+#' Loss function for alpha optimization
+#'
+#' This function calculates the loss for a given alpha by comparing the mean selected
+#' g count to a target number of groups.
+#'
+#' @param alpha Numeric, the concentration parameter for the Dirichlet distribution.
+#' @param g Integer, the number of groups.
+#' @param g_target Integer, the target number of selected groups.
+#' @param n Integer, the number of samples.
+#' @return Numeric, the loss value.
+#' @export
+#' @examples
+#' g = 6
+#' alpha = 0.1
+#' n = 30000
+#' L(0.1, g, 5, n)
 L<-function(alpha,g,g_target,n){
   (selected_g_count_mean(alpha,g,n)-g_target)^2
 }
 
-#'@examples
-#'g=6
-#'g_target=4
-#'alpha=.1
-#'n=30000
-#'alpha=best_alpha(g,g_target,n)
+
+#' Find the best alpha for a target number of selected groups
+#'
+#' This function finds the best alpha value that minimizes the loss function for a
+#' target number of selected groups.
+#'
+#' @param g Integer, the number of groups.
+#' @param g_target Integer, the target number of selected groups.
+#' @param n Integer, the number of samples.
+#' @return Numeric, the best alpha value.
+#' @export
+#' @examples
+#' g = 6
+#' g_target = 4
+#' alpha = 0.1
+#' n = 30000
+#' best_alpha(g, g_target, n)
+#' alpha = best_alpha(g, g_target, n)
+#' @examples
+#' library(ggplot2)
+#' ggplot(data.frame(x = alpha, y = ls), aes(x = x, y = y)) + geom_line() +
+#'   scale_x_continuous(trans = "log10")
 best_alpha=function(g,g_target,n){
   alpha=sort(outer(0:4,c(1:9),function(x,y){y*10^(-x)}))
   ls=plyr::aaply(alpha,1,L,g=g,g_target=g_target,n=n,.progress="text")

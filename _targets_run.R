@@ -9,3 +9,9 @@ tar_make()
 Sys.setenv(TAR_PROJECT = "smc_1")
 tar_make()
 
+Sys.setenv(TAR_PROJECT = "20240701_poster")
+tar_make()
+
+Sys.setenv(TAR_PROJECT = "20240709_test")
+tar_make()
+

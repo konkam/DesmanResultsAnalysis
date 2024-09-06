@@ -51,14 +51,12 @@ list(
     name = ln_vsa,
     command = desman_input_file |> 
       get_data_from_server() |> 
-      read_desman_input_files()
-  ),
+      read_desman_input_files()),
   tar_target(
     name = tau_vgb,
     command = variants |>
       translate_dna_string_vector_to_string_matrix() |>
-      translate_dna_matrix_to_binary_array()
-  ),
+      translate_dna_matrix_to_binary_array()),
   tar_target(
     name = mcmc_output,
     command = do.call(

@@ -1,5 +1,5 @@
 #'@examples
-#'gs="jags"
+#'gs="custom"
 #'tau_pi_n <- sim_tau_pi_epsilon_n(v = 50, g = 5, s = 3, n = 1000, alpha_pi = 1)
 #'n_vsa = tau_pi_n$n_vsa
 #'tau_vgb = tau_pi_n$tau_vgb
@@ -44,18 +44,19 @@ inference_3_run <- function(n_vsa,
                             alpha_bar_epsilon=c(1,10),
                             n_chains =2,
                             ...) {
-  smc_run(n_vsa,
+  smc_run(n_vsa=n_vsa,
          gs=gs,
          tau_vgb=tau_vgb,
          G=G,
          block_tau=FALSE,
          alpha_tau=NULL,
          alpha_epsilon=NULL,
+         bar_epsilon_1=NULL,
          bar_epsilon_1_std=bar_epsilon_1_std,
          bar_epsilon_1_mean=bar_epsilon_1_mean,
          alpha_bar_epsilon=alpha_bar_epsilon,
-         bar_epsilon=NULL,
          kappa_rho=NULL,
          alpha_pi=alpha_pi,
          n_chains = n_chains,
-         ...) }
+         ...) 
+  }

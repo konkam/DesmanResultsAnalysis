@@ -447,17 +447,26 @@ smc_custom<-function(n_vsa,
                       mcmc=FALSE,
                      inits=NULL,
                      tempering_n=FALSE,
+                     tempering_m=FALSE,
+                     tempering_v=FALSE,
                      bar_epsilon_1_tempering=FALSE,
                      alpha_tau_tempering=FALSE,
+                     lambda_m_seq=NULL,
                      alpha_tau_seq=NULL,
                      bar_epsilon_1_seq=NULL,
                      ...){
   v<-dim(n_vsa)[1]
   s<-dim(n_vsa)[2]
+  lambda_m=1
+  if(tempering_m&!is.null(lambda_m_seq)){
+    lambda_m=lambda_m_seq[1]
+  }
   if(bar_epsilon_1_tempering&!is.null(bar_epsilon_1_seq)){
     bar_epsilon_1=bar_epsilon_1_seq[1]
   }
-  if(alpha_tau_tempering&!is.null(alpha_tau_seq)){
+  
+  
+    if(alpha_tau_tempering&!is.null(alpha_tau_seq)){
     alpha_tau=alpha_tau_seq[1]
   }
   fixed_bar_epsilon=!is.null(bar_epsilon_1)
@@ -511,7 +520,8 @@ smc_custom<-function(n_vsa,
                     alpha_tau=alpha_tau,
                     kappa_rho=kappa_rho,
                     alpha_rho=alpha_rho,
-                    i=n_chains)
+                    i=n_chains,
+                    lambda_m=lambda_m)
   
   theta=inits
   
@@ -542,13 +552,14 @@ smc_custom<-function(n_vsa,
     
   }
   sample_i=1:n_chains
+  tempering_full_message=""
   
   if(!tempering_n){n_vsa_lambda=n_vsa;lambda=0}
   while(((lambda<1)|(t<=min(t_max,t_min)))&(t<max(t_max,t_min))){
     tempering_message="|| tempering "
     t=t+1
     if(tempering_n){
-      tempering=paste0(tempering_message," - data:",lambda)  
+      tempering_full_message=paste0(tempering_message," - data:",lambda)  
       n_vsa_lambda=tempering_n_stratified(n_vsa=n_vsa,n_plus=n_plus,n_vsa_df=n_vsa_df,lambda=lambda)
       fixed$n_vsa=n_vsa_lambda
     }
@@ -559,21 +570,36 @@ smc_custom<-function(n_vsa,
         fixed$bar_epsilon=c(fixed$bar_epsilon_1,1-fixed$bar_epsilon_1)
         fixed$epsilon_ba=epsilon_ba_f(bar_epsilon_1=fixed$bar_epsilon_1)
         fixed$epsilon_iba=epsilon_iba_f(i=n_chains,bar_epsilon_1=fixed$bar_epsilon_1)
-        tempering=paste0(tempering_message," - bar_epsilon_1: ",fixed$bar_epsilon_1)  
+        tempering_full_message=paste0(tempering_message," - bar_epsilon_1: ",fixed$bar_epsilon_1)  
         
       }
     }
     
+    if(tempering_m){
+      if(!is.null(lambda_m_seq)){
+        fixed$lambda_m=lambda_m_seq[min(t,length(lambda_m_1_seq))]
+        tempering_full_message=paste0(tempering_message," - lambda_m : ",fixed$lambda_m)  
+        
+      }
+    }
+    
+    if(tempering_v){
+      if(!is.null(lambda_v_seq)){
+        fixed$n_vsa=n_vsa_lambda=lambda_m_seq[min(t,length(lambda_m_1_seq))]
+        tempering_full_message=paste0(tempering_message," - lambda_m : ",fixed$lambda_m)  
+        
+      }
+    }
     
     if(alpha_tau_tempering){
       if(!is.null(alpha_tau_seq)){
         alpha_tau_t=alpha_tau_seq[min(t,length(alpha_tau_seq))]
         fixed$rep_alpha_tau=rep(alpha_tau_t,4)
-        tempering=paste0(tempering_message," - alpha_tau: ",signif(alpha_tau_t,4))  
+        tempering_full_message=paste0(tempering_message," - alpha_tau: ",signif(alpha_tau_t,4))  
       }
     }
     
-    print(paste0("t : ",t,tempering))
+    print(paste0("t : ",t,tempering_full_message))
     
     if(!mcmc&t>1){
       sample_i=sample(x=n_chains,size=n_chains,replace=(n_chains>1),prob=ww)
