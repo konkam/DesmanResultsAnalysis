@@ -1,3 +1,48 @@
+#' Sequential Monte Carlo (SMC) or MCMC Sampling for Bayesian Inference
+#'
+#' This function runs a Sequential Monte Carlo (SMC) or Markov Chain Monte Carlo (MCMC)
+#' algorithm to sample from a model specified in JAGS, NIMBLE, Stan, or a custom model.
+#' It supports various model structures with parameters for block sampling of tau, 
+#' constrained epsilon matrix, and tempering of parameters. 
+#'
+#' @param n_vsa Matrix or array of observed data.
+#' @param gs String, the model specification engine. Options are "jags", "nimble", "stan", or "custom".
+#' @param tau_ivgb_0 Initial values for tau_ivgb (optional).
+#' @param tau_vgb_0 Initial values for tau_vgb (optional).
+#' @param pi_igs_0 Initial values for pi_igs (optional).
+#' @param pi_gs_0 Initial values for pi_gs (optional).
+#' @param tau_vgb Matrix, initial values for tau_vgb. If NULL, it will be estimated.
+#' @param G Integer, number of variants (automatically determined if tau_vgb is provided).
+#' @param block_tau Logical, whether to use block sampling for tau. Defaults to TRUE.
+#' @param alpha_tau Numeric, prior parameter for tau (optional).
+#' @param alpha_epsilon Numeric, prior parameter for epsilon (optional).
+#' @param bar_epsilon_1_std Numeric, standard deviation for bar_epsilon_1 (optional).
+#' @param bar_epsilon_1_mean Numeric, mean for bar_epsilon_1 (optional).
+#' @param alpha_bar_epsilon Numeric vector, prior parameters for bar_epsilon (default: c(1, 10)).
+#' @param bar_epsilon_1 Initial value for bar_epsilon_1 (optional).
+#' @param kappa_rho Numeric, prior parameter for rho (optional).
+#' @param alpha_rho Numeric, prior parameter for rho (optional).
+#' @param alpha_pi Numeric, prior parameter for pi (default: 0.1).
+#' @param n_chains Integer, number of chains for MCMC sampling (default: 2).
+#' @param mcmc Logical, whether to use MCMC (default: FALSE for SMC).
+#' @param inits List, initial values for the parameters (optional).
+#' @param t_min Integer, minimum temperature for tempering (default: 1).
+#' @param t_max Integer, maximum temperature for tempering (default: 30).
+#' @param ess_min Minimum effective sample size (optional).
+#' @param smc_kernel Function, SMC kernel to use (default: `desman_kernel`).
+#' @param trace_all Logical, whether to trace all samples (default: TRUE).
+#' @param .update_lambda Function, function to update lambda (optional).
+#' @param n_vsa_df Data frame, additional data for n_vsa (optional).
+#' @param tempering_n Logical, whether to apply tempering to the number of samples (default: FALSE).
+#' @param bar_epsilon_1_tempering Logical, whether to apply tempering to bar_epsilon_1 (default: FALSE).
+#' @param alpha_tau_tempering Logical, whether to apply tempering to alpha_tau (default: FALSE).
+#' @param alpha_tau_seq Numeric vector, sequence for tempering alpha_tau (optional).
+#' @param bar_epsilon_1_seq Numeric vector, sequence for tempering bar_epsilon_1 (optional).
+#' @param ... Additional arguments to pass to the model sampler (JAGS, Stan, NIMBLE, or custom).
+#' 
+#' @return A list containing the SMC or MCMC samples (`smc_samples`), the model string (`model_string`), and the monitor (`monitor`).
+#' 
+#' @export
 #'@examples
 #'gs="custom"
 #'tau_pi_n <- sim_tau_pi_epsilon_n(v = 50, g = 5, s = 3, n = 1000, alpha_pi = 1)
