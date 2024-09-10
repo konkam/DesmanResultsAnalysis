@@ -609,8 +609,13 @@ smc_custom<-function(n_vsa,
       sample_i[-uniques]<-rep(uniques,times=c(xx)-1)
     }
     
+    
+    
     if(!mcmc){theta=plyr::llply(theta,resample_array,dimension=1,selection=sample_i)}
+    
+
     theta=smc_kernel(theta = theta, fixed = fixed)
+    
     
     if(!mcmc){
       w<-do.call(what=smc_logb_prime,c(theta,fixed)[c("n_vsa","tau_ivgb","pi_igs","epsilon_iba")])

@@ -177,9 +177,9 @@ sampler_m_ivsabg<-function(chi_ivsabg,
   
   
   (lambda_m*
-    plyr::maply(grid_ivsa,function(i,v,s,a){
-      rmultinom(1,size=n_vsa[v,s,a],
-              prob = chi_ivsabg[i,v,s,a,,]|>c()|>log()|>(function(x){x-max(x)})()|>exp())}))|>
+    plyr::maply(grid_ivsa,function(i,v,s,a,.n_vsa,.chi_ivsabg){
+      rmultinom(1,size=.n_vsa[v,s,a],
+              prob = .chi_ivsabg[i,v,s,a,,]|>c()|>log()|>(function(x){x-max(x)})()|>exp())},.n_vsa=n_vsa,.chi_ivsabg=chi_ivsabg))|>
     array(dim=dim(chi_ivsabg))|>
     namedims("ivsabg")
   }
