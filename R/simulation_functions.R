@@ -125,8 +125,34 @@ sim_tau_pi_epsilon_n <- function(tau_vgb=NULL,v, g, s, n, bar_epsilon_1 = .001, 
 
 
 
-
-
+#' Simulate tau_ivga, pi_igs, and epsilon_iba and n_ivsa arrays
+#'
+#' This function simulates the tau, pi, epsilon arrays, and additional parameters needed for modeling and simulation based on the given inputs. It handles ordering, matrix reorganization, and tensor operations to compute various interaction terms.
+#'
+#' @param i Integer. The number of simlations.
+#' @param v Integer. The number of positions.
+#' @param g Integer. The number of variants.
+#' @param s Integer. The number of samples.
+#' @param n Numeric. sum of n_ivsa.
+#' @param bar_epsilon_1 Numeric. A baseline epsilon parameter, default is 0.001.
+#' @param alpha_pi Numeric. A scaling factor for the pi parameter, default is 1.
+#'
+#' @return A list containing:
+#' \describe{
+#'   \item{tau_ivgb}{The simulated tau array with dimensions (i, v, g, b).}
+#'   \item{pi_igs}{The simulated pi array with dimensions (i, g, s).}
+#'   \item{epsilon_iba}{The simulated epsilon array with dimensions (i, b, a).}
+#'   \item{n_ivsa}{The simulated sample size array with dimensions (i, v, s, a).}
+#'   \item{rho_ivga}{The rho matrix computed from tau and epsilon arrays, dimensions (i, v, g, a).}
+#'   \item{chi_ivsag}{The chi matrix computed using rho and pi, dimensions (i, v, s, a, g).}
+#'   \item{chi_ivsabg}{The chi matrix computed using tau, pi, and epsilon matrices, dimensions (i, v, s, a, b, g).}
+#' }
+#'
+#' @examples
+#' sim_tau_pi_epsilon_n_i(i = 100, v = 10, g = 5, s = 3, n = 1000)
+#'
+#' @import plyr einsum
+#' @export
 sim_tau_pi_epsilon_n_i <- function(i,v, g, s, n, bar_epsilon_1 = .001, alpha_pi = 1) {
   tau_ivgb <- sim_tau_ivgb(i=i,v = v, g = g)
   pi_igs <- sim_pi_igs(i=i,g = g, s = s, alpha_pi = alpha_pi)
@@ -146,6 +172,7 @@ sim_tau_pi_epsilon_n_i <- function(i,v, g, s, n, bar_epsilon_1 = .001, alpha_pi 
                        rho_ivga=rho_ivga,
                        pi_igs = pi_igs,
                        epsilon_iba = epsilon_iba)
-  n_vsa=n_vsa[1,,]
-  list(tau_ivgb = tau_ivgb, pi_igs = pi_igs, epsilon_iba=epsilon_iba,n_ivsa = n_ivsa,rho_ivga=rho_ivga,chi_ivsag=chi_ivsag,chi_ivsabg=chi_ivsabg)
+  
+  list(tau_ivgb = tau_ivgb, pi_igs = pi_igs, epsilon_iba=epsilon_iba,
+       n_ivsa = n_ivsa,rho_ivga=rho_ivga,chi_ivsag=chi_ivsag,chi_ivsabg=chi_ivsabg)
 }

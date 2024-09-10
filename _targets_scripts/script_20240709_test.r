@@ -50,12 +50,12 @@ list(
       translate_dna_string_vector_to_string_matrix() |>
       translate_dna_matrix_to_binary_array()),
   tar_target(
-    name = smc_output_20240907,
-    command = smc_custom(ln_vsa,
+    name = smc_output_,
+    command = smc_custom(n_vsa=ln_vsa[[1]],
                          gs="custom",
                          G=5,
                          tau_vgb = NULL,
-                         tau_vgb_0=tau_vgb_0,
+                         tau_vgb_0=NULL,
                          block_tau=FALSE,
                          bar_epsilon_1_std=.01,
                          bar_epsilon_1_mean=.001,
@@ -65,7 +65,6 @@ list(
                          alpha_pi=1,
                          n_chains = 3,
                          n_vsa_df=NULL,
-                         g=G,
                          alpha_tau=.001,
                          t_min=1,
                          t_max=30,
