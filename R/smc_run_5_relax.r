@@ -34,28 +34,18 @@
 #'tau_pi_n$pi_gs
 #'tau_pi_n$n_vsa[1:2,,]|>plyr::aaply(c(1,3),sum)
 
-inference_5_run <- function(n_vsa,
-                            G,
-                            gs="jags",
+smc_run_relax_tau <- function(n_vsa,
+                            g,
                             alpha_pi=.1,
                             alpha_tau=.001,
-                            bar_epsilon_1_std=NULL,
-                            bar_epsilon_1_mean=NULL,
                             alpha_bar_epsilon=c(1,100),
                             n_chains =2,
                             ...) {
-  smc_run(n_vsa,
-         gs=gs,
+  smc_run(n_vsa=n_vsa,
          tau_vgb=NULL,
-         G=G,
+         g=g,
          block_tau=FALSE,
          alpha_tau=alpha_tau,
-         alpha_epsilon=NULL,
-         bar_epsilon_1_std=bar_epsilon_1_std,
-         bar_epsilon_1_mean=bar_epsilon_1_mean,
-         alpha_bar_epsilon=alpha_bar_epsilon,
-         bar_epsilon=NULL,
-         kappa_rho=NULL,
          alpha_pi=alpha_pi,
          n_chains = n_chains,
          ...) }

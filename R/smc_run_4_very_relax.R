@@ -38,18 +38,16 @@
 #'tau_pi_n$pi_gs  
 #'
 
-inference_4_run <- function(n_vsa,
-                            G,
+smc_run_relax_rho <- function(n_vsa,
+                            g,
                             tau_vgb,
-                            gs="jags",
                             alpha_pi=.1,
                             kappa_rho=c(1,100),
                             n_chains =2,
                             ...) {
   smc_run(n_vsa,
-         gs=gs,
          tau_vgb=NULL,
-         G=G,
+         g=g,
          block_tau=FALSE,
          alpha_tau=NULL,
          alpha_epsilon=NULL,

@@ -13,8 +13,40 @@
 #'fixed_bar_epsilon=!is.null(bar_epsilon_1)
 #'constrained_epsilon_matrix=TRUE
 #'n_chains = 2
-#'
-#'inference_3_run(n_vsa,
+#'list(n_vsa=n_vsa,
+#'tau_vgb=tau_vgb,
+#'G=G,
+#'alpha_pi=alpha_pi,
+#'block_tau=FALSE,
+#'alpha_tau=NULL,
+#'alpha_epsilon=NULL,
+#'bar_epsilon_1=NULL,
+#'alpha_bar_epsilon=alpha_bar_epsilon,
+#'kappa_rho=NULL,
+#'n_chains = n_chains)|>list2env(.GlobalEnv)
+#'tau_vgb=NULL
+#'tar_load_everything()
+#'formals(smc_run)|>
+#'(function(x){
+#'x[sapply(x,function(xx){!is.element("name",class(xx))})]})()|>
+#'plyr::llply(eval)|>
+#'list2env(.GlobalEnv)
+#'list(n_vsa=n_vsa,
+#'      tau_vgb=tau_vgb,
+#'      G=G,
+#'     alpha_pi=alpha_pi,
+#'     block_tau=FALSE,
+#'     alpha_tau=NULL,
+#'      alpha_epsilon=NULL,
+#'     bar_epsilon_1=NULL,
+#'     alpha_bar_epsilon=alpha_bar_epsilon,
+#'      kappa_rho=NULL,
+#'      n_chains = n_chains)|>
+#'list2env(.GlobalEnv)
+       
+       
+
+#'smc_run_fixed_tau(n_vsa,
 #'tau_vgb=tau_pi_n$tau_vgb,  
 #'G=G,
 #'gs=gs,
@@ -34,29 +66,18 @@
 #'facet_grid(s~chain)
 
 
-inference_3_run <- function(n_vsa,
-                            G,
+smc_run_fixed_tau <- function(n_vsa,
                             tau_vgb,
-                            gs="jags",
+                            g=dim(tau_vgb)[],
                             alpha_pi=.1,
-                            bar_epsilon_1_std=NULL,
-                            bar_epsilon_1_mean=NULL,
                             alpha_bar_epsilon=c(1,10),
                             n_chains =2,
                             ...) {
   smc_run(n_vsa=n_vsa,
-         gs=gs,
          tau_vgb=tau_vgb,
-         G=G,
-         block_tau=FALSE,
-         alpha_tau=NULL,
-         alpha_epsilon=NULL,
-         bar_epsilon_1=NULL,
-         bar_epsilon_1_std=bar_epsilon_1_std,
-         bar_epsilon_1_mean=bar_epsilon_1_mean,
-         alpha_bar_epsilon=alpha_bar_epsilon,
-         kappa_rho=NULL,
+         g=g,
          alpha_pi=alpha_pi,
+         alpha_bar_epsilon=alpha_bar_epsilon,
          n_chains = n_chains,
          ...) 
   }

@@ -14,9 +14,9 @@
 #'constrained_epsilon_matrix=TRUE
 #'n_chains = 2
 #'
-#'inference_2_run(n_vsa,
+#'smc_run_block_tau(n_vsa,
 #'G=G,
-#'gs=gs,
+#'gs="jags",
 #'alpha_bar_epsilon=alpha_bar_epsilon,
 #'bar_epsilon_1_std=bar_epsilon_1_std,
 #'bar_epsilon_1_mean=bar_epsilon_1_mean,
@@ -29,26 +29,19 @@
 #'X|>mcmc_output_df(variable_name = "bar_epsilon")|>View()
 
 
-inference_2_run <- function(n_vsa,
+smc_run_block_tau <- function(n_vsa,
                        G,
-                       gs="jags",
                        alpha_pi=.1,
-                       bar_epsilon_1_std=NULL,
-                       bar_epsilon_1_mean=NULL,
                        alpha_bar_epsilon=c(1,10),
                        n_chains =2,
                        ...) {
-smc_run(n_vsa,
-           gs=gs,
-           tau_vgb=NULL,
+smc_run(n_vsa=n_vsa,
            G=G,
            block_tau=TRUE,
+           tau_vgb=NULL,
            alpha_tau=NULL,
            alpha_epsilon=NULL,
-           bar_epsilon_1_std=bar_epsilon_1_std,
-           bar_epsilon_1_mean=bar_epsilon_1_mean,
            alpha_bar_epsilon=alpha_bar_epsilon,
-           bar_epsilon=NULL,
            kappa_rho=NULL,
            alpha_pi=alpha_pi,
            n_chains = n_chains,

@@ -63,7 +63,7 @@ smc_inits <-
         alpha_bar_epsilon=alpha_bar_epsilon_specification(
           bar_epsilon_1_std =bar_epsilon_1_std,
           bar_epsilon_1_mean=bar_epsilon_1_mean)}
-      if(!(fixed_bar_epsilon)&!is.null(alpha_bar_epsilon)){
+      if(!fixed_bar_epsilon){
         
         theta=c(theta,        
                 if(i>1){list(epsilon_iba=sim$epsilon_iba,

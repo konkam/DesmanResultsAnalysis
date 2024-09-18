@@ -1,7 +1,7 @@
 #' Sequential Monte Carlo (SMC) or MCMC Sampling for Bayesian Inference
 #'
 #' This function runs a Sequential Monte Carlo (SMC) or Markov Chain Monte Carlo (MCMC)
-#' algorithm to sample from a model specified in JAGS, NIMBLE, Stan, or a custom model.
+#' algorithm to sample from a model specified in JAgS, NIMBLE, Stan, or a custom model.
 #' It supports various model structures with parameters for block sampling of tau, 
 #' constrained epsilon matrix, and tempering of parameters. 
 #'
@@ -12,7 +12,7 @@
 #' @param pi_igs_0 Initial values for pi_igs (optional).
 #' @param pi_gs_0 Initial values for pi_gs (optional).
 #' @param tau_vgb Matrix, initial values for tau_vgb. If NULL, it will be estimated.
-#' @param G Integer, number of variants (automatically determined if tau_vgb is provided).
+#' @param g Integer, number of variants (automatically determined if tau_vgb is provided).
 #' @param block_tau Logical, whether to use block sampling for tau. Defaults to TRUE.
 #' @param alpha_tau Numeric, prior parameter for tau (optional).
 #' @param alpha_epsilon Numeric, prior parameter for epsilon (optional).
@@ -38,7 +38,7 @@
 #' @param alpha_tau_tempering Logical, whether to apply tempering to alpha_tau (default: FALSE).
 #' @param alpha_tau_seq Numeric vector, sequence for tempering alpha_tau (optional).
 #' @param bar_epsilon_1_seq Numeric vector, sequence for tempering bar_epsilon_1 (optional).
-#' @param ... Additional arguments to pass to the model sampler (JAGS, Stan, NIMBLE, or custom).
+#' @param ... Additional arguments to pass to the model sampler (JAgS, Stan, NIMBLE, or custom).
 #' 
 #' @return A list containing the SMC or MCMC samples (`smc_samples`), the model string (`model_string`), and the monitor (`monitor`).
 #' 
@@ -48,7 +48,7 @@
 #'tau_pi_n <- sim_tau_pi_epsilon_n(v = 50, g = 5, s = 3, n = 1000, alpha_pi = 1)
 #'n_vsa = tau_pi_n$n_vsa
 #'tau_vgb = tau_pi_n$tau_vgb
-#'G=if(!is.null(tau_vgb)){dim(tau_vgb)[2]}else{5}
+#'g=if(!is.null(tau_vgb)){dim(tau_vgb)[2]}else{5}
 #'bar_epsilon_1=NULL
 #'tau_vgb=NULL
 #'alpha_tau=NULL
@@ -69,7 +69,7 @@
 #'assign(paste0("X",gs),
 #'smc_run(n_vsa,
 #'tau_vgb=tau_vgb,
-#'G=G,
+#'g=g,
 #'gs=gs,
 #'adapt=0,
 #'burnin=0,
@@ -79,14 +79,15 @@
     
 smc_run<-
   function(n_vsa,
-           gs="jags",
+           gs="custom",
            tau_ivgb_0=NULL,
            tau_vgb_0=NULL,
            pi_igs_0=NULL,#set initial value
            pi_gs_0=NULL,#set initial value
            tau_vgb=NULL,
-           G=if(!is.null(tau_vgb)){dim(tau_vgb)[2]}else{5},
-           block_tau=TRUE,
+           gstar=if(!is.null(tau_vgb)){dim(tau_vgb)[2]}else{NULL},
+           g=5,
+           block_tau=FALSE,
            alpha_tau=NULL,
            alpha_epsilon=NULL,
            bar_epsilon_1_std=NULL,
@@ -112,7 +113,8 @@ smc_run<-
            alpha_tau_seq=NULL,
            bar_epsilon_1_seq=NULL,
            ...) {
-    
+    print("smc_run1")
+    print(g)
     fixed_bar_epsilon=!is.null(bar_epsilon_1)
     fixed_tau=!is.null(tau_vgb)
     relax_tau=!is.null(alpha_tau)
@@ -133,7 +135,7 @@ smc_run<-
     observations_and_constants <- 
       smc_fixed_f(n_vsa=n_vsa,
                   gs=gs,
-                  G=G,
+                  g=g,
                   bar_epsilon_1=bar_epsilon_1,
                   tau_vgb=tau_vgb,
                   alpha_tau=alpha_tau,
@@ -152,9 +154,9 @@ smc_run<-
     
     if(is.null(inits)){
       inits=smc_inits(v=dim(n_vsa)[1],
-               s=dim(n_vsa)[1],
-               g=G,
-               i=if(mcmc){1}else{n_chains},
+               s=dim(n_vsa)[2],
+               g=g,
+               i=n_chains,
                tau_vgb_0=tau_vgb_0,
                tau_ivgb_0=tau_ivgb_0,#set initial value
                pi_gs_0=pi_gs_0,
@@ -187,7 +189,7 @@ smc_run<-
                          tau_vgb=tau_vgb,
                          tau_ivgb_0=tau_ivgb_0,
                          tau_vgb_0=tau_vgb_0,
-                         G=G,
+                         g=g,
                          pi_igs_0=pi_igs_0,#set initial value
                          pi_gs_0=pi_gs_0,#set initial value
                          block_tau=block_tau,
@@ -202,7 +204,6 @@ smc_run<-
                          alpha_pi=alpha_pi,
                          n_chains = n_chains,
                          n_vsa_df=n_vsa_df,
-                         g=G,
                          t_min=t_min,
                          t_max=t_max,
                          ess_min=ess_min,

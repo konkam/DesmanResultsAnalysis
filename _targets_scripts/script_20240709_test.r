@@ -50,24 +50,30 @@ list(
       translate_dna_string_vector_to_string_matrix() |>
       translate_dna_matrix_to_binary_array()),
   tar_target(
-    name = smc_output_,
-    command = smc_custom(n_vsa=ln_vsa[[1]],
+    name = smc_output_desman,
+    command = desman_run(n_vsa=ln_vsa[[1]][1:3,,],
+                         t_max=4,
+                                     g=5,
+                                     n_chains =3)),
+  tar_target(
+    name = smc_output_AM1,
+    command = smc_custom(n_vsa=ln_vsa[[1]][1:3,,],
                          gs="custom",
-                         G=5,
+                         g=5,
                          tau_vgb = NULL,
                          tau_vgb_0=NULL,
                          block_tau=FALSE,
-                         bar_epsilon_1_std=.01,
-                         bar_epsilon_1_mean=.001,
+                         bar_epsilon_1_std=NULL,
+                         bar_epsilon_1_mean=NULL,
                          alpha_bar_epsilon=NULL,
-                         bar_epsilon_1=NULL,
+                         bar_epsilon_1=.001,
                          alpha_rho=NULL,
                          alpha_pi=1,
                          n_chains = 3,
                          n_vsa_df=NULL,
                          alpha_tau=.001,
                          t_min=1,
-                         t_max=30,
+                         t_max=4,
                          ess_min=NULL,
                          trace_all=TRUE,
                          mcmc=TRUE,
@@ -76,6 +82,49 @@ list(
                          alpha_tau_tempering=FALSE,
                          alpha_tau_seq=NULL,
                          bar_epsilon_seq=NULL)
+  ),
+#  tar_target(
+#    name = smc_output_AM1_block,
+#    command = smc_run_block_tau(
+#                n_vsa=ln_vsa[[1]],
+#                G=5,
+#                alpha_pi=.1,
+#                alpha_bar_epsilon=c(1,10),
+#                n_chains =3,
+#                mcmc=TRUE)
+#  ),
+  tar_target(
+    name = smc_output_AM2_fixed_tau,#fixed tau
+    command = smc_run_fixed_tau(n_vsa=ln_vsa[[1]],
+                         g=1455,
+                         tau_vgb = tau_vgb,
+                         block_tau=FALSE,
+                         alpha_pi=.1,
+                         alpha_bar_epsilon=c(1,10),
+                         n_chains =3,
+                         mcmc=TRUE,
+                         t_max=4)),
+  tar_target(
+    name = smc_output_AM3_relax_rho,
+    command =  smc_run_relax_rho(n_vsa,
+                           g=5,
+                           tau_vgb,
+                           alpha_pi=.1,
+                           kappa_rho=c(1,100),
+                           n_chains =3,
+                           mcmc=TRUE,
+                           t_max=4) 
+  ),
+  tar_target(
+    name = smc_output_AM4_relax_tau,
+    command = smc_run_relax_tau(n_vsa=ln_vsa[[1]][1:3,,],
+                                g=5,
+                                alpha_pi=.1,
+                                alpha_tau=.001,
+                                alpha_bar_epsilon=c(1,100),
+                                n_chains =3,
+                                mcmc=TRUE,
+                                t_max=4)
   )
 )
 

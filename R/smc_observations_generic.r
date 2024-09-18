@@ -22,7 +22,7 @@ alpha_bar_epsilon_specification <- function(bar_epsilon_1_mean, bar_epsilon_1_st
 smc_fixed_f <- 
   function(n_vsa,
            gs="jags",
-           G,
+           g,
            alpha_pi=NULL,
            alpha_epsilon=NULL,
            bar_epsilon_1_std=NULL,
@@ -54,14 +54,15 @@ smc_fixed_f <-
     if(!is.null(alpha_rho)){notrandom=c(notrandom,list(alpha_rho=alpha_rho,rep_alpha_rho=rep(alpha_rho,4)))}
     
     if(!is.null(alpha_pi)){notrandom=c(notrandom,
-                                          list(rep_alpha_pi=rep(alpha_pi,G)))}
+                                          list(rep_alpha_pi=rep(alpha_pi,g)))}
     
     
     constants=list(
       V = dim(n_vsa)[1],
       S = dim(n_vsa)[2],
-      G=G,
-      G4=4^G)
+      g=g,
+      g4=4^g,
+      g_neq_g=g_neq_g_f(g))
     if(!is.null(alpha_tau)){
       notrandom=c(notrandom,
                      list(alpha_tau=alpha_tau,

@@ -33,8 +33,8 @@ model_string_f <-
     for(a in 1:4){
     rep_alpha_tau[a]=alpha_tau}
     for(v in 1:V){
-      for(g in 1:G){
-        tau_vgb[v,g,1:4]~ddirch(rep_alpha_tau[1:4])  
+      for(gg in 1:g){
+        tau_vgb[v,gg,1:4]~ddirch(rep_alpha_tau[1:4])  
       }
     }  
     "
@@ -44,27 +44,27 @@ model_string_f <-
   for (a in 1:4){
     p_tau[a]<- 1/4}"},
   if(block_tau){"
-  for (a in 1:G4){
-    p_tau[a]<- 1/(G4)}"},
+  for (a in 1:g4){
+    p_tau[a]<- 1/(g4)}"},
   "
   for (v in 1:V){",
     if(!block_tau){
       paste0("
-    for (g in 1:G){",
+    for (gg in 1:g){",
         if(gs=="jags"){"
-          tau_vg[v,g] ~ dcat(p_tau)
+          tau_vg[v,gg] ~ dcat(p_tau)
           for (a in 1:4){
-            tau_vgb[v,g,a] =ifelse(tau_vg[v,g]==a,1,0)
+            tau_vgb[v,gg,a] =ifelse(tau_vg[v,gg]==a,1,0)
           }"},
         if(gs=="nimble"){"
-          tau_vgb[v,g,1:4]~dmulti(prob=p_tau[1:4],size=1)"},"}")},
+          tau_vgb[v,gg,1:4]~dmulti(prob=p_tau[1:4],size=1)"},"}")},
       if(block_tau){
           "
-          tau_v[v] ~ dcat(p_tau[1:G4])
-          for (g in 1:G){
-            tau_vg[v,g]=1+trunc((tau_v[v]-1)/(4^(g-1)))-4*trunc((tau_v[v]-1)/(4^(g)))
+          tau_v[v] ~ dcat(p_tau[1:g4])
+          for (gg in 1:g){
+            tau_vg[v,gg]=1+trunc((tau_v[v]-1)/(4^(gg-1)))-4*trunc((tau_v[v]-1)/(4^(gg)))
             for (a in 1:4){
-              tau_vgb[v,g,a] =ifelse(tau_vg[v,g]==a,1,0)
+              tau_vgb[v,gg,a] =ifelse(tau_vg[v,gg]==a,1,0)
             }}"},  "}")}},
   #---------------------------------------epsilon
   if (!fixed_bar_epsilon&constrained_epsilon_matrix){
@@ -91,9 +91,9 @@ model_string_f <-
 #---------------------------------------rho
 if(!relax_rho){
 "for(v in 1:V){
-      for (g in 1:G){
+      for (gg in 1:g){
             for (a in 1:4){
-              rho_vga[v, g, a] = inprod(tau_vgb[v,g,1:4], epsilon[1:4,a])
+              rho_vga[v, gg, a] = inprod(tau_vgb[v,gg,1:4], epsilon[1:4,a])
             }
           }
   }"},
@@ -103,8 +103,8 @@ if(relax_rho&!fixed_alpha_rho){
     for(a in 1:4){rep_alpha_rho[a]=alpha_rho}"},
 if(relax_rho){"
     for(v in 1:V){
-      for (g in 1:G){
-              rho_vga[v, g, 1:4]~ddirch(rep_alpha_rho) 
+      for (gg in 1:g){
+              rho_vga[v, gg, 1:4]~ddirch(rep_alpha_rho) 
             
           }
   }
@@ -115,20 +115,20 @@ if(relax_rho){"
   # Latent multinomial observation probability
   for (v in 1:V){
     for (s in 1:S){
-      for (g in 1:G){
+      for (gg in 1:g){
         for (a in 1:4){
-          p_g[v, s, g, a] = pi_gs[g, s] * rho_vga[v, g, a]
+          p_g[v, s, gg, a] = pi_gs[gg, s] * rho_vga[v, gg, a]
         }
       }
       for (a in 1:4){
-        p_vsa[v, s, a] = sum(p_g[v, s,1:G, a]) # Sum over variants
+        p_vsa[v, s, a] = sum(p_g[v, s,1:g, a]) # Sum over variants
       }
     }
   }
   
   
   for (s in 1:S){
-    pi_gs[1:G, s] ~ ddirch(rep_alpha_pi[1:G])
+    pi_gs[1:g, s] ~ ddirch(rep_alpha_pi[1:g])
   }
 }
 ")}
@@ -145,24 +145,24 @@ stan_model_string_generic_f <- function(gs="jags",
 data {
   int<lower=1> V; // Number of positions
   int<lower=1> S; // Number of samples
-  int<lower=1> G; // Number of variants
+  int<lower=1> g; // Number of variants
   int nvs[V, S];  // Total count for each position-sample combination
-  real alpha[G];  // Dirichlet prior parameters for pi_gs",
+  real alpha[g];  // Dirichlet prior parameters for pi_gs",
                                           if (!is.null(bar_epsilon_1)) {
                                             "
   real shape_epsilon[2];        // Dirichlet prior parameter for epsilon (match)"},                                         "
 }
 
 parameters {
-  simplex[G] pi_gs[S];                     // Mixing proportions for each sample and group
+  simplex[g] pi_gs[S];                     // Mixing proportions for each sample and group
   simplex[2] bar_epsilon;                 // Base probabilities for matching/mismatching
-  int<lower=0, upper=1> tau_vgb[V, G, 4]; // Inidicator of each variant that matches position and variant
+  int<lower=0, upper=1> tau_vgb[V, g, 4]; // Inidicator of each variant that matches position and variant
 }
 
 transformed parameters {
   real epsilon[4, 4];           // Epsilon matrix with different probabilities for match/mismatch
-  real mixed_variants[V, G, 4]; // Computed variants after mixing
-  real p_g[V, S, G, 4];         // Probability grid for variants, samples, groups, alleles
+  real mixed_variants[V, g, 4]; // Computed variants after mixing
+  real p_g[V, S, g, 4];         // Probability grid for variants, samples, groups, alleles
   real p_vsa[V, S, 4];          // Probability grid for observed data
   
   // Construct epsilon based on bar_epsilon
@@ -174,9 +174,9 @@ transformed parameters {
   
   // Compute mixed variants based on tau_vgb and epsilon
   for (v in 1:V) {
-    for (g in 1:G) {
+    for (gg in 1:g) {
       for (a in 1:4) {
-        mixed_variants[v, g, a] = dot_product(tau_vgb[v, g], epsilon[, a]);
+        mixed_variants[v, gg, a] = dot_product(tau_vgb[v, gg], epsilon[, a]);
       }
     }
   }
@@ -184,13 +184,13 @@ transformed parameters {
   // Calculate p_g and p_vsa using mixed_variants and pi_gs
   for (v in 1:V) {
     for (s in 1:S) {
-      for (g in 1:G) {
+      for (gg in 1:g) {
         for (a in 1:4) {
-          p_g[v, s, g, a] = pi_gs[s, g] * mixed_variants[v, g, a];
+          p_g[v, s, gg, a] = pi_gs[s, gg] * mixed_variants[v, gg, a];
         }
       }
       for (a in 1:4) {
-        p_vsa[v, s, a] = sum(p_g[v, s, , a]); // Sum over G
+        p_vsa[v, s, a] = sum(p_g[v, s, , a]); // Sum over g
       }
     }
   }

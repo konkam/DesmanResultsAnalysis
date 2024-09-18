@@ -420,7 +420,7 @@ smc_custom<-function(n_vsa,
                      tau_vgb=NULL,
                      tau_ivgb_0=NULL,
                      tau_vgb_0=NULL,
-                     G=if(!is.null(tau_vgb)){dim(tau_vgb)[2]}else{5},
+                     g=if(!is.null(tau_vgb)){dim(tau_vgb)[2]}else{5},
                      pi_igs_0=NULL,#set initial value
                      pi_gs_0=NULL,#set initial value,
                      epsilon_ba_0=NULL,
@@ -437,7 +437,6 @@ smc_custom<-function(n_vsa,
                      alpha_pi=.1,
                      n_chains = 2,
                       n_vsa_df=NULL,
-                      g=G,
                       t_min=1,
                       t_max,
                       ess_min=NULL,
@@ -465,6 +464,7 @@ smc_custom<-function(n_vsa,
     bar_epsilon_1=bar_epsilon_1_seq[1]
   }
   
+  print("smc_custom0")
   
     if(alpha_tau_tempering&!is.null(alpha_tau_seq)){
     alpha_tau=alpha_tau_seq[1]
@@ -509,7 +509,7 @@ smc_custom<-function(n_vsa,
   
   fixed=smc_fixed_f(n_vsa=n_vsa,
                     gs="custom",
-                    G=g,
+                    g=g,
                     alpha_pi=alpha_pi,
                     alpha_epsilon=alpha_epsilon,
                     bar_epsilon_1_std=bar_epsilon_1_std,
@@ -553,6 +553,7 @@ smc_custom<-function(n_vsa,
   }
   sample_i=1:n_chains
   tempering_full_message=""
+  print("smc_custom1")
   
   if(!tempering_n){n_vsa_lambda=n_vsa;lambda=0}
   while(((lambda<1)|(t<=min(t_max,t_min)))&(t<max(t_max,t_min))){
@@ -600,7 +601,7 @@ smc_custom<-function(n_vsa,
     }
     
     print(paste0("t : ",t,tempering_full_message))
-    
+  
     if(!mcmc&t>1){
       sample_i=sample(x=n_chains,size=n_chains,replace=(n_chains>1),prob=ww)
       xx=table(sample_i)
@@ -610,13 +611,17 @@ smc_custom<-function(n_vsa,
     }
     
     
-    
+    print("smc_custom2")
     if(!mcmc){theta=plyr::llply(theta,resample_array,dimension=1,selection=sample_i)}
-    
 
-    theta=smc_kernel(theta = theta, fixed = fixed)
     
-    
+    print("smc_custom3")
+    print(mcmc)
+    save(list=ls(),file="myfile.rda")
+    theta<-smc_kernel(theta = theta, fixed = fixed)
+  
+    print("smc_custom4")
+    print(mcmc)
     if(!mcmc){
       w<-do.call(what=smc_logb_prime,c(theta,fixed)[c("n_vsa","tau_ivgb","pi_igs","epsilon_iba")])
       w<-exp(w-max(w))
@@ -637,7 +642,7 @@ smc_custom<-function(n_vsa,
         n_vsa_lambda=lambda_n_vsa$n_vsa_lambda}
       
     }
-    
+    print("smc_custom5")
     
     
     if(trace_all){
