@@ -68,16 +68,24 @@
 
 smc_run_fixed_tau <- function(n_vsa,
                             tau_vgb,
-                            g=dim(tau_vgb)[],
+                            discriminant_v=discriminant_v_f(tau_vgb),
+                            reduced_tau_vgb=reduce_tau_vgb_f(tau_vgb,n_vsa,discriminant_v),
+                            g=dim(reduced_tau_vgb$tau_vgb)[2],
                             alpha_pi=.1,
                             alpha_bar_epsilon=c(1,10),
                             n_chains =2,
                             ...) {
+  
+  
+  pi_igs_0=if(g==dim(reduced_tau_vgb$tau_vgb)[2]){plyr::raply(n_chains,reduced_tau_vgb$pi_gs_0)}else{NULL}
+  
+  print("smc_run_fixed_tau")
   smc_run(n_vsa=n_vsa,
-         tau_vgb=tau_vgb,
+         tau_vgb=reduced_tau_vgb$tau_vgb,
          g=g,
          alpha_pi=alpha_pi,
          alpha_bar_epsilon=alpha_bar_epsilon,
          n_chains = n_chains,
+         pi_igs_0 = pi_igs_0,
          ...) 
   }

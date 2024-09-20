@@ -113,15 +113,18 @@ smc_run<-
            alpha_tau_seq=NULL,
            bar_epsilon_1_seq=NULL,
            ...) {
-    print("smc_run1")
-    print(g)
+    
     fixed_bar_epsilon=!is.null(bar_epsilon_1)
-    fixed_tau=!is.null(tau_vgb)
+    constrained_tau=FALSE
+    fixed_tau=FALSE
+    if(!is.null(tau_vgb)){    
+      constrained_tau=g<dim(tau_vgb)[2]
+      fixed_tau=(g>=(dim(tau_vgb)[2]))
+      g=min(g,dim(tau_vgb)[2])}
     relax_tau=!is.null(alpha_tau)
     relax_rho=!is.null(kappa_rho)|!is.null(alpha_rho)
     fixed_alpha_rho=!is.null(alpha_rho)
     constrained_epsilon_matrix=is.null(alpha_epsilon)
-    
     model_string <-
       model_string_f(
         gs=gs,
@@ -131,14 +134,16 @@ smc_run<-
         fixed_tau=fixed_tau,
         relax_tau=relax_tau,
         relax_rho=relax_rho)
-    
-    observations_and_constants <- 
+
+        observations_and_constants <- 
       smc_fixed_f(n_vsa=n_vsa,
                   gs=gs,
                   g=g,
                   bar_epsilon_1=bar_epsilon_1,
                   tau_vgb=tau_vgb,
                   alpha_tau=alpha_tau,
+                  fixed_tau=fixed_tau,
+                  constrained_tau=constrained_tau,
                   alpha_epsilon=alpha_epsilon,
                   alpha_bar_epsilon=alpha_bar_epsilon,
                   kappa_rho=kappa_rho,
@@ -151,7 +156,6 @@ smc_run<-
                 fixed_bar_epsilon=fixed_bar_epsilon,
                 constrained_epsilon_matrix=constrained_epsilon_matrix,
                 relax_rho=relax_rho)
-    
     if(is.null(inits)){
       inits=smc_inits(v=dim(n_vsa)[1],
                s=dim(n_vsa)[2],
@@ -178,9 +182,6 @@ smc_run<-
 
     
   # Compiling and producing posterior samples from the model.
-    
-    
-    
     
     
     if(gs=="custom"){

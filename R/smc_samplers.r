@@ -101,6 +101,24 @@ sampler_tau_ivgb<-function(tau_ivgb,
   }
   tau_ivgb
 }
+
+
+einsumCpp_vgb_ihs_iba__ivgsa = einsum::einsum_generator("vgb,ihs,iba->ivgsa")
+einsumCpp_gh_ivhc_ihs_ica__ivsa = einsum::einsum_generator("gh,ivhc,ihs,ica->ivsa")
+
+non_discarded_g_f<-function(n_vsa,tau_vgb){
+  n_vsa|>plyr::aaply(c(1,3),sum)|>(`>`)(0)|>plyr::aaply(1,sum)|>(`==`)(1)->x
+  n_vsa|>plyr::aaply(1,sum)|>(`>`)(100)->y
+  (x&y)|>which()->constant_positions
+  
+  if(length(constant_positions)>0){
+  n_vsa[constant_positions,,]|>plyr::aaply(c(1,3),sum)|>(`>`)(0)|>array(dim=c(length(constant_positions),1,4))|>translate_dna_binary_array_to_string_vector()->constraint
+  non_discarded_g=tau_vgb[constant_positions,,]|>translate_dna_binary_array_to_string_vector()|>is.element(constraint)|>which()
+  }else{non_discarded_g=1:dim(tau_vgb)[2]}
+  non_discarded_g
+}
+
+
 #' Sample Constrained tau_ivgb
 #'
 #' This function performs a constrained sampling of tau_ivgb based on the inputs tau_ivgb, tau_vgb, pi_igs, epsilon_iba, and n_vsa.
@@ -129,33 +147,32 @@ sampler_constrained_tau_ivgb<-function(tau_ivgb,
                           n_vsa,
                           i=if(!is.null(tau_ivgb)){dim(tau_ivgb)[1]},
                           v=dim(tau_ivgb)[2],
-                           #s=dim(pi_gs)[2],
+                          s=dim(pi_igs)[3],
                           g=dim(pi_igs)[2],
-                          gstar=dim(tau_vgb)[2],
                           g_neq_g=g_neq_g_f(g),
-                          grid_i=1:i){
-    tau_ivgb=
-      plyr::maply(grid_i,function(ii){
-        taustar=tau_ivgb[ii,,,,drop=FALSE]
+                          non_discarded_g=non_discarded_g_f(n_vsa,tau_vgb),
+                          gstar=length(non_discarded_g),
+                          discriminant_v=discriminant_v_f(tau_vgb),
+                          smallv=length(discriminant_v),
+                          grid_ig=expand.grid(i=1:i,g=1:gstar)){
+print(Sys.time())
         for(gg in 1:g){
-          a_vgsa=einsum::einsum("vgb,igs,iba->vgsa",
-                                tau_vgb,pi_igs[ii,gg,,drop=FALSE],epsilon_iba[ii,,,drop=FALSE])
-          b_vsa=einsum::einsum("gh,vhc,ihs,ica->vsa",
-                               g_neq_g[gg,,drop=FALSE],taustar[,,,drop=FALSE],pi_igs[ii,,,drop=FALSE],
-                               epsilon_iba[ii,,,drop=FALSE])
-          gg2<-plyr::aaply(a_vgsa,2,function(a,b,n){
-            einsum::einsum(
-              equation_string="vsa,vsa->",
-              log(a+b),n)},b=b_vsa,n=n_vsa)|>
-            (function(x){exp(x-max(x))})()|>
-            (function(p){sample(gstar,1,prob = p)})()
-          taustar[,gg,]<-tau_vgb[,gg2,]
-        }
-        taustar})|>
-      namedims(index="ivgb")
+          a_ivgsa=einsumCpp_vgb_ihs_iba__ivgsa(tau_vgb[discriminant_v,non_discarded_g,,drop=FALSE],pi_igs[,gg,,drop=FALSE],epsilon_iba[,,,drop=FALSE])
+          b_ivsa=einsumCpp_gh_ivhc_ihs_ica__ivsa(g_neq_g[gg,,drop=FALSE],tau_ivgb[,discriminant_v,,,drop=FALSE],pi_igs,epsilon_iba)
+          plyr::maply(grid_ig,function(iii,ggg,a=a_ivgsa,b=b_ivsa,n=n_vsa){
+            sum(log(array(a[iii,,ggg,,],dim=c(smallv,s,4))+array(b[iii,,,],dim=c(smallv,s,4)))*array(n,dim=c(smallv,s,4)))})|>
+      namedims(index="ig")|>
+            plyr::aaply(1,function(x){exp(x-max(x))})|>
+            plyr::aaply(1,function(p){sample(gstar,1,prob = p)})->new_gs
+          for (ii in 1:i){tau_ivgb[ii,,gg,]<-tau_vgb[,non_discarded_g[new_gs[ii]],,drop=FALSE]}}
+  print(Sys.time())
+  
   tau_ivgb
 }
 
+discriminant_v_f<-function(tau_vgb){
+  tau_vgb|>plyr::aaply(c(1,3),sum)|>(`>`)(0)|>plyr::aaply(1,sum)|>(`>`)(1)|>which()
+}
 
 
 #'@description sampler_tau
@@ -179,7 +196,7 @@ sampler_tilde_rho_ivga<-function(rep_alpha_rho,
     namedims("ivga")}
 
 
-
+sampler_alpha_rho<-function(kappa_rho){rgamma(1,shape = kappa_rho[1],rate=kappa_rho[2])}
 
 #'@description sampler_mu_nu
 #'@examples

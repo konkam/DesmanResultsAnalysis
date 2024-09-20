@@ -24,12 +24,13 @@ temper_alpha_tau=FALSE)
 #'          theta=theta,
 #'          fixed=list(n_vsa=n_vsa,rep_alpha_pi=rep(.1,g),rep_alpha_tau=rep(.1,4),alpha_bar_epsilon=c(1,100)))
 kernel_f<-function(
-        fixed_bar_epsilon=fixed_bar_epsilon,
-        constrained_epsilon_matrix=constrained_epsilon_matrix,
-        block_tau=block_tau,
-        fixed_tau=fixed_tau,
-        relax_tau=relax_tau,
-        relax_rho=relax_rho){
+        fixed_bar_epsilon,
+        constrained_epsilon_matrix,
+        block_tau,
+        fixed_tau,
+        constrained_tau,
+        relax_tau,
+        relax_rho){
       eval(parse(text=paste0("
   function(
     theta,
@@ -45,8 +46,9 @@ kernel_f<-function(
         rho_ivga<-
         sampler_tilde_rho_ivga(m_ivga=einsum::einsum('ivsag->ivga',m_ivsag),
                                rep_alpha_rho=allvar$rep_alpha_rho);
+      allvar$pi_igs<-
       thetanew$pi_igs<-
-        pi_igs<-
+      pi_igs<-
         sampler_pi_igs(m_igs=einsum::einsum('ivsag->igs',m_ivsag),
                        rep_alpha_pi=allvar$rep_alpha_pi);"
     },
@@ -54,21 +56,23 @@ kernel_f<-function(
       "
       chi_ivsabg=einsum::einsum('ivgb,iba,igs->ivsabg',allvar$tau_ivgb,allvar$epsilon_iba,allvar$pi_igs);
       m_ivsabg=sampler_m_ivsabg(n_vsa=allvar$n_vsa,chi_ivsabg=chi_ivsabg,lambda_m=allvar$lambda_m);
-       thetanew$pi_igs<-
+       allvar$pi_igs<-
+      thetanew$pi_igs<-
           pi_igs<-
           sampler_pi_igs(m_igs=einsum::einsum('ivsabg->igs',m_ivsabg),
                          rep_alpha_pi=allvar$rep_alpha_pi);"},
     if(!relax_rho&relax_tau&!fixed_tau){
-      "thetanew$tau_ivgb<-
-        tau_ivgb<-
-        sampler_tilde_tau_ivgb(m_ivgb=einsum::einsum('ivsabg->ivgb',m_ivsabg),
+      "allvar$tau_ivgb<-
+       thetanew$tau_ivgb<-
+       tau_ivgb<-
+       sampler_tilde_tau_ivgb(m_ivgb=einsum::einsum('ivsabg->ivgb',m_ivsabg),
                                rep_alpha_tau=allvar$rep_alpha_tau);"
       },
-    if(!relax_rho&!relax_tau&!fixed_tau&!block_tau){
+    if(!relax_rho&!relax_tau&!fixed_tau&!block_tau&!constrained_tau){
       "tau_ivgb<-
           thetanew$tau_ivgb<-
           sampler_tau_ivgb(tau_ivgb=theta$tau_ivgb,
-                        pi_igs=pi_igs,
+                        pi_igs=allvar$pi_igs,
                         epsilon_iba=allvar$epsilon_iba,
                         n_vsa=allvar$n_vsa,
                         block_tau=FALSE,
@@ -79,6 +83,25 @@ kernel_f<-function(
                         alpha_tau=0,
                         m_ivgb=einsum::einsum('ivsabg->ivgb',m_ivsabg),
                            rep_alpha_tau=allvar$rep_alpha_tau);"
+    },
+    if(!relax_rho&!relax_tau&!fixed_tau&!block_tau&constrained_tau){
+      "tau_ivgb<-
+          thetanew$tau_ivgb<-
+          sampler_constrained_tau_ivgb(tau_ivgb=theta$tau_ivgb,
+                tau_vgb=allvar$tau_vgb,  
+                        pi_igs=pi_igs,
+                        epsilon_iba=allvar$epsilon_iba,
+                        n_vsa=allvar$n_vsa,
+                          i=allvar$i,
+                          v=allvar$v,
+                          s=allvar$s,
+                          g=allvar$g,
+                          g_neq_g=allvar$g_neq_g,
+                          non_discarded_g=allvar$non_discarded_g,
+                          gstar=allvar$gstar,
+                          discriminant_v=allvar$discriminant_v,
+                          smallv=allvar$smallv,
+                          grid_ig=allvar$grid_ig);"
     },
     if(!relax_rho&!relax_tau&!fixed_tau&block_tau){
       "tau_ivgb<-

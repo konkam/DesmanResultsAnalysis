@@ -30,6 +30,8 @@ smc_fixed_f <-
            alpha_bar_epsilon=NULL,
            bar_epsilon_1=NULL,
            tau_vgb=NULL,
+           fixed_tau=FALSE,
+           constrained_tau=FALSE,
            alpha_tau=NULL,
            kappa_rho=NULL,
            alpha_rho=NULL,
@@ -42,7 +44,8 @@ smc_fixed_f <-
     notrandom=list(n_vsa=n_vsa,
                       n_vs=n_vsa |> apply(MARGIN = c(1, 2), FUN = sum),
                    lambda_m=lambda_m)
-    if(!is.null(tau_vgb)){notrandom=c(notrandom,list(tau_vgb=tau_vgb),if(i>1){list(tau_ivgb=plyr::raply(i,tau_vgb))})}
+    if(fixed_tau){notrandom=c(notrandom,list(tau_vgb=tau_vgb),if(i>1){list(tau_ivgb=plyr::raply(i,tau_vgb))})}
+    if(constrained_tau){notrandom=c(notrandom,list(tau_vgb=tau_vgb))}
     if(!is.null(alpha_epsilon)){notrandom=c(notrandom,list(alpha_epsilon=alpha_epsilon,rep_alpha_epsilon=rep(alpha_epsilon,4)))}
     if(!is.null(alpha_bar_epsilon)){notrandom=c(notrandom,list(alpha_bar_epsilon=alpha_bar_epsilon))}else{
       if(!is.null(bar_epsilon_1_std)&!is.null(bar_epsilon_1_mean)){
@@ -59,13 +62,17 @@ smc_fixed_f <-
     
     constants=list(
       V = dim(n_vsa)[1],
+      v=dim(n_vsa)[1],
       S = dim(n_vsa)[2],
+      s = dim(n_vsa)[2],
       g=g,
+      i=i,
       g4=4^g,
       g_neq_g=g_neq_g_f(g))
     if(!is.null(alpha_tau)){
       notrandom=c(notrandom,
                      list(alpha_tau=alpha_tau,
+      g_neq_g=g_neq_g_f(g),
                           rep_alpha_tau=rep(alpha_tau,4)))
     }
     
@@ -74,6 +81,20 @@ smc_fixed_f <-
                                                  bar_epsilon=c(bar_epsilon_1,1-bar_epsilon_1),
                                                  epsilon_ba=epsilon_ba_f(bar_epsilon_1),
                                                  epsilon_iba=epsilon_iba_f(i=i,bar_epsilon_1=bar_epsilon_1)))}
+    
+    if(!is.null(tau_vgb)){
+      
+      non_discarded_g=non_discarded_g_f(n_vsa,tau_vgb)
+      gstar=length(non_discarded_g)
+      discriminant_v=discriminant_v_f(tau_vgb)
+      smallv=length(discriminant_v)
+      grid_ig=expand.grid(i=1:i,g=1:gstar)
+      notrandom=c(notrandom,list(
+    non_discarded_g=non_discarded_g,
+    gstar=gstar,
+    discriminant_v=discriminant_v,
+    smallv=smallv,
+    grid_ig=grid_ig))}
     
     
     if(gs!="nimble"){c(constants,notrandom)}else{list(constants=constants,notrandom=notrandom)}
