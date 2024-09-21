@@ -19,3 +19,7 @@ smc_1:
 20240709_test:
   store: _targets_store/20240709_test
   script: _targets_scripts/script_20240709_test.r
+
+test_jags:
+  store: _targets_store/test_jags
+  script: _targets_scripts/script_test_jags.r

@@ -7,7 +7,7 @@ library(dplyr)
 library(runjags)
 library(RColorBrewer)
 
-"R" |>  list.files(full.names = TRUE) |>sapply(FUN = source)
+"R" |>  list.files(full.names = TRUE) |>sapply(FUN = source)->noprint
 gm=4
 g=4
 

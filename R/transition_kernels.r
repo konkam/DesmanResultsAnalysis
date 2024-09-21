@@ -109,7 +109,7 @@ kernel_f<-function(
           sampler_tau_ivgb(tau_ivgb=allvar$tau_ivgb,
                         pi_igs=allvar$pi_igs,
                         epsilon_iba=allvar$epsilon_iba,
-                        n_vsa=n_vsa,
+                        n_vsa=allvar$n_vsa,
                         block_tau=TRUE,
                         v=dim(theta$tau_ivgb)[2],
                         #s=dim(theta$pi_gs)[2],

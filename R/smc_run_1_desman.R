@@ -54,9 +54,6 @@ desman_run <- function(n_vsa,
                                 n_chains =2,
                                 ...) {
   
-  print("desman_run")
-  print(g)
-  print(dim(n_vsa))
   smc_run(n_vsa,
           gs="custom",
           g=g,

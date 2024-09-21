@@ -45,7 +45,7 @@ smc_fixed_f <-
                       n_vs=n_vsa |> apply(MARGIN = c(1, 2), FUN = sum),
                    lambda_m=lambda_m)
     if(fixed_tau){notrandom=c(notrandom,list(tau_vgb=tau_vgb),if(i>1){list(tau_ivgb=plyr::raply(i,tau_vgb))})}
-    if(constrained_tau){notrandom=c(notrandom,list(tau_vgb=tau_vgb))}
+    if(constrained_tau){notrandom=c(notrandom,list(tau_vgb_star=tau_vgb,gstar=dim(tau_vgb)[2]))}
     if(!is.null(alpha_epsilon)){notrandom=c(notrandom,list(alpha_epsilon=alpha_epsilon,rep_alpha_epsilon=rep(alpha_epsilon,4)))}
     if(!is.null(alpha_bar_epsilon)){notrandom=c(notrandom,list(alpha_bar_epsilon=alpha_bar_epsilon))}else{
       if(!is.null(bar_epsilon_1_std)&!is.null(bar_epsilon_1_mean)){
@@ -83,7 +83,7 @@ smc_fixed_f <-
                                                  epsilon_iba=epsilon_iba_f(i=i,bar_epsilon_1=bar_epsilon_1)))}
     
     if(!is.null(tau_vgb)){
-      
+      if(gs=="custom"){
       non_discarded_g=non_discarded_g_f(n_vsa,tau_vgb)
       gstar=length(non_discarded_g)
       discriminant_v=discriminant_v_f(tau_vgb)
@@ -94,8 +94,9 @@ smc_fixed_f <-
     gstar=gstar,
     discriminant_v=discriminant_v,
     smallv=smallv,
-    grid_ig=grid_ig))}
+    grid_ig=grid_ig))}}
     
-    
-    if(gs!="nimble"){c(constants,notrandom)}else{list(constants=constants,notrandom=notrandom)}
+    if(gs=="jags"){notrandom=notrandom[setdiff(names(notrandom),"rep_alpha_tau")]}
+    if(gs!="nimble"){c(constants,notrandom)|>(function(x){x[unique(names(x))]})()
+      }else{list(constants=constants,notrandom=notrandom)}
   }

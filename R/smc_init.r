@@ -29,10 +29,12 @@ smc_inits <-
   function(v,
            s,
            g,
+           gstar=NULL,
            i=1,
            gs="jags",
            tau_vgb_0=NULL,#set initial value
            fixed_tau=FALSE,
+           constrained_tau=FALSE,
            tau_ivgb_0=NULL,#set initial value
            alpha_tau=NULL,
            pi_igs_0=NULL,#set initial value
@@ -53,7 +55,7 @@ smc_inits <-
     theta=list()
     sim=if(i>1){sim_tau_pi_epsilon_n_i(v=v,g=g,s=s,i=i,n=0)
     }else{sim_tau_pi_epsilon_n(v=v,g=g,s=s,n=0)}
-    
+    if(constrained_tau){gth=sample(gstar,g)}
     
     if(is.null(kappa_rho)&is.null(alpha_rho)){
       if(!fixed_bar_epsilon&

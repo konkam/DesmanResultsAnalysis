@@ -10,6 +10,7 @@ model_string_f <-
            constrained_epsilon_matrix=TRUE,
            block_tau=TRUE,
            fixed_tau=FALSE,
+           constrained_tau=FALSE,
            relax_tau=FALSE,
            relax_rho=FALSE,
            fixed_alpha_rho=FALSE) {
@@ -18,23 +19,37 @@ model_string_f <-
 "model "},
   "{
   # Likelihood
-  for (v in 1:V){
-    for (s in 1:S){
-      n_vsa[v,s,1:4] ~ dmulti(p_vsa[v,s,1:4],n_vs[v,s])
+  for (vv in 1:v){
+    for (ss in 1:S){
+      n_vsa[vv,ss,1:4] ~ dmulti(p_vsa[vv,ss,1:4],n_vs[vv,ss])
     }
   }",
   #---------------------------------------tau
   if((!relax_rho)){paste0(
   "
   # Mangled variants",
-  if(!fixed_tau){
+  if(constrained_tau){
+    "
+    for (gg in 1:gstar){p_gg[gg]<- 1/gstar}
+     for (gg in 1:g){gth[gg]~dcat(p_gg)}
+     for (gg in 1:g){
+     for (vv in 1:v){
+     for (b in 1:4){
+      tau_vgb[vv,gg,b]=tau_vgb_star[vv,gth[gg],b]
+     }
+     }
+     }
+    "
+  },
+  
+  if(!fixed_tau&!constrained_tau){
     if(relax_tau){
     "
     for(a in 1:4){
     rep_alpha_tau[a]=alpha_tau}
-    for(v in 1:V){
+    for(vv in 1:v){
       for(gg in 1:g){
-        tau_vgb[v,gg,1:4]~ddirch(rep_alpha_tau[1:4])  
+        tau_vgb[vv,gg,1:4]~ddirch(rep_alpha_tau[1:4])  
       }
     }  
     "
@@ -47,24 +62,24 @@ model_string_f <-
   for (a in 1:g4){
     p_tau[a]<- 1/(g4)}"},
   "
-  for (v in 1:V){",
+  for (vv in 1:v){",
     if(!block_tau){
       paste0("
     for (gg in 1:g){",
         if(gs=="jags"){"
-          tau_vg[v,gg] ~ dcat(p_tau)
+          tau_vg[vv,gg] ~ dcat(p_tau)
           for (a in 1:4){
-            tau_vgb[v,gg,a] =ifelse(tau_vg[v,gg]==a,1,0)
+            tau_vgb[vv,gg,a] =ifelse(tau_vg[vv,gg]==a,1,0)
           }"},
         if(gs=="nimble"){"
-          tau_vgb[v,gg,1:4]~dmulti(prob=p_tau[1:4],size=1)"},"}")},
+          tau_vgb[vv,gg,1:4]~dmulti(prob=p_tau[1:4],size=1)"},"}")},
       if(block_tau){
           "
-          tau_v[v] ~ dcat(p_tau[1:g4])
+          tau_v[vv] ~ dcat(p_tau[1:g4])
           for (gg in 1:g){
-            tau_vg[v,gg]=1+trunc((tau_v[v]-1)/(4^(gg-1)))-4*trunc((tau_v[v]-1)/(4^(gg)))
+            tau_vg[vv,gg]=1+trunc((tau_v[vv]-1)/(4^(gg-1)))-4*trunc((tau_v[vv]-1)/(4^(gg)))
             for (a in 1:4){
-              tau_vgb[v,gg,a] =ifelse(tau_vg[v,gg]==a,1,0)
+              tau_vgb[vv,gg,a] =ifelse(tau_vg[vv,gg]==a,1,0)
             }}"},  "}")}},
   #---------------------------------------epsilon
   if (!fixed_bar_epsilon&constrained_epsilon_matrix){
@@ -90,10 +105,10 @@ model_string_f <-
     "})},
 #---------------------------------------rho
 if(!relax_rho){
-"for(v in 1:V){
+"for(vv in 1:v){
       for (gg in 1:g){
             for (a in 1:4){
-              rho_vga[v, gg, a] = inprod(tau_vgb[v,gg,1:4], epsilon[1:4,a])
+              rho_vga[vv, gg, a] = inprod(tau_vgb[vv,gg,1:4], epsilon[1:4,a])
             }
           }
   }"},
@@ -102,9 +117,9 @@ if(relax_rho&!fixed_alpha_rho){
     alpha_rho~dbeta(kappa_rho[1],kappa_rho[2])
     for(a in 1:4){rep_alpha_rho[a]=alpha_rho}"},
 if(relax_rho){"
-    for(v in 1:V){
+    for(vv in 1:v){
       for (gg in 1:g){
-              rho_vga[v, gg, 1:4]~ddirch(rep_alpha_rho) 
+              rho_vga[vv, gg, 1:4]~ddirch(rep_alpha_rho) 
             
           }
   }
@@ -113,15 +128,15 @@ if(relax_rho){"
 #---------------------------------------n 
   "
   # Latent multinomial observation probability
-  for (v in 1:V){
+  for (vv in 1:v){
     for (s in 1:S){
       for (gg in 1:g){
         for (a in 1:4){
-          p_g[v, s, gg, a] = pi_gs[gg, s] * rho_vga[v, gg, a]
+          p_g[vv, s, gg, a] = pi_gs[gg, s] * rho_vga[vv, gg, a]
         }
       }
       for (a in 1:4){
-        p_vsa[v, s, a] = sum(p_g[v, s,1:g, a]) # Sum over variants
+        p_vsa[vv, s, a] = sum(p_g[vv, s,1:g, a]) # Sum over variants
       }
     }
   }
@@ -173,24 +188,24 @@ transformed parameters {
   }
   
   // Compute mixed variants based on tau_vgb and epsilon
-  for (v in 1:V) {
+  for (vv in 1:v) {
     for (gg in 1:g) {
       for (a in 1:4) {
-        mixed_variants[v, gg, a] = dot_product(tau_vgb[v, gg], epsilon[, a]);
+        mixed_variants[vv, gg, a] = dot_product(tau_vgb[vv, gg], epsilon[, a]);
       }
     }
   }
   
   // Calculate p_g and p_vsa using mixed_variants and pi_gs
-  for (v in 1:V) {
+  for (vv in 1:v) {
     for (s in 1:S) {
       for (gg in 1:g) {
         for (a in 1:4) {
-          p_g[v, s, gg, a] = pi_gs[s, gg] * mixed_variants[v, gg, a];
+          p_g[vv, s, gg, a] = pi_gs[s, gg] * mixed_variants[vv, gg, a];
         }
       }
       for (a in 1:4) {
-        p_vsa[v, s, a] = sum(p_g[v, s, , a]); // Sum over g
+        p_vsa[vv, s, a] = sum(p_g[vv, s, , a]); // Sum over g
       }
     }
   }
@@ -208,9 +223,9 @@ if (is.null(bar_epsilon_1)) {
   bar_epsilon_1=bar_epsilon[1]"
 },"
   // Likelihood
-  for (v in 1:V) {
+  for (vv in 1:v) {
     for (s in 1:S) {
-      nvs[v, s] ~ multinomial(p_vsa[v, s]);
+      nvs[vv, s] ~ multinomial(p_vsa[vv, s]);
     }
   }
 }")} 

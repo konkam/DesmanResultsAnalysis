@@ -354,7 +354,54 @@ smc_sampler<-function(n_vsa,
 
 
 
-
+#' Sequential Monte Carlo (SMC) Function, with transition kernels as in Gibbs.
+#'
+#' This function implements a highly customizable Sequential Monte Carlo (SMC) algorithm for variational Gaussian-binary models (VGB). 
+#' It allows the user to define various parameters and initial values for SMC runs with optional tempering and MCMC resampling steps.
+#'
+#' @param n_vsa Numeric matrix. The variational parameters for each chain.
+#' @param tau_vgb Matrix or NULL. The initial tau values for the VGB model. Default is NULL.
+#' @param tau_ivgb_0 Matrix or NULL. The initial values for inverse tau for the VGB model. Default is NULL.
+#' @param tau_vgb_0 Matrix or NULL. The initial values for tau in the VGB model. Default is NULL.
+#' @param g Numeric. Number of components in the mixture model, inferred from `tau_vgb` if available, otherwise set to 5.
+#' @param pi_igs_0 Numeric vector or NULL. Initial values for pi parameters. Default is NULL.
+#' @param pi_gs_0 Numeric vector or NULL. Initial values for pi across groups. Default is NULL.
+#' @param epsilon_ba_0 Numeric matrix or NULL. Initial values for epsilon parameters. Default is NULL.
+#' @param epsilon_iba_0 Numeric matrix or NULL. Initial values for epsilon across different dimensions. Default is NULL.
+#' @param block_tau Logical. Whether to block update tau parameters. Default is TRUE.
+#' @param alpha_tau Numeric vector or NULL. Prior parameter for tau. Default is NULL.
+#' @param alpha_rho Numeric or NULL. Prior parameter for rho. Default is NULL.
+#' @param alpha_epsilon Numeric or NULL. Prior parameter for epsilon. Default is NULL.
+#' @param bar_epsilon_1_std Numeric or NULL. Standard deviation for bar epsilon 1. Default is NULL.
+#' @param bar_epsilon_1_mean Numeric or NULL. Mean for bar epsilon 1. Default is NULL.
+#' @param alpha_bar_epsilon Numeric vector. Prior parameters for bar epsilon. Default is c(1, 10).
+#' @param bar_epsilon_1 Numeric or NULL. The value for bar epsilon 1. Default is NULL.
+#' @param kappa_rho Numeric or NULL. Prior parameter for kappa rho. Default is NULL.
+#' @param alpha_pi Numeric. Prior parameter for pi. Default is 0.1.
+#' @param n_chains Numeric. Number of chains for the SMC. Default is 2.
+#' @param n_vsa_df Numeric or NULL. Degrees of freedom for the variational parameters. Default is NULL.
+#' @param t_min Numeric. Minimum number of iterations for the SMC. Default is 1.
+#' @param t_max Numeric. Maximum number of iterations for the SMC.
+#' @param ess_min Numeric or NULL. Minimum effective sample size. Default is NULL.
+#' @param smc_kernel Function. Kernel function to update SMC particles. Default is `desman_kernel`.
+#' @param trace_all Logical. Whether to trace all intermediate values. Default is TRUE.
+#' @param .update_lambda Function. Lambda update function for tempering. Default is `update_lambda`.
+#' @param mcmc Logical. Whether to perform MCMC resampling. Default is FALSE.
+#' @param inits List or NULL. Initial values for the SMC run. If NULL, defaults will be used.
+#' @param tempering_n Logical. Whether to use tempering on the n_vsa parameters. Default is FALSE.
+#' @param tempering_m Logical. Whether to use tempering on the mass parameter. Default is FALSE.
+#' @param tempering_v Logical. Whether to use tempering on the variance parameter. Default is FALSE.
+#' @param bar_epsilon_1_tempering Logical. Whether to use tempering for bar epsilon 1. Default is FALSE.
+#' @param alpha_tau_tempering Logical. Whether to use tempering for alpha tau. Default is FALSE.
+#' @param lambda_m_seq Numeric vector or NULL. Sequence of lambda_m values for tempering. Default is NULL.
+#' @param alpha_tau_seq Numeric vector or NULL. Sequence of alpha tau values for tempering. Default is NULL.
+#' @param bar_epsilon_1_seq Numeric vector or NULL. Sequence of bar epsilon 1 values for tempering. Default is NULL.
+#' @param ... Additional arguments passed to other methods.
+#'
+#' @return A list containing the final parameter values (`theta`) and traces if `trace_all` is TRUE.
+#' @examples
+#' result <- smc_custom(n_vsa = matrix(1:10, nrow=5, ncol=2), t_max=100)
+#' @export
 
 #'@description SMC algorithm
 #'@param i : integer >0, number of particles
@@ -618,7 +665,8 @@ smc_custom<-function(n_vsa,
     
   
     if(!mcmc){theta=plyr::llply(theta,resample_array,dimension=1,selection=sample_i)}
-
+      #print("smc_custom")
+      #save(list=ls(),file="myfile.rda")
         theta<-smc_kernel(theta = theta, fixed = fixed)
   
     

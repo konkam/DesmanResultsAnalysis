@@ -47,7 +47,7 @@ epsilon_ba_f <- function(bar_epsilon_1){diag(x = 1 - bar_epsilon_1, nrow = 4) +
 #' sim_pi_igs(i=3,g = 3, s=5,alpha_pi=.1)
 
 epsilon_iba_f <- function(i,bar_epsilon_1){ epsilon_ba=epsilon_ba_f(bar_epsilon_1)
-epsilon_iba=plyr::raply(i,epsilon_ba)|>(`dimnames<-`)(list(i=1:i,b=1:4,a=1:4))
+epsilon_iba=plyr::raply(i,epsilon_ba,.drop = FALSE)|>(`dimnames<-`)(list(i=1:i,b=1:4,a=1:4))
 }
 
 

@@ -15,3 +15,6 @@ tar_make()
 Sys.setenv(TAR_PROJECT = "20240709_test")
 tar_make()
 
+
+Sys.setenv(TAR_PROJECT = "test_jags")
+tar_make()

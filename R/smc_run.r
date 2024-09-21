@@ -24,7 +24,7 @@
 #' @param alpha_rho Numeric, prior parameter for rho (optional).
 #' @param alpha_pi Numeric, prior parameter for pi (default: 0.1).
 #' @param n_chains Integer, number of chains for MCMC sampling (default: 2).
-#' @param mcmc Logical, whether to use MCMC (default: FALSE for SMC).
+#' @param mcmc Logical, whether to resample particles (FALSE) or use use MCMC (TRUE).
 #' @param inits List, initial values for the parameters (optional).
 #' @param t_min Integer, minimum temperature for tempering (default: 1).
 #' @param t_max Integer, maximum temperature for tempering (default: 30).
@@ -132,9 +132,10 @@ smc_run<-
         constrained_epsilon_matrix=constrained_epsilon_matrix,
         block_tau=block_tau,
         fixed_tau=fixed_tau,
+        constrained_tau=constrained_tau,
         relax_tau=relax_tau,
         relax_rho=relax_rho)
-
+    print("smc_run obs")
         observations_and_constants <- 
       smc_fixed_f(n_vsa=n_vsa,
                   gs=gs,
@@ -150,6 +151,7 @@ smc_run<-
                   bar_epsilon_1_std=bar_epsilon_1_std,
                   bar_epsilon_1_mean=bar_epsilon_1_mean,
                   alpha_pi=alpha_pi)
+        print("smc_run monitor")
     
     monitor=smc_monitor_f( gs=gs,
                 fixed_tau=fixed_tau,
@@ -160,6 +162,7 @@ smc_run<-
       inits=smc_inits(v=dim(n_vsa)[1],
                s=dim(n_vsa)[2],
                g=g,
+               gstar=gstar,
                i=n_chains,
                tau_vgb_0=tau_vgb_0,
                tau_ivgb_0=tau_ivgb_0,#set initial value
@@ -169,6 +172,7 @@ smc_run<-
                epsilon_ba_0=epsilon_ba_0,
                fixed_pi=fixed_pi,
                fixed_tau=fixed_tau,
+               constrained_tau=constrained_tau,
                alpha_tau=alpha_tau,
                alpha_epsilon=alpha_epsilon,
                alpha_bar_epsilon=alpha_bar_epsilon,
@@ -220,10 +224,14 @@ smc_run<-
       }
     
    if(gs=="jags"){
+     print("smc_run_jags")
+     save(list=ls(),file="myfile.rda")
      smc_samples <-runjags::run.jags(
-      model = model_string,
-      data = observations_and_constants,
-      monitor = monitor,n.chains = n_chains,
+       sample = t_max,
+       model = model_string,
+       data = observations_and_constants,
+       monitor = monitor,
+       n.chains = n_chains,
       #inits=inits,
       ...
      )}

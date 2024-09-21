@@ -30,13 +30,13 @@
 
 
 smc_run_block_tau <- function(n_vsa,
-                       G,
+                       g,
                        alpha_pi=.1,
                        alpha_bar_epsilon=c(1,10),
                        n_chains =2,
                        ...) {
 smc_run(n_vsa=n_vsa,
-           G=G,
+           g=g,
            block_tau=TRUE,
            tau_vgb=NULL,
            alpha_tau=NULL,

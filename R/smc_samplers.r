@@ -155,7 +155,7 @@ sampler_constrained_tau_ivgb<-function(tau_ivgb,
                           discriminant_v=discriminant_v_f(tau_vgb),
                           smallv=length(discriminant_v),
                           grid_ig=expand.grid(i=1:i,g=1:gstar)){
-print(Sys.time())
+
         for(gg in 1:g){
           a_ivgsa=einsumCpp_vgb_ihs_iba__ivgsa(tau_vgb[discriminant_v,non_discarded_g,,drop=FALSE],pi_igs[,gg,,drop=FALSE],epsilon_iba[,,,drop=FALSE])
           b_ivsa=einsumCpp_gh_ivhc_ihs_ica__ivsa(g_neq_g[gg,,drop=FALSE],tau_ivgb[,discriminant_v,,,drop=FALSE],pi_igs,epsilon_iba)
@@ -165,8 +165,6 @@ print(Sys.time())
             plyr::aaply(1,function(x){exp(x-max(x))})|>
             plyr::aaply(1,function(p){sample(gstar,1,prob = p)})->new_gs
           for (ii in 1:i){tau_ivgb[ii,,gg,]<-tau_vgb[,non_discarded_g[new_gs[ii]],,drop=FALSE]}}
-  print(Sys.time())
-  
   tau_ivgb
 }
 

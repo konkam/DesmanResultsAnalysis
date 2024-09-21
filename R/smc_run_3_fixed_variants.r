@@ -1,4 +1,27 @@
-#'@examples
+#' This function performs Sequential Monte Carlo (SMC) sampling with fixed tau. 
+#' It adjusts the `tau_vgb` based on the given `n_vsa` and other parameters,
+#' then calls the `smc_run` function to complete the process.
+#'
+#' @param n_vsa Integer. The number of VSA (variable selection algorithm) samples to run.
+#' @param tau_vgb Matrix or list. The tau matrix related to VGB (variance-gamma model parameters).
+#' @param discriminant_v vector of positions index for which tau_vgb is not constant, default is computed from `discriminant_v_f(tau_vgb)`.
+#' @param reduced_tau_vgb List. A reduced version of `tau_vgb`, computed by default using `reduce_tau_vgb_f(tau_vgb, n_vsa, discriminant_v)`.
+#' @param g Integer. Number of groups or dimensions, derived from `reduced_tau_vgb$tau_vgb`. Default is the number of columns in `reduced_tau_vgb$tau_vgb`.
+#' @param alpha_pi Numeric. Alpha prior for Pi, default is 0.1.
+#' @param alpha_bar_epsilon Numeric vector. Prior parameters for epsilon, default is c(1, 10).
+#' @param n_chains Integer. The number of Markov chains to run, default is 2.
+#' @param ... Additional arguments passed to the `smc_run` function.
+#'
+#' @return The output from the `smc_run` function, which may include posterior samples or SMC diagnostics.
+#'
+#' @details
+#' This function prepares and processes the `tau_vgb` variable by reducing it 
+#' based on the discriminant vector and the number of VSA samples. It then runs
+#' the Sequential Monte Carlo algorithm using `smc_run`, passing necessary parameters.
+#' If the number of groups `g` matches the dimensions of `reduced_tau_vgb$tau_vgb`, 
+#' an initial Pi vector (`pi_igs_0`) is set up.
+#'
+#' @examples
 #'gs="custom"
 #'tau_pi_n <- sim_tau_pi_epsilon_n(v = 50, g = 5, s = 3, n = 1000, alpha_pi = 1)
 #'n_vsa = tau_pi_n$n_vsa
@@ -64,6 +87,7 @@
 #'ggplot(aes(x=iteration,y=value,group=interaction(chain,g,s),fill=g))+
 #'geom_area()+
 #'facet_grid(s~chain)
+#' @export
 
 
 smc_run_fixed_tau <- function(n_vsa,
